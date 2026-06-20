@@ -57,8 +57,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <aside class="sidebar d-flex" id="app-sidebar">
         <div class="sidebar-header d-flex justify-content-between align-items-center">
             <a href="index.php" class="sidebar-brand">
-                <i class="fa-solid fa-boxes-stacked"></i>
-                <span>Grovixo</span>
+                <?php if (!empty($compSettings['company_logo']) && file_exists(BASE_DIR . '/uploads/' . $compSettings['company_logo'])): ?>
+                    <img src="<?php echo BASE_URL . '/uploads/' . $compSettings['company_logo']; ?>" alt="Logo" style="height: 32px; width: 32px; object-fit: contain; border-radius: 6px;">
+                <?php else: ?>
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                <?php endif; ?>
+                <span><?php echo \App\Models\Helpers::sanitize($compSettings['company_name'] ?? 'Grovixo'); ?></span>
             </a>
             <button class="btn-close d-lg-none" id="sidebar-close-btn" type="button" aria-label="Close" style="filter: none;"></button>
         </div>

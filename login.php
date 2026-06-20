@@ -21,6 +21,11 @@ if ($auth->check()) {
 
 $errorMessage = "";
 
+// Load company settings for branding
+$compSettings = $db->query("SELECT company_name, company_logo FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+$brandName = $compSettings['company_name'] ?? 'Grovixo';
+$brandLogo = $compSettings['company_logo'] ?? '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!Helpers::verifyCsrf()) {
         $errorMessage = "Security Validation Failed. Please refresh and try again.";
@@ -77,7 +82,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="auth-card">
     <div class="text-center mb-4">
-        <h3 class="mb-1 text-dark"><i class="fa-solid fa-boxes-stacked text-indigo me-2"></i>Grovixo</h3>
+        <?php if (!empty($brandLogo) && file_exists(UPLOAD_DIR . '/' . $brandLogo)): ?>
+            <img src="<?php echo BASE_URL . '/uploads/' . $brandLogo; ?>" alt="Logo" style="height: 48px; margin-bottom: 8px;">
+        <?php else: ?>
+            <i class="fa-solid fa-boxes-stacked text-indigo" style="font-size: 2.5rem;"></i>
+        <?php endif; ?>
+        <h3 class="mb-1 text-dark"><?php echo Helpers::sanitize($brandName); ?></h3>
         <p class="text-secondary small">Invoice & Inventory Management System</p>
     </div>
     

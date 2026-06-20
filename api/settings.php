@@ -82,23 +82,71 @@ switch ($action) {
             Helpers::jsonResponse(false, "Business name is required.");
         }
 
+        // Handle logo upload
+        $logo_filename = null;
+        $update_logo = false;
+
+        if (!empty($_FILES['company_logo_file']['name']) && $_FILES['company_logo_file']['error'] === UPLOAD_ERR_OK) {
+            $allowed = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $_FILES['company_logo_file']['tmp_name']);
+            finfo_close($finfo);
+
+            if (!in_array($mime, $allowed)) {
+                Helpers::jsonResponse(false, "Invalid logo format. Use PNG, JPG, SVG, or WebP.");
+            }
+            if ($_FILES['company_logo_file']['size'] > 2 * 1024 * 1024) {
+                Helpers::jsonResponse(false, "Logo file must be under 2MB.");
+            }
+
+            $ext = pathinfo($_FILES['company_logo_file']['name'], PATHINFO_EXTENSION);
+            $logo_filename = 'company_logo_' . time() . '.' . $ext;
+            $dest = UPLOAD_DIR . '/' . $logo_filename;
+
+            if (!move_uploaded_file($_FILES['company_logo_file']['tmp_name'], $dest)) {
+                Helpers::jsonResponse(false, "Failed to upload logo file.");
+            }
+
+            // Delete old logo
+            $old = $db->query("SELECT company_logo FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+            if (!empty($old['company_logo']) && file_exists(UPLOAD_DIR . '/' . $old['company_logo'])) {
+                @unlink(UPLOAD_DIR . '/' . $old['company_logo']);
+            }
+            $update_logo = true;
+        }
+
+        // Handle logo removal
+        if (!empty($_POST['remove_logo'])) {
+            $old = $db->query("SELECT company_logo FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+            if (!empty($old['company_logo']) && file_exists(UPLOAD_DIR . '/' . $old['company_logo'])) {
+                @unlink(UPLOAD_DIR . '/' . $old['company_logo']);
+            }
+            $logo_filename = '';
+            $update_logo = true;
+        }
+
         try {
-            $db->query("
-                UPDATE company_settings
+            $sql = "UPDATE company_settings
                 SET company_name = ?, gst_number = ?, email = ?, phone = ?, address = ?,
                     invoice_prefix = ?, gst_slabs = ?, state_code = ?, invoice_footer = ?, invoice_terms = ?,
                     loyalty_enabled = ?, loyalty_points_per_100 = ?, loyalty_redeem_value = ?,
                     invoice_template = ?, thermal_width = ?,
-                    bank_name = ?, bank_account_no = ?, bank_ifsc = ?, bank_branch = ?, upi_id = ?,
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE id = 1
-            ", [
+                    bank_name = ?, bank_account_no = ?, bank_ifsc = ?, bank_branch = ?, upi_id = ?";
+            $params = [
                 $company_name, $gst_number, $email, $phone, $address,
                 $invoice_prefix, $gst_slabs, $state_code, $invoice_footer, $invoice_terms,
                 $loyalty_enabled, $loyalty_points_per_100, $loyalty_redeem_value,
                 $invoice_template, $thermal_width,
                 $bank_name, $bank_account_no, $bank_ifsc, $bank_branch, $upi_id
-            ]);
+            ];
+
+            if ($update_logo) {
+                $sql .= ", company_logo = ?";
+                $params[] = $logo_filename;
+            }
+
+            $sql .= ", updated_at = CURRENT_TIMESTAMP WHERE id = 1";
+            $db->query($sql, $params);
 
             Helpers::logActivity($db, "settings", "Updated system and company configurations.");
             Helpers::jsonResponse(true, "Settings updated successfully.");

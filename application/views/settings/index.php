@@ -43,6 +43,24 @@
                         <!-- COMPANY DETAILS PANE -->
                         <div class="tab-pane fade show active" id="company-pane" role="tabpanel" aria-labelledby="company-tab" tabindex="0">
                             <div class="row g-3">
+                                <!-- Logo Upload -->
+                                <div class="col-md-12">
+                                    <label class="form-label">Company Logo</label>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div id="logo-preview" style="width:64px; height:64px; border-radius:10px; border:2px dashed #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#f8fafc;">
+                                            <i class="fa-solid fa-image text-muted fs-4" id="logo-placeholder"></i>
+                                            <img id="logo-img" src="" alt="Logo" style="width:100%; height:100%; object-fit:contain; display:none;">
+                                        </div>
+                                        <div>
+                                            <input type="file" class="form-control form-control-sm" id="set-logo-file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="max-width:280px;">
+                                            <small class="text-muted">PNG, JPG, SVG, or WebP. Max 2MB. Used in sidebar & invoices.</small>
+                                            <div class="mt-1">
+                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 d-none" id="btn-remove-logo"><i class="fa-solid fa-trash-can me-1"></i>Remove Logo</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-6">
                                     <label class="form-label">Business Name *</label>
                                     <input type="text" class="form-control" name="company_name" id="set-name" required>
@@ -258,26 +276,71 @@ $(document).ready(function() {
                 $("#set-bank-ifsc").val(s.bank_ifsc || '');
                 $("#set-bank-branch").val(s.bank_branch || '');
                 $("#set-upi-id").val(s.upi_id || '');
+                // Company Logo
+                if (s.company_logo) {
+                    $('#logo-img').attr('src', BASE_URL + '/uploads/' + s.company_logo).show();
+                    $('#logo-placeholder').hide();
+                    $('#btn-remove-logo').removeClass('d-none');
+                }
             }
         }
     });
 
-    // Save Settings
+    // Logo file preview
+    $('#set-logo-file').on('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            Swal.fire({ icon: 'warning', title: 'File Too Large', text: 'Logo must be under 2MB', background: '#ffffff', color: '#0f172a' });
+            $(this).val('');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#logo-img').attr('src', e.target.result).show();
+            $('#logo-placeholder').hide();
+            $('#btn-remove-logo').removeClass('d-none');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Remove logo
+    $('#btn-remove-logo').click(function() {
+        $('#logo-img').attr('src', '').hide();
+        $('#logo-placeholder').show();
+        $('#set-logo-file').val('');
+        $(this).addClass('d-none');
+        // Mark for removal on save
+        if (!$('#remove-logo-flag').length) {
+            $('#settingsForm').append('<input type="hidden" name="remove_logo" id="remove-logo-flag" value="1">');
+        }
+    });
+
+    // Save Settings (with FormData for file upload)
     $("#settingsForm").submit(function(e) {
         e.preventDefault();
-        var formData = $(this).serialize();
+        var formData = new FormData(this);
         // Ensure loyalty_enabled is sent even when unchecked
         if (!$("#set-loyalty-enabled").is(':checked')) {
-            formData += '&loyalty_enabled=0';
+            formData.set('loyalty_enabled', '0');
+        }
+        // Add logo file if selected
+        var logoFile = $('#set-logo-file')[0].files[0];
+        if (logoFile) {
+            formData.append('company_logo_file', logoFile);
         }
         $.ajax({
             url: BASE_URL + '/api/settings.php?action=save',
             type: 'POST',
             data: formData,
+            processData: false,
+            contentType: false,
             dataType: 'json',
             success: function(res) {
                 if (res.status) {
-                    Swal.fire({ icon: 'success', title: 'Settings Saved', text: res.message, background: '#ffffff', color: '#0f172a' });
+                    Swal.fire({ icon: 'success', title: 'Settings Saved', text: res.message, background: '#ffffff', color: '#0f172a' }).then(function() {
+                        location.reload();
+                    });
                 } else {
                     Swal.fire({ icon: 'error', title: 'Update Failed', text: res.message, background: '#ffffff', color: '#0f172a' });
                 }
