@@ -1,103 +1,129 @@
-# Grovixo - Invoice & Inventory Management System (IIMS)
+# Grovixo IIMS v2.0
 
-Grovixo is a modern, responsive, and secure **Invoice & Inventory Management System (IIMS)**. Built using PHP, PDO, Bootstrap 5, and jQuery, Grovixo provides a comprehensive solution for managing inventory tracking, real-time POS billing, sales/purchase ledgers, expense tracking, and system configuration.
+**Invoice & Inventory Management System** — A complete billing, inventory, and business management platform for Indian businesses.
 
----
-
-## 1. System Architecture & Tech Stack
-
-Grovixo uses an organized Model-View-Controller (MVC) structure to separate concern areas:
-* **Core Language**: PHP (support for PHP 8+)
-* **Database Layer**: PDO wrapper supporting **MySQL** (primary) and **SQLite** (automatic fallback and testing database).
-* **Front-end UI**: Bootstrap 5, Vanilla CSS, FontAwesome 6, and Outfit & Inter typography.
-* **Interactions**: jQuery, DataTables (interactive client-side listings), Chart.js (dashboard visualizations), and SweetAlert 2 (modern popups).
-* **Backup Engine**: Automated database dump generation for disaster recovery.
+Built with PHP 8+, Bootstrap 5, jQuery, Chart.js, and SQLite/MySQL.
 
 ---
 
-## 2. Key Modules & Features
+## Features
 
-### 🔐 Authentication & Role-Based Access Control (RBAC)
-* **Secure Login**: Password encryption using bcrypt (`PASSWORD_BCRYPT`).
-* **Active Session Management**: Auto-logout after 30 minutes of inactivity.
-* **Role Permissions**: Dynamic database-driven access control. Predefined roles include:
-  1. **Super Admin**: Complete control (User management, settings, backups).
-  2. **Admin**: Inventory, invoicing, custom CRM, and billing logs.
-  3. **Staff / Cashier**: Fast POS checkout and customer lists.
-  4. **Accountant**: Financial statements, expenses, and analytics reports.
+**POS Billing**
+- Barcode scan / search by name, SKU
+- Hold & Recall bills (F3/F5) for multi-customer checkout
+- Split payment (Cash + UPI + Card on same invoice)
+- GST compliance: auto CGST/SGST (intra-state) or IGST (inter-state)
+- HSN/SAC code support on products and invoices
+- Discount coupons with validation rules
+- Customer loyalty points (earn & redeem)
+- Keyboard shortcuts (F2-F6, ESC)
 
-### 📊 Performance Dashboard
-* **KPI Metric Cards**: Real-time sales, purchases, expenses, and net profit calculations.
-* **Analytics Trends**: 
-  * Weekly revenue trends chart (Line Chart).
-  * 30-day expense breakdown by category (Pie Chart).
-  * 6-month monthly sales trend comparison (Bar Chart).
-* **KPI Trackers**: Real-time counters showing total active customers, suppliers, active inventory SKU count, and critical low-stock items alerts.
+**Modules**
+- Inventory with categories, brands, units, barcode generation
+- Purchase orders from suppliers with stock auto-update
+- Quotations/Estimates with convert-to-invoice
+- Delivery challans for goods dispatch
+- Sales & Purchase returns with credit/debit notes
+- Customer CRM with ledgers, credit limits, loyalty
+- Supplier directory with payables tracking
+- Expense tracking with categories
+- User management with 4 roles, 15 permissions
 
-### 📦 Inventory & Stock Adjustments
-* **Detailed Inventory**: Standard management of SKU, EAN/UPC barcode, brands, measurement units, purchase/cost pricing, GST tax slabs (0%, 5%, 12%, 18%, 28%), and low-stock limits.
-* **Audit Trail Ledger**: Interactive stock adjustments (stock increases, decreases, damages, expirations, or losses) logged for audit trails.
+**Reports & Analytics**
+- Dashboard with KPI cards, charts, top products
+- P&L summary, sales ledger, stock valuation
+- GST report (CGST/SGST/IGST breakdown)
+- Overdue invoices report
+- Customer receivables & supplier payables
+- Day-end cash register reconciliation
+- CSV export on all reports
 
-### 🛒 Real-time Billing POS Terminal
-* **Interactive Cart**: Search items by name, barcode scan, or SKU.
-* **Automatic Tax Slabs & Discounts**: Auto-calculates base pricing, row-level tax rate calculations, flat transaction discounts, and round-offs.
-* **Customer Ledgers**: Walk-in checkout or mapping to outstanding credit accounts.
-* **Printable Invoices**: Fully styled invoices optimized for paper and POS thermal printer output.
-
----
-
-## 3. Responsive Web Design Strategy
-
-Grovixo implements a custom mobile and tablet responsive interface layout:
-
-* **Slide-In Navigation Drawer**: On tablet and mobile viewports (`< 992px`), the sidebar collapses offscreen and slides in smoothly with a glassmorphism blurred backdrop overlay (`.sidebar-backdrop`).
-* **Flexible Bottom Navigation Bar**: Immediate touch access to high-frequency actions (Dashboard, Inventory, POS Terminal, CRM) and a menu toggle button to slide in the navigation drawer.
-* **Auto-Generated Table Cards**: On mobile screens, long horizontal tables are dynamically transformed into stacked card layouts via an automatic JS injector in `footer.php`. This inserts descriptive labels before cell contents on-the-fly.
-* **Fluid Search & Inputs**: All inputs and search blocks adapt fluidly, collapsing/expanding according to screen dimensions.
-
----
-
-## 4. Database Schema Setup
-
-The system handles database initialization and migrations automatically on startup. The SQL schemas are detailed inside [database/schema.sql](file:///Users/hasmukh/dev/invoices/database/schema.sql) and default values inside [database/seed.sql](file:///Users/hasmukh/dev/invoices/database/seed.sql).
-
-### Key System Entities:
-* `users` / `roles` / `permissions` / `role_permissions`
-* `products` / `categories` / `brands` / `units`
-* `stock_transactions` (Stock correction ledgers)
-* `customers` / `customer_payments` / `invoices` / `invoice_items`
-* `suppliers` / `supplier_payments` / `purchases` / `purchase_items`
-* `expenses` / `expense_categories` / `payments`
-* `login_logs` / `activity_logs` / `backup_logs`
+**Print Templates**
+- Professional A4 invoice (branded, GST columns, bank details)
+- Thermal 80mm POS receipt (auto-print)
+- Quotation & Delivery Challan print
+- Barcode label printing (Code128, configurable grid)
+- WhatsApp invoice sharing
 
 ---
 
-## 5. Local Setup & Credentials
+## Quick Start
 
-### Installation
-1. Ensure a PHP development server and MySQL are installed.
-2. Clone the repository inside your local directory.
-3. Configure your database details inside [config/database.php](file:///Users/hasmukh/dev/invoices/config/database.php) (MySQL port, username, password).
-4. Run the local development server:
-   ```bash
-   php -S localhost:8000
-   ```
-5. Open your web browser and navigate to `http://localhost:8000/login.php`.
-
-### Default Administrator Credentials
-* **Email:** `hasmukhkikod@gmail.com`
-* **Password:** `admin123`
-
----
-
-## 6. Testing & Verifications
-
-The system includes automated tests suite under the `tests/` directory:
-* [tests/run_tests.php](file:///Users/hasmukh/dev/invoices/tests/run_tests.php): Validates security configurations, database connections, schema structures, password decryptions, XSS filters, and CSRF token protections.
-* [tests/verify_flow.php](file:///Users/hasmukh/dev/invoices/tests/verify_flow.php): Simulates headless E2E flow calculations (stock adjustments, checkout totals, sales revenue, and COGS/profit accuracy checks).
-
-To execute the test suite:
 ```bash
-php tests/run_tests.php
-php tests/verify_flow.php
+# 1. Clone
+git clone https://github.com/Hasmukhkikod/Inventory-Billing-.git
+cd Inventory-Billing-
+
+# 2. Install dependencies
+composer install
+
+# 3. Configure database
+cp .env.example .env
+# Edit .env: set DB_DRIVER=sqlite (or mysql with credentials)
+
+# 4. Run
+php -S localhost:8000 server.php
+
+# 5. Open http://localhost:8000
 ```
+
+**Default login:** `hasmukhkikod@gmail.com` / `admin123`
+
+Database tables and seed data are auto-created on first run.
+
+---
+
+## Desktop Distribution
+
+For clients who need a one-click desktop install (no XAMPP/MySQL):
+
+1. Copy project to a Windows PC
+2. Run `desktop/BUILD.bat`
+3. Send the generated ZIP to client
+4. Client extracts and double-clicks "Start Grovixo.bat"
+
+See `desktop/BUILD_INSTRUCTIONS.txt` for details.
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|-----------|
+| Backend | PHP 8.0+ |
+| Database | MySQL 5.7+ / SQLite 3 |
+| Routing | nikic/fast-route |
+| Frontend | Bootstrap 5.3, jQuery 3.6 |
+| Charts | Chart.js |
+| Tables | DataTables 1.13 |
+| Alerts | SweetAlert2 |
+| Icons | Font Awesome 6.4 |
+| Barcodes | JsBarcode |
+
+---
+
+## Project Structure
+
+```
+├── api/                    # 18 AJAX API endpoints
+├── application/
+│   ├── controllers/        # 13 MVC controllers
+│   ├── models/             # Database, Auth, Helpers
+│   └── views/              # PHP view templates (13 modules)
+├── assets/                 # CSS, JS
+├── database/               # Schema, seed, migrations
+├── desktop/                # Client distribution scripts
+├── config/                 # App & database config
+├── invoice_print.php       # A4 invoice template
+├── invoice_thermal.php     # Thermal receipt template
+├── quotation_print.php     # Quotation print
+├── challan_print.php       # Delivery challan print
+├── barcode_print.php       # Barcode label printing
+└── DOCUMENTATION.md        # Complete system documentation
+```
+
+---
+
+## License
+
+All rights reserved. Grovixo IIMS v2.0.
