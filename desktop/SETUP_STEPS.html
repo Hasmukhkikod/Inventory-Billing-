@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grovixo IIMS - Setup Steps</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #f1f5f9; padding: 0; }
+
+        .page {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .logo {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+            letter-spacing: -1px;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: #94a3b8;
+            font-weight: 400;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a78bfa;
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 16px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        /* Two Column Layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #94a3b8;
+            margin-bottom: 28px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #1e293b;
+        }
+        .section-title .highlight {
+            color: #60a5fa;
+            font-weight: 700;
+        }
+
+        /* Step Cards */
+        .step {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 28px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: white;
+        }
+        .step-num.blue { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+        .step-num.green { background: linear-gradient(135deg, #059669, #10b981); }
+        .step-num.purple { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+        .step-num.orange { background: linear-gradient(135deg, #d97706, #f59e0b); }
+
+        .step-body h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 6px;
+        }
+        .step-body p {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .file-tag {
+            display: inline-block;
+            background: #1e293b;
+            color: #60a5fa;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid #334155;
+        }
+
+        /* Terminal Mockup */
+        .terminal {
+            background: #0c0f1a;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        .terminal-bar {
+            background: #1a1f2e;
+            padding: 8px 12px;
+            display: flex;
+            gap: 6px;
+        }
+        .terminal-bar span {
+            width: 10px; height: 10px; border-radius: 50%;
+        }
+        .dot-r { background: #ef4444; }
+        .dot-y { background: #eab308; }
+        .dot-g { background: #22c55e; }
+        .terminal-body {
+            padding: 14px 16px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.78rem;
+            line-height: 1.7;
+            color: #4ade80;
+        }
+        .t-white { color: #e2e8f0; }
+        .t-yellow { color: #fbbf24; }
+        .t-cyan { color: #22d3ee; }
+        .t-gray { color: #475569; }
+        .t-green { color: #4ade80; }
+
+        /* Browser Mockup */
+        .browser {
+            background: #f8fafc;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 12px;
+            border: 1px solid #334155;
+        }
+        .browser-bar {
+            background: #e2e8f0;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .browser-bar .dots { display: flex; gap: 5px; }
+        .browser-bar .dots span { width: 9px; height: 9px; border-radius: 50%; }
+        .browser-bar .url-bar {
+            flex: 1;
+            background: white;
+            border-radius: 4px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            color: #64748b;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .browser-body {
+            padding: 20px;
+            text-align: center;
+            color: #1e293b;
+        }
+        .browser-body .app-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #2563eb;
+            margin-bottom: 4px;
+        }
+        .browser-body .app-sub {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 14px;
+        }
+        .browser-body .login-field {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 8px 14px;
+            margin: 6px auto;
+            max-width: 240px;
+            font-size: 0.75rem;
+            color: #64748b;
+            text-align: left;
+        }
+        .browser-body .login-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 30px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* Divider */
+        .center-divider {
+            position: relative;
+        }
+        .center-divider::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, #334155 20%, #334155 80%, transparent);
+        }
+
+        /* Arrow between steps */
+        .arrow {
+            text-align: center;
+            margin: -8px 0 16px 62px;
+            color: #334155;
+            font-size: 1.2rem;
+        }
+
+        /* Folder Structure */
+        .folder-tree {
+            background: #1a1f2e;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.78rem;
+            line-height: 1.8;
+            margin-top: 16px;
+        }
+        .folder-tree .folder { color: #fbbf24; }
+        .folder-tree .file { color: #60a5fa; }
+        .folder-tree .desc { color: #475569; }
+        .folder-tree .bat { color: #4ade80; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 24px;
+            border-top: 1px solid #1e293b;
+            color: #475569;
+            font-size: 0.8rem;
+        }
+
+        /* Checkmarks */
+        .check-list {
+            list-style: none;
+            margin-top: 12px;
+        }
+        .check-list li {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            padding: 4px 0;
+        }
+        .check-list li::before {
+            content: '✓';
+            color: #4ade80;
+            font-weight: 800;
+            margin-right: 8px;
+        }
+
+        /* No-need list */
+        .no-list li::before {
+            content: '✗';
+            color: #f87171;
+        }
+
+        /* Print */
+        @media print {
+            body { background: white; color: #1e293b; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .page { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">⚡ Grovixo IIMS</div>
+            <div class="subtitle">Invoice & Inventory Management System</div>
+            <div class="badge">COMPLETE SETUP GUIDE &bull; v2.0</div>
+        </div>
+
+        <!-- Two Columns -->
+        <div class="two-col">
+            <!-- LEFT: Your Steps (Developer) -->
+            <div>
+                <div class="section-title"><span class="highlight">YOUR</span> STEPS &bull; ONE-TIME BUILD</div>
+
+                <!-- Step 1 -->
+                <div class="step">
+                    <div class="step-num blue">1</div>
+                    <div class="step-body">
+                        <h3>Copy Project to Windows PC</h3>
+                        <p>Transfer your <span class="file-tag">invoices/</span> folder to any Windows computer via USB, Google Drive, or git.</p>
+                    </div>
+                </div>
+                <div class="arrow">↓</div>
+
+                <!-- Step 2 -->
+                <div class="step">
+                    <div class="step-num purple">2</div>
+                    <div class="step-body">
+                        <h3>Double-Click BUILD.bat</h3>
+                        <p>Open <span class="file-tag">desktop/</span> folder, run <span class="file-tag">BUILD.bat</span>. Wait 2-3 minutes.</p>
+                        <div class="terminal">
+                            <div class="terminal-bar"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+                            <div class="terminal-body">
+                                <span class="t-white">============================================</span><br>
+                                <span class="t-cyan"> GROVIXO IIMS - Building Client Package...</span><br>
+                                <span class="t-white">============================================</span><br><br>
+                                <span class="t-green">[1/6] Cleaning previous build...         [OK]</span><br>
+                                <span class="t-green">[2/6] Downloading PHP 8.3 portable...     [OK]</span><br>
+                                <span class="t-green">[3/6] Configuring PHP extensions...       [OK]</span><br>
+                                <span class="t-green">[4/6] Copying application files...        [OK]</span><br>
+                                <span class="t-green">[5/6] Creating launcher scripts...        [OK]</span><br>
+                                <span class="t-green">[6/6] Creating final ZIP package...       [OK]</span><br><br>
+                                <span class="t-yellow"> BUILD COMPLETE!</span><br>
+                                <span class="t-white"> Output: Grovixo-IIMS-Portable-v2.0.zip</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow">↓</div>
+
+                <!-- Step 3 -->
+                <div class="step">
+                    <div class="step-num green">3</div>
+                    <div class="step-body">
+                        <h3>Send ZIP to Client</h3>
+                        <p>You get one file: <span class="file-tag">Grovixo-IIMS-Portable-v2.0.zip</span> (~70 MB). Send via Email, WhatsApp, USB, or Google Drive.</p>
+                    </div>
+                </div>
+
+                <!-- What's in the ZIP -->
+                <div style="margin-top: 20px; margin-left: 64px;">
+                    <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">What's inside the ZIP:</p>
+                    <div class="folder-tree">
+                        <span class="folder">📁 Grovixo-IIMS/</span><br>
+                        ├── <span class="bat">▶ Start Grovixo.bat</span> <span class="desc">← Client clicks this</span><br>
+                        ├── <span class="bat">■ Stop Grovixo.bat</span> <span class="desc">← To stop server</span><br>
+                        ├── <span class="file">📄 README.txt</span> <span class="desc">← Simple instructions</span><br>
+                        ├── <span class="file">🌐 Installation Guide.html</span><br>
+                        ├── <span class="folder">📁 php/</span> <span class="desc">← PHP runtime (auto)</span><br>
+                        └── <span class="folder">📁 app/</span> <span class="desc">← Your billing system</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Client Steps -->
+            <div>
+                <div class="section-title"><span class="highlight">CLIENT</span> STEPS &bull; EVERY PC</div>
+
+                <!-- Client Step 1 -->
+                <div class="step">
+                    <div class="step-num orange">1</div>
+                    <div class="step-body">
+                        <h3>Extract the ZIP</h3>
+                        <p>Right-click → <strong>"Extract All"</strong> to Desktop or any folder. That's the installation — done!</p>
+                    </div>
+                </div>
+                <div class="arrow">↓</div>
+
+                <!-- Client Step 2 -->
+                <div class="step">
+                    <div class="step-num green">2</div>
+                    <div class="step-body">
+                        <h3>Double-Click "Start Grovixo"</h3>
+                        <p>Open extracted folder, double-click <span class="file-tag">Start Grovixo.bat</span>. A black window opens — <strong>keep it open</strong>.</p>
+                        <div class="terminal">
+                            <div class="terminal-bar"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+                            <div class="terminal-body">
+                                <span class="t-cyan"> Grovixo IIMS v2.0</span><br>
+                                <span class="t-white"> Starting server... please wait.</span><br><br>
+                                <span class="t-yellow"> Browser opening at: http://localhost:8000</span><br><br>
+                                <span class="t-gray"> Keep this window open while using.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow">↓</div>
+
+                <!-- Client Step 3 -->
+                <div class="step">
+                    <div class="step-num blue">3</div>
+                    <div class="step-body">
+                        <h3>Login & Start Billing!</h3>
+                        <p>Browser opens automatically. Login with credentials and start using.</p>
+                        <div class="browser">
+                            <div class="browser-bar">
+                                <div class="dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+                                <div class="url-bar">🔒 localhost:8000</div>
+                            </div>
+                            <div class="browser-body">
+                                <div class="app-title">⚡ Grovixo</div>
+                                <div class="app-sub">Invoice & Inventory Management</div>
+                                <div class="login-field">📧 your-email@company.com</div>
+                                <div class="login-field">🔒 ••••••••</div>
+                                <div class="login-btn">→ Login Securely</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- What client doesn't need -->
+                <div style="margin-top: 32px; margin-left: 64px;">
+                    <p style="font-size: 0.78rem; color: #4ade80; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">✓ Client gets:</p>
+                    <ul class="check-list">
+                        <li>Works offline — no internet needed</li>
+                        <li>Data stored safely on their PC</li>
+                        <li>Nothing else to install</li>
+                        <li>Works on Windows 10/11</li>
+                    </ul>
+
+                    <p style="font-size: 0.78rem; color: #f87171; margin: 16px 0 8px; text-transform: uppercase; letter-spacing: 1px;">✗ Client doesn't need:</p>
+                    <ul class="check-list no-list">
+                        <li>No XAMPP</li>
+                        <li>No MySQL / phpMyAdmin</li>
+                        <li>No database setup</li>
+                        <li>No config files</li>
+                        <li>No technical knowledge</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Grovixo IIMS v2.0 &bull; Invoice & Inventory Management System &bull; Powered by PHP + SQLite
+        </div>
+    </div>
+</body>
+</html>

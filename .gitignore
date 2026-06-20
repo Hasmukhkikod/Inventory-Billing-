@@ -1,0 +1,35 @@
+# Dependencies
+/vendor/
+composer.phar
+
+# Environment
+.env
+
+# Database
+/database/database.sqlite
+
+# Uploads & generated files
+/uploads/*
+!/uploads/.gitkeep
+/backups/*
+!/backups/.gitkeep
+/logs/*
+!/logs/.gitkeep
+
+# Desktop build artifacts
+/desktop/_build/
+/desktop/build/
+/desktop/portable/
+/desktop/Output/
+/desktop/php-portable.zip
+/desktop/temp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
