@@ -100,24 +100,17 @@ class Database {
             $schemaSql = file_get_contents($schemaFile);
 
             if ($this->driver === 'sqlite') {
-                // Translate MySQL syntax into valid SQLite syntax
+                // Translate MySQL → SQLite syntax
                 $schemaSql = preg_replace('/INT\s+AUTO_INCREMENT\s+PRIMARY\s+KEY/i', 'INTEGER PRIMARY KEY AUTOINCREMENT', $schemaSql);
                 $schemaSql = preg_replace('/INT\s+AUTO_INCREMENT/i', 'INTEGER', $schemaSql);
-                
-                // Replace general INT constraints with INTEGER for foreign keys mappings
-                $schemaSql = preg_replace('/role_id INT/i', 'role_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/category_id INT/i', 'category_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/brand_id INT/i', 'brand_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/unit_id INT/i', 'unit_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/product_id INT/i', 'product_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/customer_id INT/i', 'customer_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/supplier_id INT/i', 'supplier_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/purchase_id INT/i', 'purchase_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/invoice_id INT/i', 'invoice_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/user_id INT/i', 'user_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/created_by INT/i', 'created_by INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/permission_id INT/i', 'permission_id INTEGER', $schemaSql);
-                $schemaSql = preg_replace('/id INT/i', 'id INTEGER', $schemaSql);
+                // Universal: any column ending with _id INT or named id INT → INTEGER
+                $schemaSql = preg_replace('/(\w+)\s+INT\b(?!\s*AUTO_INCREMENT)/i', '$1 INTEGER', $schemaSql);
+                // Remove MySQL-specific clauses
+                $schemaSql = preg_replace('/\s*ENGINE\s*=\s*InnoDB[^;]*/i', '', $schemaSql);
+                $schemaSql = preg_replace('/\s*DEFAULT\s+CHARSET\s*=\s*\w+/i', '', $schemaSql);
+                $schemaSql = preg_replace('/\s*ON\s+UPDATE\s+CURRENT_TIMESTAMP/i', '', $schemaSql);
+                // Remove CREATE INDEX statements (SQLite handles these differently)
+                $schemaSql = preg_replace('/CREATE\s+INDEX\s+[^;]+;/i', '', $schemaSql);
             }
 
             $this->executeMultiQuery($schemaSql);
