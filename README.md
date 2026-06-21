@@ -1,129 +1,56 @@
 # Grovixo IIMS v2.0
 
-**Invoice & Inventory Management System** — A complete billing, inventory, and business management platform for Indian businesses.
+**Billing & Inventory Management System**
 
-Built with PHP 8+, Bootstrap 5, jQuery, Chart.js, and SQLite/MySQL.
+---
+
+## How to Use (Windows PC)
+
+**Step 1:** Download this project (Code > Download ZIP) and extract it.
+
+**Step 2:** Double-click **`START.bat`**
+
+**Step 3:** Browser opens automatically. Login and use.
+
+That's it. No XAMPP, no MySQL, no setup needed. Everything installs automatically on first run.
 
 ---
 
 ## Features
 
-**POS Billing**
-- Barcode scan / search by name, SKU
-- Hold & Recall bills (F3/F5) for multi-customer checkout
-- Split payment (Cash + UPI + Card on same invoice)
-- GST compliance: auto CGST/SGST (intra-state) or IGST (inter-state)
-- HSN/SAC code support on products and invoices
-- Discount coupons with validation rules
-- Customer loyalty points (earn & redeem)
-- Keyboard shortcuts (F2-F6, ESC)
-
-**Modules**
-- Inventory with categories, brands, units, barcode generation
-- Purchase orders from suppliers with stock auto-update
-- Quotations/Estimates with convert-to-invoice
-- Delivery challans for goods dispatch
-- Sales & Purchase returns with credit/debit notes
-- Customer CRM with ledgers, credit limits, loyalty
-- Supplier directory with payables tracking
-- Expense tracking with categories
-- User management with 4 roles, 15 permissions
-
-**Reports & Analytics**
-- Dashboard with KPI cards, charts, top products
-- P&L summary, sales ledger, stock valuation
-- GST report (CGST/SGST/IGST breakdown)
-- Overdue invoices report
-- Customer receivables & supplier payables
-- Day-end cash register reconciliation
-- CSV export on all reports
-
-**Print Templates**
-- Professional A4 invoice (branded, GST columns, bank details)
-- Thermal 80mm POS receipt (auto-print)
-- Quotation & Delivery Challan print
-- Barcode label printing (Code128, configurable grid)
+- POS Billing with barcode scanning
+- Hold & Recall bills, Split payments
+- GST compliant (CGST/SGST/IGST + HSN codes)
+- Quotations, Delivery Challans
+- Inventory management with stock tracking
+- Customer CRM with loyalty points
+- Discount coupons / promo codes
+- Reports: Sales, P&L, GST, Stock, Overdue
+- Day-end cash register report
+- Print: A4 invoice, Thermal receipt, Barcodes
 - WhatsApp invoice sharing
+- Multi-user with role-based access
+- Company branding (logo + name in settings)
+- Works offline — data stored locally
 
 ---
 
-## Quick Start
+## For Developers
 
 ```bash
-# 1. Clone
-git clone https://github.com/Hasmukhkikod/Inventory-Billing-.git
-cd Inventory-Billing-
-
-# 2. Install dependencies
 composer install
-
-# 3. Configure database
-cp .env.example .env
-# Edit .env: set DB_DRIVER=sqlite (or mysql with credentials)
-
-# 4. Run
+cp .env.example .env   # Set DB_DRIVER=sqlite or mysql
 php -S localhost:8000 server.php
-
-# 5. Open http://localhost:8000
 ```
 
-**Default login:** `hasmukhkikod@gmail.com` / `admin123`
-
-Database tables and seed data are auto-created on first run.
-
----
-
-## Desktop Distribution
-
-For clients who need a one-click desktop install (no XAMPP/MySQL):
-
-1. Copy project to a Windows PC
-2. Run `desktop/BUILD.bat`
-3. Send the generated ZIP to client
-4. Client extracts and double-clicks "Start Grovixo.bat"
-
-See `desktop/BUILD_INSTRUCTIONS.txt` for details.
+See [DOCUMENTATION.md](DOCUMENTATION.md) for complete system docs.
 
 ---
 
 ## Tech Stack
 
-| Component | Technology |
-|-----------|-----------|
-| Backend | PHP 8.0+ |
-| Database | MySQL 5.7+ / SQLite 3 |
-| Routing | nikic/fast-route |
-| Frontend | Bootstrap 5.3, jQuery 3.6 |
-| Charts | Chart.js |
-| Tables | DataTables 1.13 |
-| Alerts | SweetAlert2 |
-| Icons | Font Awesome 6.4 |
-| Barcodes | JsBarcode |
+PHP 8+ | Bootstrap 5 | jQuery | Chart.js | SQLite/MySQL | DataTables | SweetAlert2
 
 ---
 
-## Project Structure
-
-```
-├── api/                    # 18 AJAX API endpoints
-├── application/
-│   ├── controllers/        # 13 MVC controllers
-│   ├── models/             # Database, Auth, Helpers
-│   └── views/              # PHP view templates (13 modules)
-├── assets/                 # CSS, JS
-├── database/               # Schema, seed, migrations
-├── desktop/                # Client distribution scripts
-├── config/                 # App & database config
-├── invoice_print.php       # A4 invoice template
-├── invoice_thermal.php     # Thermal receipt template
-├── quotation_print.php     # Quotation print
-├── challan_print.php       # Delivery challan print
-├── barcode_print.php       # Barcode label printing
-└── DOCUMENTATION.md        # Complete system documentation
-```
-
----
-
-## License
-
-All rights reserved. Grovixo IIMS v2.0.
+Grovixo IIMS v2.0 — All rights reserved.
