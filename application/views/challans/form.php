@@ -69,12 +69,12 @@ $isEdit = !empty($challan);
 
     <!-- Dispatch Details & Save Panel -->
     <div class="col-lg-4">
-        <div class="panel-card h-100">
+        <div class="panel-card" style="position: sticky; top: 1rem;">
             <div class="panel-header">
                 <h6 class="mb-0 text-dark"><i class="fa-solid fa-truck-fast me-2 text-indigo"></i>Dispatch Details</h6>
             </div>
 
-            <div class="panel-body d-flex flex-column justify-content-between h-100">
+            <div class="panel-body">
                 <div>
                     <?php echo \App\Models\Helpers::csrfField(); ?>
                     <?php if ($isEdit): ?>
