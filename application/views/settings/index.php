@@ -209,7 +209,7 @@
 
                     </div>
 
-                    <div class="mt-4 pt-3 border-top border-secondary text-end">
+                    <div class="mt-4 pt-3 border-top border-secondary text-end" id="settings-save-row">
                         <button type="submit" class="btn btn-primary"><i class="fa-solid fa-circle-check me-2"></i>Commit Changes</button>
                     </div>
                 </form>
@@ -580,6 +580,10 @@ $(document).ready(function() {
         gstSlabs = gstSlabs.filter(s => s !== val);
         renderGstTags();
     });
+
+    // Hide Commit Changes button when Coupons tab is active
+    $('button[data-bs-target="#coupons-pane"]').on('shown.bs.tab', function() { $('#settings-save-row').hide(); });
+    $('#settingsTabs button:not([data-bs-target="#coupons-pane"])').on('shown.bs.tab', function() { $('#settings-save-row').show(); });
 
     // ==================== COUPON MANAGEMENT ====================
     const couponCsrf = $('input[name="csrf_token"]').val();
