@@ -83,7 +83,7 @@ switch ($action) {
 
         $id = (int)($_POST['id'] ?? 0);
         try {
-            $db->query("UPDATE coupons SET status='INACTIVE', deleted_at=NOW() WHERE id=?", [$id]);
+            $db->query("UPDATE coupons SET status='INACTIVE', deleted_at=CURRENT_TIMESTAMP WHERE id=?", [$id]);
             Helpers::jsonResponse(true, 'Coupon deleted');
         } catch (Exception $e) {
             Helpers::jsonResponse(false, 'Failed: ' . $e->getMessage());

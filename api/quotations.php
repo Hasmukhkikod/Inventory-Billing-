@@ -128,7 +128,7 @@ switch ($action) {
                     }
 
                     $t->query("
-                        UPDATE quotations SET customer_id = ?, quotation_date = ?, valid_until = ?, subtotal = ?, discount = ?, gst_amount = ?, grand_total = ?, notes = ?, updated_at = NOW()
+                        UPDATE quotations SET customer_id = ?, quotation_date = ?, valid_until = ?, subtotal = ?, discount = ?, gst_amount = ?, grand_total = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
                         WHERE id = ?
                     ", [
                         $customer_id > 0 ? $customer_id : null,
@@ -143,7 +143,7 @@ switch ($action) {
                     ]);
 
                     // Remove old items
-                    $t->query("UPDATE quotation_items SET deleted_at = NOW() WHERE quotation_id = ?", [$quotation_id]);
+                    $t->query("UPDATE quotation_items SET deleted_at = CURRENT_TIMESTAMP WHERE quotation_id = ?", [$quotation_id]);
 
                     // Insert updated items
                     foreach ($validatedItems as $vi) {
@@ -216,7 +216,7 @@ switch ($action) {
                 Helpers::jsonResponse(false, "Cannot delete a converted quotation.");
             }
 
-            $db->query("UPDATE quotations SET status = 'INACTIVE', deleted_at = NOW() WHERE id = ?", [$id]);
+            $db->query("UPDATE quotations SET status = 'INACTIVE', deleted_at = CURRENT_TIMESTAMP WHERE id = ?", [$id]);
             Helpers::logActivity($db, "quotations", "Deleted quotation: " . $quotation['quotation_no'], $id);
             Helpers::jsonResponse(true, "Quotation deleted successfully.");
         } catch (Exception $e) {
@@ -248,7 +248,7 @@ switch ($action) {
                 Helpers::jsonResponse(false, "Cannot change status of a converted quotation.");
             }
 
-            $db->query("UPDATE quotations SET status = ?, updated_at = NOW() WHERE id = ?", [$new_status, $id]);
+            $db->query("UPDATE quotations SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [$new_status, $id]);
             Helpers::logActivity($db, "quotations", "Updated quotation status to $new_status: " . $quotation['quotation_no'], $id);
             Helpers::jsonResponse(true, "Status updated to $new_status.");
         } catch (Exception $e) {
@@ -289,7 +289,7 @@ switch ($action) {
             ", [$id])->fetchAll();
 
             // Mark quotation as CONVERTED
-            $db->query("UPDATE quotations SET status = 'CONVERTED', updated_at = NOW() WHERE id = ?", [$id]);
+            $db->query("UPDATE quotations SET status = 'CONVERTED', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [$id]);
             Helpers::logActivity($db, "quotations", "Converted quotation to invoice: " . $quotation['quotation_no'], $id);
 
             // Return data for POS to load

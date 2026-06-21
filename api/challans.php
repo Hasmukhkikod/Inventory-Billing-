@@ -117,7 +117,7 @@ switch ($action) {
 
         $id = (int)($_POST['id'] ?? 0);
         try {
-            $db->query("UPDATE challans SET status='INACTIVE', deleted_at=NOW() WHERE id=?", [$id]);
+            $db->query("UPDATE challans SET status='INACTIVE', deleted_at=CURRENT_TIMESTAMP WHERE id=?", [$id]);
             Helpers::jsonResponse(true, 'Challan deleted');
         } catch (Exception $e) {
             Helpers::jsonResponse(false, 'Failed: ' . $e->getMessage());

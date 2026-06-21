@@ -68,7 +68,7 @@ switch ($action) {
             $bill = $db->query("SELECT * FROM held_bills WHERE id = ? AND status = 'ACTIVE' LIMIT 1", [$id])->fetch();
             if (!$bill) Helpers::jsonResponse(false, 'Held bill not found');
 
-            $db->query("UPDATE held_bills SET status = 'INACTIVE', deleted_at = NOW() WHERE id = ?", [$id]);
+            $db->query("UPDATE held_bills SET status = 'INACTIVE', deleted_at = CURRENT_TIMESTAMP WHERE id = ?", [$id]);
             Helpers::logActivity($db, 'billing', 'Recalled held bill #' . $id, $id);
             Helpers::jsonResponse(true, 'Bill recalled', $bill);
         } catch (Exception $e) {
@@ -82,7 +82,7 @@ switch ($action) {
 
         $id = (int)($_POST['id'] ?? 0);
         try {
-            $db->query("UPDATE held_bills SET status = 'INACTIVE', deleted_at = NOW() WHERE id = ?", [$id]);
+            $db->query("UPDATE held_bills SET status = 'INACTIVE', deleted_at = CURRENT_TIMESTAMP WHERE id = ?", [$id]);
             Helpers::jsonResponse(true, 'Held bill deleted');
         } catch (Exception $e) {
             Helpers::jsonResponse(false, 'Failed: ' . $e->getMessage());
