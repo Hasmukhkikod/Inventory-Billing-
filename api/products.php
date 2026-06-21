@@ -71,6 +71,10 @@ switch ($action) {
             Helpers::jsonResponse(false, "Product Name and SKU are required.");
         }
 
+        if ($cost_price < 0 || $selling_price < 0) {
+            Helpers::jsonResponse(false, "Prices cannot be negative.");
+        }
+
         // SKU Unique Check
         $skuCheckQuery = ($id > 0) 
             ? "SELECT id FROM products WHERE sku = ? AND id != ? LIMIT 1"
@@ -214,6 +218,8 @@ switch ($action) {
         break;
 
     case 'category_save':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['category_name'] ?? '');
         $desc = trim($_POST['description'] ?? '');
@@ -222,10 +228,11 @@ switch ($action) {
         try {
             if ($id > 0) {
                 $db->query("UPDATE categories SET category_name = ?, description = ? WHERE id = ?", [$name, $desc, $id]);
+                Helpers::jsonResponse(true, "Category updated.", ['id' => $id]);
             } else {
-                $db->insert("INSERT INTO categories (category_name, description) VALUES (?, ?)", [$name, $desc]);
+                $newId = $db->insert("INSERT INTO categories (category_name, description) VALUES (?, ?)", [$name, $desc]);
+                Helpers::jsonResponse(true, "Category added.", ['id' => (int)$newId]);
             }
-            Helpers::jsonResponse(true, "Category saved successfully.");
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
         }
@@ -242,6 +249,8 @@ switch ($action) {
         break;
 
     case 'brand_save':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['brand_name'] ?? '');
         if (empty($name)) Helpers::jsonResponse(false, "Brand Name is required.");
@@ -249,10 +258,11 @@ switch ($action) {
         try {
             if ($id > 0) {
                 $db->query("UPDATE brands SET brand_name = ? WHERE id = ?", [$name, $id]);
+                Helpers::jsonResponse(true, "Brand updated.", ['id' => $id]);
             } else {
-                $db->insert("INSERT INTO brands (brand_name) VALUES (?)", [$name]);
+                $newId = $db->insert("INSERT INTO brands (brand_name) VALUES (?)", [$name]);
+                Helpers::jsonResponse(true, "Brand added.", ['id' => (int)$newId]);
             }
-            Helpers::jsonResponse(true, "Brand saved successfully.");
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
         }
@@ -269,6 +279,8 @@ switch ($action) {
         break;
 
     case 'unit_save':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['unit_name'] ?? '');
         $short = trim($_POST['short_name'] ?? '');
@@ -277,10 +289,11 @@ switch ($action) {
         try {
             if ($id > 0) {
                 $db->query("UPDATE units SET unit_name = ?, short_name = ? WHERE id = ?", [$name, $short, $id]);
+                Helpers::jsonResponse(true, "Unit updated.", ['id' => $id]);
             } else {
-                $db->insert("INSERT INTO units (unit_name, short_name) VALUES (?, ?)", [$name, $short]);
+                $newId = $db->insert("INSERT INTO units (unit_name, short_name) VALUES (?, ?)", [$name, $short]);
+                Helpers::jsonResponse(true, "Unit added.", ['id' => (int)$newId]);
             }
-            Helpers::jsonResponse(true, "Unit saved successfully.");
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
         }
