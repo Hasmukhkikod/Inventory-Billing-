@@ -77,6 +77,7 @@ $type = $_GET['type'] ?? 'SALES'; // SALES or PURCHASE
             
             <div class="panel-body d-flex flex-column justify-content-between h-100">
                 <div>
+                    <?php echo \App\Models\Helpers::csrfField(); ?>
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Return Remarks / Reason *</label>
                         <textarea class="form-control" id="ret-remarks" rows="4" required placeholder="Reason for returning items..."></textarea>

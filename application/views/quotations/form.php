@@ -106,7 +106,7 @@ $isEdit = !empty($quotation);
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-secondary">Flat Discount (₹)</span>
-                        <input type="number" step="0.01" class="form-control text-end py-1" style="width: 120px;" id="qt-discount-input" value="<?php echo $isEdit ? number_format((float)$quotation['discount'], 2, '.', '') : '0.00'; ?>">
+                        <input type="number" step="0.01" min="0" class="form-control text-end py-1" style="width: 120px;" id="qt-discount-input" value="<?php echo $isEdit ? number_format((float)$quotation['discount'], 2, '.', '') : '0.00'; ?>">
                     </div>
 
                     <hr class="my-3 border-dark">
@@ -367,12 +367,12 @@ $(document).ready(function() {
         const discount = parseFloat($("#qt-discount-input").val()) || 0;
 
         if (cart.length === 0) {
-            Swal.fire({ icon: 'warning', title: 'Cart Empty', text: 'Please add products to the quotation.', background: '#151e30', color: '#f3f4f6' });
+            Swal.fire({ icon: 'warning', title: 'Cart Empty', text: 'Please add products to the quotation.', background: '#ffffff', color: '#0f172a' });
             return;
         }
 
         if (!quotationDate) {
-            Swal.fire({ icon: 'warning', title: 'Date Required', text: 'Please set the quotation date.', background: '#151e30', color: '#f3f4f6' });
+            Swal.fire({ icon: 'warning', title: 'Date Required', text: 'Please set the quotation date.', background: '#ffffff', color: '#0f172a' });
             return;
         }
 

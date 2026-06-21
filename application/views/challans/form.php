@@ -302,15 +302,15 @@ $(document).ready(function() {
         const notes = $("#dc-notes").val().trim();
 
         if (!customerId) {
-            Swal.fire({ icon: 'warning', title: 'Customer Missing', text: 'Please select a customer.', background: '#151e30', color: '#f3f4f6' });
+            Swal.fire({ icon: 'warning', title: 'Customer Missing', text: 'Please select a customer.', background: '#ffffff', color: '#0f172a' });
             return;
         }
         if (!challanDate) {
-            Swal.fire({ icon: 'warning', title: 'Date Missing', text: 'Please select a challan date.', background: '#151e30', color: '#f3f4f6' });
+            Swal.fire({ icon: 'warning', title: 'Date Missing', text: 'Please select a challan date.', background: '#ffffff', color: '#0f172a' });
             return;
         }
         if (cart.length === 0) {
-            Swal.fire({ icon: 'warning', title: 'Cart Empty', text: 'Please add products to dispatch.', background: '#151e30', color: '#f3f4f6' });
+            Swal.fire({ icon: 'warning', title: 'Cart Empty', text: 'Please add products to dispatch.', background: '#ffffff', color: '#0f172a' });
             return;
         }
 

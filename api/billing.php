@@ -62,6 +62,14 @@ switch ($action) {
 
         if (empty($cart)) Helpers::jsonResponse(false, 'Cart is empty');
         if (empty($payments)) Helpers::jsonResponse(false, 'Select a payment method');
+        if ($discount_amount < 0) Helpers::jsonResponse(false, 'Discount amount cannot be negative');
+
+        // Validate payment amounts are non-negative
+        foreach ($payments as $p) {
+            if ((float)($p['amount'] ?? 0) < 0) {
+                Helpers::jsonResponse(false, 'Payment amount cannot be negative');
+            }
+        }
 
         try {
             $db->transaction(function($t) use ($customer_id, $invoice_type, $discount_amount, $coupon_id, $coupon_discount, $loyalty_points_redeemed, $loyalty_discount, $due_date, $notes, $is_igst, $payments, $cart) {
@@ -76,6 +84,9 @@ switch ($action) {
                     $pid = (int)$item['id'];
                     $qty = (float)$item['qty'];
                     $disc = (float)($item['discount'] ?? 0);
+
+                    if ($qty <= 0) throw new Exception("Quantity must be greater than zero.");
+                    if ($disc < 0 || $disc > 100) throw new Exception("Discount percentage must be between 0 and 100.");
 
                     $product = $t->query("SELECT * FROM products WHERE id = ? AND status = 'ACTIVE' AND deleted_at IS NULL LIMIT 1", [$pid])->fetch();
                     if (!$product) throw new Exception("Product ID $pid not found");

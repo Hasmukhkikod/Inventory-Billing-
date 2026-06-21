@@ -41,14 +41,20 @@ $isEdit = !empty($customer);
 
                 <div class="col-md-6">
                     <label class="form-label">Opening Balance (₹)</label>
-                    <input type="number" step="0.01" class="form-control" name="opening_balance" id="cust-opening-balance" placeholder="0.00" value="<?php echo $isEdit ? (float)$customer['opening_balance'] : '0.00'; ?>">
+                    <input type="number" step="0.01" min="0" class="form-control" name="opening_balance" id="cust-opening-balance" placeholder="0.00" value="<?php echo $isEdit ? (float)$customer['opening_balance'] : '0.00'; ?>">
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Credit Limit (₹)</label>
-                    <input type="number" step="0.01" class="form-control" name="credit_limit" id="cust-credit-limit" placeholder="0.00" value="<?php echo $isEdit ? (float)$customer['credit_limit'] : '0.00'; ?>">
+                    <input type="number" step="0.01" min="0" class="form-control" name="credit_limit" id="cust-credit-limit" placeholder="0.00" value="<?php echo $isEdit ? (float)$customer['credit_limit'] : '0.00'; ?>">
                     <small class="text-muted">Use 0 for unlimited / no limit</small>
                 </div>
-                
+
+                <div class="col-md-6">
+                    <label class="form-label">State</label>
+                    <input type="text" class="form-control" name="state" id="cust-state" placeholder="e.g. Maharashtra" value="<?php echo $isEdit ? \App\Models\Helpers::sanitize($customer['state'] ?? '') : ''; ?>">
+                    <small class="text-muted">Required for CGST/SGST vs IGST calculation</small>
+                </div>
+
                 <div class="col-md-12">
                     <label class="form-label">Address</label>
                     <textarea class="form-control" name="address" id="cust-address" rows="3" placeholder="Full address..."><?php echo $isEdit ? \App\Models\Helpers::sanitize($customer['address']) : ''; ?></textarea>

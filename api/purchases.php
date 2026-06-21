@@ -76,6 +76,9 @@ switch ($action) {
         if (empty($cart)) {
             Helpers::jsonResponse(false, "Purchase cart is empty.");
         }
+        if ($discount < 0) {
+            Helpers::jsonResponse(false, "Discount cannot be negative.");
+        }
 
         try {
             $db->transaction(function($t) use ($supplier_id, $purchase_date, $payment_status, $discount, $cart) {
@@ -89,6 +92,16 @@ switch ($action) {
                     $qty = (float)$item['qty'];
                     $cost = (float)$item['cost_price'];
                     $gst_rate = (float)$item['gst_percentage'];
+
+                    if ($qty <= 0) {
+                        throw new Exception("Quantity must be greater than zero.");
+                    }
+                    if ($cost < 0) {
+                        throw new Exception("Cost price cannot be negative.");
+                    }
+                    if ($gst_rate < 0) {
+                        throw new Exception("GST percentage cannot be negative.");
+                    }
 
                     $product = $t->query("SELECT * FROM products WHERE id = ? AND status = 'ACTIVE' LIMIT 1", [$pid])->fetch();
                     if (!$product) {

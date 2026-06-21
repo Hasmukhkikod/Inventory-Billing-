@@ -46,7 +46,7 @@ $isEdit = !empty($supplier);
                 <?php if (!$isEdit): ?>
                 <div class="col-md-6">
                     <label class="form-label">Opening Balance (₹)</label>
-                    <input type="number" step="0.01" class="form-control" name="opening_balance" id="supp-opening" placeholder="0.00" value="0.00">
+                    <input type="number" step="0.01" min="0" class="form-control" name="opening_balance" id="supp-opening" placeholder="0.00" value="0.00">
                 </div>
                 <?php endif; ?>
                 

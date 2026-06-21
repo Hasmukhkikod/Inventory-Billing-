@@ -223,7 +223,7 @@ $(document).ready(function () {
             '<select class="form-select form-select-sm pay-method" style="width: 50%;">' +
             '<option value="CASH">CASH</option><option value="UPI">UPI</option><option value="CARD">CARD</option>' +
             '<option value="NET_BANKING">NET BANKING</option><option value="CREDIT">CREDIT</option></select>' +
-            '<input type="number" step="0.01" class="form-control form-control-sm pay-amount" placeholder="Amount" value="0.00">' +
+            '<input type="number" step="0.01" min="0" class="form-control form-control-sm pay-amount" placeholder="Amount" value="0.00">' +
             '<button class="btn btn-sm btn-outline-danger py-0 px-1 btn-remove-split"><i class="fa-solid fa-xmark"></i></button></div>';
         $('#payment-methods-container').append(html);
         paymentIndex++;
@@ -502,7 +502,7 @@ $(document).ready(function () {
         $('#payment-methods-container').html(
             '<div class="payment-row d-flex gap-2 mb-2" data-index="0">' +
             '<select class="form-select form-select-sm pay-method" style="width: 55%;"><option value="CASH">CASH</option><option value="UPI">UPI / QR SCAN</option><option value="CARD">CARD</option><option value="NET_BANKING">NET BANKING</option><option value="CREDIT">CREDIT</option></select>' +
-            '<input type="number" step="0.01" class="form-control form-control-sm pay-amount" placeholder="Amount" value="0.00"></div>'
+            '<input type="number" step="0.01" min="0" class="form-control form-control-sm pay-amount" placeholder="Amount" value="0.00"></div>'
         );
         paymentIndex = 1;
     }

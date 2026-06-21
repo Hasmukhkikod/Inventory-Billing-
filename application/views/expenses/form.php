@@ -24,9 +24,12 @@ $isEdit = !empty($expense);
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Expense Category *</label>
-                    <select class="form-select" name="category_id" id="exp-category" required>
-                        <option value="">-- Choose Category --</option>
-                    </select>
+                    <div class="input-group">
+                        <select class="form-select" name="category_id" id="exp-category" required>
+                            <option value="">-- Choose Category --</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" type="button" id="btn-quick-exp-category" title="Add New Category"><i class="fa-solid fa-plus"></i></button>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Date *</label>
@@ -79,6 +82,26 @@ $isEdit = !empty($expense);
     </div>
 </div>
 
+<!-- Quick Add Expense Category Modal -->
+<div class="modal fade" id="quickExpCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Add Expense Category</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Category Name *</label>
+                <input type="text" class="form-control" id="new-exp-category-name" placeholder="e.g. Office Supplies" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" id="btn-save-exp-category">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 $(document).ready(function() {
     const selectedCategory = '<?php echo $isEdit ? (int)$expense['category_id'] : ''; ?>';
@@ -97,6 +120,31 @@ $(document).ready(function() {
                 });
             }
         }
+    });
+
+    // Quick Add Expense Category
+    $('#btn-quick-exp-category').click(function() {
+        $('#new-exp-category-name').val('');
+        $('#quickExpCategoryModal').modal('show');
+    });
+
+    $('#btn-save-exp-category').click(function() {
+        const name = $('#new-exp-category-name').val().trim();
+        if (!name) return;
+        $.ajax({
+            url: BASE_URL + '/api/expenses.php?action=category_save',
+            type: 'POST',
+            data: { csrf_token: $('input[name="csrf_token"]').val(), category_name: name },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status) {
+                    $('#exp-category').append(`<option value="${res.data.id}" selected>${res.data.name}</option>`);
+                    $('#quickExpCategoryModal').modal('hide');
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message });
+                }
+            }
+        });
     });
 
     $("#expenseForm").submit(function(e) {

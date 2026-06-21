@@ -21,9 +21,12 @@
                 <div class="row g-3 mb-4">
                     <div class="col-md-5">
                         <label class="form-label fw-semibold">Select Supplier *</label>
-                        <select class="form-select" id="pur-supplier-select" required>
-                            <option value="">-- Select Supplier --</option>
-                        </select>
+                        <div class="input-group">
+                            <select class="form-select" id="pur-supplier-select" required>
+                                <option value="">-- Select Supplier --</option>
+                            </select>
+                            <button class="btn btn-outline-secondary" type="button" id="btn-quick-supplier" title="Add New Supplier"><i class="fa-solid fa-plus"></i></button>
+                        </div>
                     </div>
                     <div class="col-md-7 position-relative">
                         <label class="form-label fw-semibold">Search Product to Add *</label>
@@ -67,13 +70,14 @@
 
     <!-- Summary / Save Panel -->
     <div class="col-lg-4">
-        <div class="panel-card h-100">
+        <div class="panel-card" style="position: sticky; top: 1rem;">
             <div class="panel-header">
                 <h6 class="mb-0 text-dark"><i class="fa-solid fa-file-invoice-dollar me-2 text-indigo"></i>Checkout Summary</h6>
             </div>
-            
-            <div class="panel-body d-flex flex-column justify-content-between h-100">
+
+            <div class="panel-body d-flex flex-column justify-content-between">
                 <div>
+                    <?php echo \App\Models\Helpers::csrfField(); ?>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Purchase Date *</label>
                         <input type="date" class="form-control" id="pur-date" required value="<?php echo date('Y-m-d'); ?>">
@@ -100,7 +104,7 @@
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-secondary">Flat Discount (₹)</span>
-                        <input type="number" step="0.01" class="form-control text-end py-1" style="width: 120px;" id="pur-discount-input" value="0.00">
+                        <input type="number" step="0.01" min="0" class="form-control text-end py-1" style="width: 120px;" id="pur-discount-input" value="0.00">
                     </div>
 
                     <hr class="my-3 border-dark">
@@ -111,12 +115,55 @@
                     </div>
                 </div>
 
-                <div>
+                <div class="pb-4">
                     <button class="btn btn-success w-100 py-3 fs-5" id="btn-save-purchase">
                         <i class="fa-solid fa-circle-check me-2"></i>Generate PO Entry
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add Supplier Modal -->
+<div class="modal fade" id="quickSupplierModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-truck-field me-2 text-indigo"></i>Add Supplier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickSupplierForm">
+                <?php echo \App\Models\Helpers::csrfField(); ?>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label">Supplier Name *</label>
+                            <input type="text" class="form-control" name="supplier_name" id="qs-name" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Mobile *</label>
+                            <input type="text" class="form-control" name="mobile" id="qs-mobile" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Contact Person</label>
+                            <input type="text" class="form-control" name="contact_person" id="qs-contact">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">GST Number</label>
+                            <input type="text" class="form-control" name="gst_number" id="qs-gst">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" name="address" id="qs-address" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add & Select</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -289,6 +336,45 @@ $(document).ready(function() {
         $("#pur-tax").text('₹' + tax.toFixed(2));
         $("#pur-grand-total").text('₹' + (grand > 0 ? grand.toFixed(2) : '0.00'));
     }
+
+    // Quick Add Supplier
+    $("#btn-quick-supplier").click(function() {
+        $("#quickSupplierForm")[0].reset();
+        $("#quickSupplierModal").modal('show');
+    });
+
+    $("#quickSupplierForm").submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: BASE_URL + '/api/suppliers.php?action=save',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(res) {
+                if (res.status) {
+                    // Reload suppliers and select the new one
+                    const select = $("#pur-supplier-select");
+                    $.ajax({
+                        url: BASE_URL + '/api/suppliers.php?action=list',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(r) {
+                            select.find('option:not(:first)').remove();
+                            if (r.status) {
+                                r.data.forEach(s => select.append(`<option value="${s.id}">${s.supplier_name} (${s.mobile})</option>`));
+                                // Select the last added supplier
+                                select.val(select.find('option:last').val());
+                            }
+                        }
+                    });
+                    $("#quickSupplierModal").modal('hide');
+                    Swal.fire({ icon: 'success', title: 'Supplier Added', text: res.message, timer: 1500, showConfirmButton: false });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message });
+                }
+            }
+        });
+    });
 
     $("#btn-save-purchase").click(function() {
         const supplierId = $("#pur-supplier-select").val();

@@ -155,7 +155,7 @@ $companyState = trim($compSettings['state'] ?? '');
 
             <div class="checkout-row align-items-center mt-2">
                 <span class="text-secondary">Flat Discount (₹)</span>
-                <input type="number" step="0.01" class="form-control text-end py-1" style="width: 120px;" id="bill-discount-input" value="0.00">
+                <input type="number" step="0.01" min="0" class="form-control text-end py-1" style="width: 120px;" id="bill-discount-input" value="0.00">
             </div>
 
             <?php if ($loyaltyEnabled): ?>
@@ -206,7 +206,7 @@ $companyState = trim($compSettings['state'] ?? '');
                             <option value="NET_BANKING">NET BANKING</option>
                             <option value="CREDIT">CREDIT</option>
                         </select>
-                        <input type="number" step="0.01" class="form-control form-control-sm pay-amount" placeholder="Amount" value="0.00">
+                        <input type="number" step="0.01" min="0" class="form-control form-control-sm pay-amount" placeholder="Amount" value="0.00">
                     </div>
                 </div>
                 <!-- Payment summary -->
