@@ -31,6 +31,11 @@
                             <i class="fa-solid fa-university me-2"></i>Bank Details
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="coupons-tab" data-bs-toggle="tab" data-bs-target="#coupons-pane" type="button" role="tab" aria-controls="coupons-pane" aria-selected="false">
+                            <i class="fa-solid fa-tags me-2"></i>Coupons
+                        </button>
+                    </li>
                 </ul>
             </div>
             
@@ -206,6 +211,100 @@
 
                     <div class="mt-4 pt-3 border-top border-secondary text-end">
                         <button type="submit" class="btn btn-primary"><i class="fa-solid fa-circle-check me-2"></i>Commit Changes</button>
+                    </div>
+                </form>
+
+                <!-- COUPONS PANE (outside the settings form since it has its own CRUD) -->
+                <div class="tab-content">
+                    <div class="tab-pane fade" id="coupons-pane" role="tabpanel" aria-labelledby="coupons-tab" tabindex="0">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h6 class="text-indigo mb-0"><i class="fa-solid fa-tags me-2"></i>Discount Coupons & Promo Codes</h6>
+                            <button class="btn btn-primary btn-sm" id="btn-add-coupon"><i class="fa-solid fa-plus me-1"></i>Create Coupon</button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="couponsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Value</th>
+                                        <th>Min Order</th>
+                                        <th>Valid Until</th>
+                                        <th>Used</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="coupons-tbody">
+                                    <tr><td colspan="9" class="text-center py-4 text-secondary">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coupon Create/Edit Modal -->
+    <div class="modal fade" id="couponModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="couponModalTitle"><i class="fa-solid fa-tags text-indigo me-2"></i>Create Coupon</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="couponForm">
+                    <?php echo \App\Models\Helpers::csrfField(); ?>
+                    <input type="hidden" name="id" id="coupon-id" value="0">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Coupon Code *</label>
+                                <input type="text" class="form-control text-uppercase" name="coupon_code" id="coupon-code" required placeholder="e.g. SAVE20">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Coupon Name *</label>
+                                <input type="text" class="form-control" name="coupon_name" id="coupon-name" required placeholder="e.g. Diwali Sale 20%">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Discount Type *</label>
+                                <select class="form-select" name="discount_type" id="coupon-type">
+                                    <option value="PERCENTAGE">Percentage (%)</option>
+                                    <option value="FLAT">Flat Amount (₹)</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Discount Value *</label>
+                                <input type="number" step="0.01" min="0" class="form-control" name="discount_value" id="coupon-value" required placeholder="e.g. 10">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Min Order Amount (₹)</label>
+                                <input type="number" step="0.01" min="0" class="form-control" name="min_order_amount" id="coupon-min" value="0" placeholder="0 = no minimum">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Max Discount (₹)</label>
+                                <input type="number" step="0.01" min="0" class="form-control" name="max_discount" id="coupon-max" placeholder="For % type only">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Valid From</label>
+                                <input type="date" class="form-control" name="valid_from" id="coupon-from">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Valid Until</label>
+                                <input type="date" class="form-control" name="valid_until" id="coupon-until">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Usage Limit</label>
+                                <input type="number" min="0" class="form-control" name="usage_limit" id="coupon-limit" value="0" placeholder="0 = unlimited">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-circle-check me-1"></i>Save Coupon</button>
                     </div>
                 </form>
             </div>
@@ -480,6 +579,105 @@ $(document).ready(function() {
         const val = parseFloat($(this).data('val'));
         gstSlabs = gstSlabs.filter(s => s !== val);
         renderGstTags();
+    });
+
+    // ==================== COUPON MANAGEMENT ====================
+    const couponCsrf = $('input[name="csrf_token"]').val();
+
+    // Load coupons when tab is shown
+    $('button[data-bs-target="#coupons-pane"]').on('shown.bs.tab', function() { loadCoupons(); });
+
+    function loadCoupons() {
+        $.getJSON(BASE_URL + '/api/coupons.php?action=list', function(res) {
+            const tbody = $('#coupons-tbody').empty();
+            if (!res.status || res.data.length === 0) {
+                tbody.html('<tr><td colspan="9" class="text-center py-4 text-secondary">No coupons created yet. Click "Create Coupon" to add one.</td></tr>');
+                return;
+            }
+            res.data.forEach(function(c) {
+                const typeLabel = c.discount_type === 'PERCENTAGE' ? c.discount_value + '%' : '₹' + parseFloat(c.discount_value).toFixed(2);
+                const validUntil = c.valid_until ? new Date(c.valid_until).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) : 'No expiry';
+                const isExpired = c.valid_until && new Date(c.valid_until) < new Date();
+                const limitText = c.usage_limit > 0 ? c.used_count + '/' + c.usage_limit : c.used_count + '/∞';
+                const statusBadge = isExpired ? '<span class="badge bg-light-danger">Expired</span>' : '<span class="badge bg-light-success">Active</span>';
+
+                tbody.append(`
+                    <tr>
+                        <td><span class="fw-bold text-indigo">${c.coupon_code}</span></td>
+                        <td>${c.coupon_name}</td>
+                        <td><span class="badge bg-light-primary">${c.discount_type}</span></td>
+                        <td class="fw-semibold">${typeLabel}</td>
+                        <td>₹${parseFloat(c.min_order_amount).toFixed(0)}</td>
+                        <td class="${isExpired ? 'text-rose' : ''}">${validUntil}</td>
+                        <td>${limitText}</td>
+                        <td>${statusBadge}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-2 btn-edit-coupon" data-id="${c.id}" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2 btn-delete-coupon" data-id="${c.id}" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `);
+            });
+        });
+    }
+
+    // Create coupon button
+    $('#btn-add-coupon').click(function() {
+        $('#couponModalTitle').html('<i class="fa-solid fa-tags text-indigo me-2"></i>Create Coupon');
+        $('#coupon-id').val(0);
+        $('#couponForm')[0].reset();
+        $('#couponModal').modal('show');
+    });
+
+    // Edit coupon
+    $(document).on('click', '.btn-edit-coupon', function() {
+        const id = $(this).data('id');
+        $.getJSON(BASE_URL + '/api/coupons.php?action=get&id=' + id, function(res) {
+            if (!res.status) return;
+            const c = res.data;
+            $('#couponModalTitle').html('<i class="fa-solid fa-pen text-indigo me-2"></i>Edit Coupon');
+            $('#coupon-id').val(c.id);
+            $('#coupon-code').val(c.coupon_code);
+            $('#coupon-name').val(c.coupon_name);
+            $('#coupon-type').val(c.discount_type);
+            $('#coupon-value').val(c.discount_value);
+            $('#coupon-min').val(c.min_order_amount);
+            $('#coupon-max').val(c.max_discount || '');
+            $('#coupon-from').val(c.valid_from || '');
+            $('#coupon-until').val(c.valid_until || '');
+            $('#coupon-limit').val(c.usage_limit);
+            $('#couponModal').modal('show');
+        });
+    });
+
+    // Save coupon
+    $('#couponForm').submit(function(e) {
+        e.preventDefault();
+        $.post(BASE_URL + '/api/coupons.php?action=save', $(this).serialize(), function(res) {
+            if (res.status) {
+                $('#couponModal').modal('hide');
+                loadCoupons();
+                Swal.fire({ icon: 'success', title: 'Coupon Saved', text: res.message, timer: 1500, showConfirmButton: false, background: '#ffffff', color: '#0f172a' });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#0f172a' });
+            }
+        }, 'json');
+    });
+
+    // Delete coupon
+    $(document).on('click', '.btn-delete-coupon', function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Delete Coupon?', text: 'This coupon will be deactivated.',
+            icon: 'warning', showCancelButton: true, confirmButtonText: 'Delete', confirmButtonColor: '#dc2626',
+            background: '#ffffff', color: '#0f172a'
+        }).then(function(r) {
+            if (r.isConfirmed) {
+                $.post(BASE_URL + '/api/coupons.php?action=delete', { csrf_token: couponCsrf, id: id }, function(res) {
+                    if (res.status) { loadCoupons(); }
+                }, 'json');
+            }
+        });
     });
 });
 </script>
