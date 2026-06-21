@@ -22,9 +22,12 @@ $isEdit = !empty($challan);
                 <div class="row g-3 mb-4">
                     <div class="col-md-5">
                         <label class="form-label fw-semibold">Select Customer *</label>
-                        <select class="form-select" id="dc-customer-select" required>
-                            <option value="">-- Select Customer --</option>
-                        </select>
+                        <div class="input-group">
+                            <select class="form-select" id="dc-customer-select" required>
+                                <option value="">-- Select Customer --</option>
+                            </select>
+                            <button class="btn btn-outline-secondary" type="button" id="btn-quick-customer" title="Add New Customer"><i class="fa-solid fa-plus"></i></button>
+                        </div>
                     </div>
                     <div class="col-md-7 position-relative">
                         <label class="form-label fw-semibold">Search Product to Add *</label>
@@ -120,6 +123,49 @@ $isEdit = !empty($challan);
     </div>
 </div>
 
+<!-- Quick Add Customer Modal -->
+<div class="modal fade" id="quickCustomerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2 text-indigo"></i>Add Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="quickCustomerForm">
+                <?php echo \App\Models\Helpers::csrfField(); ?>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label">Customer Name *</label>
+                            <input type="text" class="form-control" name="customer_name" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Mobile *</label>
+                            <input type="text" class="form-control" name="mobile" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">GST Number</label>
+                            <input type="text" class="form-control" name="gst_number">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">State</label>
+                            <input type="text" class="form-control" name="state" placeholder="e.g. Maharashtra">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" name="address" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add & Select</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 $(document).ready(function() {
     let cart = [];
@@ -127,19 +173,43 @@ $(document).ready(function() {
     const editId = $('#dc-edit-id').val() || 0;
 
     // Load Customers
-    $.ajax({
-        url: BASE_URL + '/api/billing.php?action=get_customers',
-        type: 'GET',
-        dataType: 'json',
-        success: function(res) {
-            const select = $("#dc-customer-select");
-            if (res.status) {
-                res.data.forEach(c => select.append(`<option value="${c.id}">${c.customer_name} (${c.mobile})</option>`));
+    function loadCustomers(selectId) {
+        $.ajax({
+            url: BASE_URL + '/api/billing.php?action=get_customers',
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                const select = $("#dc-customer-select");
+                select.find('option:not(:first)').remove();
+                if (res.status) {
+                    res.data.forEach(c => select.append(`<option value="${c.id}">${c.customer_name} (${c.mobile})</option>`));
+                }
+                if (selectId) {
+                    select.val(selectId);
+                }
+                <?php if ($isEdit && !empty($challan['customer_id'])): ?>
+                else {
+                    select.val('<?php echo (int)$challan['customer_id']; ?>');
+                }
+                <?php endif; ?>
             }
-            <?php if ($isEdit && !empty($challan['customer_id'])): ?>
-            select.val('<?php echo (int)$challan['customer_id']; ?>');
-            <?php endif; ?>
-        }
+        });
+    }
+    loadCustomers();
+
+    // Quick Add Customer
+    $('#btn-quick-customer').click(function() { $('#quickCustomerForm')[0].reset(); $('#quickCustomerModal').modal('show'); });
+    $('#quickCustomerForm').submit(function(e) {
+        e.preventDefault();
+        $.post(BASE_URL + '/api/customers.php?action=save', $(this).serialize(), function(res) {
+            if (res.status) {
+                $('#quickCustomerModal').modal('hide');
+                loadCustomers(res.data.id);
+                Swal.fire({ icon: 'success', title: 'Customer Added', timer: 1500, showConfirmButton: false, background: '#ffffff', color: '#0f172a' });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Failed', text: res.message, background: '#ffffff', color: '#0f172a' });
+            }
+        }, 'json');
     });
 
     // If editing, load existing cart items
@@ -340,8 +410,8 @@ $(document).ready(function() {
                         icon: 'success',
                         title: 'Challan Saved',
                         text: res.message,
-                        background: '#151e30',
-                        color: '#f3f4f6'
+                        background: '#ffffff',
+                        color: '#0f172a'
                     }).then(() => {
                         window.location.href = BASE_URL + '/challans/view.php?id=' + (res.data.challan_id || editId);
                     });
@@ -350,8 +420,8 @@ $(document).ready(function() {
                         icon: 'error',
                         title: 'Error Saving Challan',
                         text: res.message,
-                        background: '#151e30',
-                        color: '#f3f4f6'
+                        background: '#ffffff',
+                        color: '#0f172a'
                     });
                 }
             }
