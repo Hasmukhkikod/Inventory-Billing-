@@ -2,6 +2,10 @@
 /vendor/
 composer.phar
 
+# PHP Runtime (bundled for client distribution)
+/php/
+php.zip
+
 # Environment
 .env
 

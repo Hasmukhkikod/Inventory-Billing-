@@ -1,0 +1,47 @@
+==========================================
+  HOW TO PREPARE PACKAGE FOR CLIENT
+==========================================
+
+You do this ONCE on any Windows PC, then share the
+final ZIP with all your clients.
+
+
+STEP 1: Download PHP
+   - Go to: https://windows.php.net/download
+   - Download: "VS16 x64 Thread Safe" ZIP
+   - (Usually named: php-8.x.x-Win32-vs16-x64.zip)
+
+STEP 2: Extract PHP into this project
+   - Create a folder called "php" inside this project
+   - Extract the PHP ZIP contents into the "php" folder
+   - You should see: php/php.exe, php/ext/, etc.
+
+STEP 3: Configure PHP
+   - Inside php/ folder, copy "php.ini-development" and rename to "php.ini"
+   - Open php.ini in Notepad, find and remove the semicolon (;) from:
+       ;extension=pdo_sqlite  -->  extension=pdo_sqlite
+       ;extension=sqlite3     -->  extension=sqlite3
+       ;extension=mbstring    -->  extension=mbstring
+       ;extension=fileinfo    -->  extension=fileinfo
+       ;extension=gd          -->  extension=gd
+   - Also find and uncomment:
+       ;extension_dir = "ext"  -->  extension_dir = "ext"
+   - Save and close
+
+STEP 4: Test it
+   - Double-click START.bat
+   - Browser should open with Grovixo login page
+   - If it works, proceed to Step 5
+
+STEP 5: ZIP and share
+   - Select the entire project folder
+   - Right-click > "Send to" > "Compressed (zipped) folder"
+   - Share this ZIP with your client via:
+     Google Drive, USB, email, whatever works
+
+CLIENT ONLY DOES:
+   1. Extract the ZIP
+   2. Double-click START.bat
+   3. Login and use
+
+==========================================
