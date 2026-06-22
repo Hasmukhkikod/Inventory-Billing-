@@ -127,6 +127,59 @@
 [data-theme="dark"] .dataTables_wrapper { color: var(--text-primary); }
 [data-theme="dark"] .dataTables_empty { color: var(--text-secondary) !important; }
 [data-theme="dark"] .table-responsive { color: var(--text-primary); }
+/* Force dark table backgrounds - override Bootstrap's --bs-table-bg variable */
+[data-theme="dark"] .table {
+    --bs-table-bg: var(--bg-secondary);
+    --bs-table-striped-bg: var(--bg-tertiary);
+    --bs-table-hover-bg: #273449;
+    --bs-table-color: var(--text-primary);
+    --bs-table-border-color: var(--border-color);
+    color: var(--text-primary) !important;
+    background-color: var(--bg-secondary) !important;
+}
+[data-theme="dark"] .table > :not(caption) > * > * {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border-bottom-color: var(--border-color) !important;
+    box-shadow: none !important;
+}
+[data-theme="dark"] .table > tbody > tr:nth-child(odd) > * {
+    background-color: var(--bg-tertiary) !important;
+}
+[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+    background-color: #273449 !important;
+    color: var(--text-primary) !important;
+}
+[data-theme="dark"] .table thead th {
+    background-color: #0f172a !important;
+    color: var(--text-secondary) !important;
+    border-bottom-color: var(--border-color) !important;
+}
+[data-theme="dark"] .table tbody td a { color: var(--accent-indigo) !important; }
+[data-theme="dark"] .table tbody td .text-emerald, [data-theme="dark"] .table td .text-emerald { color: var(--accent-emerald) !important; }
+[data-theme="dark"] .table tbody td .text-rose, [data-theme="dark"] .table td .text-rose { color: var(--accent-rose) !important; }
+[data-theme="dark"] .table tbody td .text-success, [data-theme="dark"] .table td .text-success { color: var(--accent-emerald) !important; }
+[data-theme="dark"] .table-bordered > :not(caption) > * > * { border-color: var(--border-color) !important; }
+[data-theme="dark"] .dataTables_wrapper .dataTables_length select,
+[data-theme="dark"] .dataTables_wrapper .dataTables_filter input {
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: var(--text-primary) !important;
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--accent-indigo) !important;
+    color: white !important;
+    border-color: var(--accent-indigo) !important;
+}
+[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
 
 /* Theme toggle button animation */
 #theme-toggle-btn {
