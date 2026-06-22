@@ -28,6 +28,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Select2 Searchable Dropdowns -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- Bulk Actions -->
+<script src="<?php echo BASE_URL; ?>/assets/js/bulk-actions.js"></script>
 
 <!-- App Global Logic -->
 <script>

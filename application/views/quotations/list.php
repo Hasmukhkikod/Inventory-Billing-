@@ -14,10 +14,25 @@
     </div>
 
     <div class="panel-body text-dark">
+        <div class="bulk-actions-toolbar d-flex align-items-center gap-2 mb-3" data-table="quotationsTable" data-api="<?php echo BASE_URL; ?>/api/quotations.php">
+            <div class="form-check">
+                <input class="form-check-input bulk-select-all" type="checkbox" title="Select All">
+            </div>
+            <select class="form-select form-select-sm bulk-action-select" style="width: 180px;">
+                <option value="">-- Bulk Action --</option>
+                <option value="delete">Delete Selected</option>
+                <option value="export_csv">Export Selected CSV</option>
+            </select>
+            <button class="btn btn-sm btn-outline-secondary btn-bulk-apply" disabled>
+                <i class="fa-solid fa-check-double me-1"></i>Apply
+            </button>
+            <span class="badge bg-light-primary small d-none bulk-count">0 selected</span>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover w-100" id="quotationsTable">
                 <thead>
                     <tr>
+                        <th style="width: 30px;"></th>
                         <th>Quotation No</th>
                         <th>Customer</th>
                         <th>Date</th>
@@ -45,6 +60,14 @@ $(document).ready(function() {
             dataSrc: 'data'
         },
         columns: [
+            {
+                data: 'id',
+                orderable: false,
+                className: 'text-center',
+                render: function(data) {
+                    return '<input type="checkbox" class="form-check-input bulk-check" value="' + data + '">';
+                }
+            },
             {
                 data: 'quotation_no',
                 className: 'fw-semibold text-dark',
@@ -124,7 +147,7 @@ $(document).ready(function() {
                 }
             }
         ],
-        order: [[0, 'desc']]
+        order: [[1, 'desc']]
     });
 
     // Delete quotation

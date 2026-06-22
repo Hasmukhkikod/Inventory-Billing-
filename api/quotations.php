@@ -307,6 +307,28 @@ switch ($action) {
         }
         break;
 
+    case 'bulk':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, 'Method not allowed');
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, 'CSRF verification failed');
+
+        $bulk_action = trim($_POST['bulk_action'] ?? '');
+        $ids = json_decode($_POST['ids'] ?? '[]', true);
+
+        if (empty($ids)) Helpers::jsonResponse(false, 'No records selected');
+
+        try {
+            if ($bulk_action === 'delete') {
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                $db->query("UPDATE quotations SET status = 'INACTIVE', deleted_at = CURRENT_TIMESTAMP WHERE id IN ($placeholders)", $ids);
+                Helpers::logActivity($db, 'quotations', 'Bulk deleted ' . count($ids) . ' records');
+                Helpers::jsonResponse(true, count($ids) . ' records deleted successfully');
+            }
+            Helpers::jsonResponse(false, 'Unknown bulk action');
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, 'Bulk action failed: ' . $e->getMessage());
+        }
+        break;
+
     default:
         Helpers::jsonResponse(false, "Action not found: " . $action);
 }
