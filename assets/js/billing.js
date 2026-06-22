@@ -463,25 +463,24 @@ $(document).ready(function () {
                 if (res.status) {
                     lastInvoiceId = res.data.invoice_id;
                     Swal.fire({
-                        icon: 'success', title: 'Invoice: ' + res.data.invoice_number,
-                        html: '<div class="d-flex flex-column gap-2 mt-3">' +
-                            '<button class="btn btn-primary btn-sm py-2 btn-swal-print" data-id="' + res.data.invoice_id + '"><i class="fa-solid fa-print me-2"></i>Print Invoice</button>' +
-                            '<button class="btn btn-outline-primary btn-sm py-2 btn-swal-thermal" data-id="' + res.data.invoice_id + '"><i class="fa-solid fa-receipt me-2"></i>Thermal Receipt</button>' +
-                            '<button class="btn btn-success btn-sm py-2 btn-swal-wa" data-id="' + res.data.invoice_id + '" data-no="' + res.data.invoice_number + '"><i class="fa-brands fa-whatsapp me-2"></i>WhatsApp</button></div>',
-                        showConfirmButton: true, confirmButtonText: 'New Checkout', confirmButtonColor: '#10b981', background: '#151e30', color: '#f3f4f6',
-                        didOpen: function () {
-                            $('.btn-swal-print').click(function () { window.open(BASE_URL + '/invoice_print.php?id=' + $(this).data('id'), '_blank'); });
-                            $('.btn-swal-thermal').click(function () { window.open(BASE_URL + '/invoice_thermal.php?id=' + $(this).data('id'), '_blank'); });
-                            $('.btn-swal-wa').click(function () {
-                                const no = $(this).data('no');
-                                const total = $('#bill-grand-total').text();
-                                const msg = 'Invoice ' + no + ' - Total: ' + total + '. Thank you for your business!';
-                                window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
-                            });
-                        }
-                    }).then(function () { resetCheckout(); });
+                        icon: 'success',
+                        title: 'Invoice Created!',
+                        html: '<div class="fw-bold fs-5 mb-3">' + res.data.invoice_number + '</div>' +
+                            '<div class="d-flex flex-wrap gap-2 justify-content-center">' +
+                            '<a href="' + BASE_URL + '/invoice_print.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-print me-1"></i>Print</a>' +
+                            '<a href="' + BASE_URL + '/invoice_thermal.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>' +
+                            '<a href="https://api.whatsapp.com/send?text=' + encodeURIComponent('Invoice ' + res.data.invoice_number + ' - Total: ' + $('#bill-grand-total').text() + '. Thank you!') + '" target="_blank" class="btn btn-success btn-sm"><i class="fa-brands fa-whatsapp me-1"></i>WhatsApp</a>' +
+                            '</div>',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#2563eb',
+                        background: '#ffffff',
+                        color: '#1e293b'
+                    }).then(function () {
+                        resetCheckout();
+                        window.location.href = BASE_URL + '/billing/index.php';
+                    });
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Failed', text: res.message, background: '#151e30', color: '#f3f4f6' });
+                    Swal.fire({ icon: 'error', title: 'Failed', text: res.message, background: '#ffffff', color: '#1e293b' });
                 }
             }
         });
