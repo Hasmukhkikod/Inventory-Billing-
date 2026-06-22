@@ -70,11 +70,17 @@ switch ($action) {
 
         try {
             $db->transaction(function($t) use ($customer_id, $challan_date, $transport_name, $vehicle_no, $notes, $invoice_id, $cart) {
-                $prefQ = $t->query("SELECT challan_prefix FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+                $prefQ = $t->query("SELECT challan_prefix, challan_start, challan_end FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
                 $prefix = $prefQ['challan_prefix'] ?? 'DC-';
+                $startNum = (int)($prefQ['challan_start'] ?? 1);
+                $endNum = (int)($prefQ['challan_end'] ?? 99999);
                 $year = date('Y');
                 $count = $t->query("SELECT COUNT(*) as c FROM challans WHERE challan_date LIKE ?", ["$year-%"])->fetch();
-                $seq = str_pad((int)($count['c'] ?? 0) + 1, 5, '0', STR_PAD_LEFT);
+                $nextNum = $startNum + (int)($count['c'] ?? 0);
+                if ($nextNum > $endNum) {
+                    throw new Exception("Challan number limit reached ($endNum). Update range in Settings.");
+                }
+                $seq = str_pad($nextNum, 5, '0', STR_PAD_LEFT);
                 $challan_no = $prefix . $year . '-' . $seq;
 
                 $challanId = $t->insert("

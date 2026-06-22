@@ -57,6 +57,27 @@ try {
     // Low stock count
     $lowStockCount = (int)($db->query("SELECT COUNT(*) as count FROM products WHERE status = 'ACTIVE' AND current_stock <= minimum_stock")->fetch()['count'] ?? 0);
 
+    // v2.0: Document number range warnings
+    $docWarnings = [];
+    try {
+        $settings = $db->query("SELECT invoice_start, invoice_end, quotation_start, quotation_end, purchase_start, purchase_end, challan_start, challan_end FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+        $year = date('Y');
+        $docs = [
+            ['name' => 'Invoice', 'table' => 'invoices', 'date_col' => 'invoice_date', 'start' => (int)($settings['invoice_start'] ?? 1), 'end' => (int)($settings['invoice_end'] ?? 99999)],
+            ['name' => 'Quotation', 'table' => 'quotations', 'date_col' => 'quotation_date', 'start' => (int)($settings['quotation_start'] ?? 1), 'end' => (int)($settings['quotation_end'] ?? 99999)],
+            ['name' => 'Purchase', 'table' => 'purchases', 'date_col' => 'purchase_date', 'start' => (int)($settings['purchase_start'] ?? 1), 'end' => (int)($settings['purchase_end'] ?? 99999)],
+            ['name' => 'Challan', 'table' => 'challans', 'date_col' => 'challan_date', 'start' => (int)($settings['challan_start'] ?? 1), 'end' => (int)($settings['challan_end'] ?? 99999)],
+        ];
+        foreach ($docs as $d) {
+            $used = (int)($db->query("SELECT COUNT(*) as c FROM {$d['table']} WHERE {$d['date_col']} LIKE ?", ["$year-%"])->fetch()['c'] ?? 0);
+            $total = $d['end'] - $d['start'] + 1;
+            $remaining = $total - $used;
+            if ($remaining <= 100) {
+                $docWarnings[] = ['name' => $d['name'], 'remaining' => $remaining, 'limit' => $d['end']];
+            }
+        }
+    } catch (Exception $e) {}
+
     // v2.0: Overdue invoices
     $overdueCount = 0;
     try {
@@ -228,6 +249,7 @@ try {
             'total_products' => $totalProducts,
             'low_stock_count' => $lowStockCount,
             'overdue_count' => $overdueCount,
+            'doc_warnings' => $docWarnings,
             'held_count' => $heldCount,
             'receivable_total' => $receivableTotal,
             'expiring_count' => $expiringCount

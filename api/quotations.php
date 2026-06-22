@@ -159,11 +159,17 @@ switch ($action) {
                 } else {
                     // CREATE new quotation
 
-                    $prefQ = $t->query("SELECT quotation_prefix FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+                    $prefQ = $t->query("SELECT quotation_prefix, quotation_start, quotation_end FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
                     $prefix = $prefQ['quotation_prefix'] ?? 'QT-';
+                    $startNum = (int)($prefQ['quotation_start'] ?? 1);
+                    $endNum = (int)($prefQ['quotation_end'] ?? 99999);
                     $year = date('Y');
                     $countQuery = $t->query("SELECT COUNT(*) as count FROM quotations WHERE quotation_date LIKE ?", ["$year-%"])->fetch();
-                    $seq = str_pad((int)($countQuery['count'] ?? 0) + 1, 5, '0', STR_PAD_LEFT);
+                    $nextNum = $startNum + (int)($countQuery['count'] ?? 0);
+                    if ($nextNum > $endNum) {
+                        throw new Exception("Quotation number limit reached ($endNum). Update range in Settings.");
+                    }
+                    $seq = str_pad($nextNum, 5, '0', STR_PAD_LEFT);
                     $quotation_no = $prefix . $year . '-' . $seq;
 
                     $qId = $t->insert("

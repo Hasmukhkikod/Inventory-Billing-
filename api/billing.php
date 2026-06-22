@@ -164,12 +164,18 @@ switch ($action) {
                 $pay_status = 'PAID';
                 if ($balance_amount > 0) $pay_status = ($actual_paid > 0) ? 'PARTIAL' : 'UNPAID';
 
-                // Generate invoice number
-                $prefQ = $t->query("SELECT invoice_prefix FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+                // Generate invoice number with range check
+                $prefQ = $t->query("SELECT invoice_prefix, invoice_start, invoice_end FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
                 $prefix = $prefQ['invoice_prefix'] ?? 'INV-';
+                $startNum = (int)($prefQ['invoice_start'] ?? 1);
+                $endNum = (int)($prefQ['invoice_end'] ?? 99999);
                 $year = date('Y');
                 $countQ = $t->query("SELECT COUNT(*) as count FROM invoices WHERE invoice_date LIKE ?", ["$year-%"])->fetch();
-                $seq = str_pad((int)($countQ['count'] ?? 0) + 1, 5, '0', STR_PAD_LEFT);
+                $nextNum = $startNum + (int)($countQ['count'] ?? 0);
+                if ($nextNum > $endNum) {
+                    throw new Exception("Invoice number limit reached ($endNum). Please update the range in Settings → Invoice & Tax.");
+                }
+                $seq = str_pad($nextNum, 5, '0', STR_PAD_LEFT);
                 $invoice_number = $prefix . $year . '-' . $seq;
 
                 // Loyalty points earned

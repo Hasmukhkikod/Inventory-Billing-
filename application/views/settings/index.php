@@ -93,24 +93,100 @@
                         <div class="tab-pane fade" id="billing-pane" role="tabpanel" aria-labelledby="billing-tab" tabindex="0">
                             <div class="row g-3">
                                 <div class="col-md-12 mb-2">
-                                    <h6 class="text-indigo mb-0"><i class="fa-solid fa-hashtag me-2"></i>Document Number Prefixes</h6>
-                                    <small class="text-muted">Customize the prefix for each document type. Numbers are auto-generated as PREFIX-YEAR-00001</small>
+                                    <h6 class="text-indigo mb-0"><i class="fa-solid fa-hashtag me-2"></i>Document Numbering</h6>
+                                    <small class="text-muted">Set prefix, start number, and end number for each document. Alert shows when 100 numbers are left.</small>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Invoice Prefix</label>
-                                    <input type="text" class="form-control" name="invoice_prefix" id="set-prefix" placeholder="e.g. INV-">
+
+                                <!-- Invoice -->
+                                <div class="col-md-12">
+                                    <div class="border rounded p-3 mb-2">
+                                        <div class="row g-2 align-items-end">
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">Invoice Prefix</label>
+                                                <input type="text" class="form-control" name="invoice_prefix" id="set-prefix" placeholder="INV-">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">Start Number</label>
+                                                <input type="number" min="1" class="form-control" name="invoice_start" id="set-inv-start" placeholder="e.g. 1">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">End Number (Limit)</label>
+                                                <input type="number" min="1" class="form-control" name="invoice_end" id="set-inv-end" placeholder="e.g. 10000">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <span class="badge bg-light-primary d-block py-2 text-center" id="inv-range-status">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Quotation Prefix</label>
-                                    <input type="text" class="form-control" name="quotation_prefix" id="set-qt-prefix" placeholder="e.g. QT-">
+
+                                <!-- Quotation -->
+                                <div class="col-md-12">
+                                    <div class="border rounded p-3 mb-2">
+                                        <div class="row g-2 align-items-end">
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">Quotation Prefix</label>
+                                                <input type="text" class="form-control" name="quotation_prefix" id="set-qt-prefix" placeholder="QT-">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">Start Number</label>
+                                                <input type="number" min="1" class="form-control" name="quotation_start" id="set-qt-start" placeholder="e.g. 1">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">End Number (Limit)</label>
+                                                <input type="number" min="1" class="form-control" name="quotation_end" id="set-qt-end" placeholder="e.g. 10000">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <span class="badge bg-light-primary d-block py-2 text-center" id="qt-range-status">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Purchase Prefix</label>
-                                    <input type="text" class="form-control" name="purchase_prefix" id="set-po-prefix" placeholder="e.g. PO-">
+
+                                <!-- Purchase -->
+                                <div class="col-md-12">
+                                    <div class="border rounded p-3 mb-2">
+                                        <div class="row g-2 align-items-end">
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">Purchase Prefix</label>
+                                                <input type="text" class="form-control" name="purchase_prefix" id="set-po-prefix" placeholder="PO-">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">Start Number</label>
+                                                <input type="number" min="1" class="form-control" name="purchase_start" id="set-po-start" placeholder="e.g. 1">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">End Number (Limit)</label>
+                                                <input type="number" min="1" class="form-control" name="purchase_end" id="set-po-end" placeholder="e.g. 10000">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <span class="badge bg-light-primary d-block py-2 text-center" id="po-range-status">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Challan Prefix</label>
-                                    <input type="text" class="form-control" name="challan_prefix" id="set-dc-prefix" placeholder="e.g. DC-">
+
+                                <!-- Challan -->
+                                <div class="col-md-12">
+                                    <div class="border rounded p-3 mb-2">
+                                        <div class="row g-2 align-items-end">
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">Challan Prefix</label>
+                                                <input type="text" class="form-control" name="challan_prefix" id="set-dc-prefix" placeholder="DC-">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">Start Number</label>
+                                                <input type="number" min="1" class="form-control" name="challan_start" id="set-dc-start" placeholder="e.g. 1">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold">End Number (Limit)</label>
+                                                <input type="number" min="1" class="form-control" name="challan_end" id="set-dc-end" placeholder="e.g. 10000">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <span class="badge bg-light-primary d-block py-2 text-center" id="dc-range-status">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">GST Tax Slabs (%)</label>
@@ -414,9 +490,21 @@ $(document).ready(function() {
                 $("#set-phone").val(s.phone || '');
                 $("#set-address").val(s.address || '');
                 $("#set-prefix").val(s.invoice_prefix || 'INV-');
+                $("#set-inv-start").val(s.invoice_start || 1);
+                $("#set-inv-end").val(s.invoice_end || 99999);
                 $("#set-qt-prefix").val(s.quotation_prefix || 'QT-');
+                $("#set-qt-start").val(s.quotation_start || 1);
+                $("#set-qt-end").val(s.quotation_end || 99999);
                 $("#set-po-prefix").val(s.purchase_prefix || 'PO-');
+                $("#set-po-start").val(s.purchase_start || 1);
+                $("#set-po-end").val(s.purchase_end || 99999);
                 $("#set-dc-prefix").val(s.challan_prefix || 'DC-');
+                $("#set-dc-start").val(s.challan_start || 1);
+                $("#set-dc-end").val(s.challan_end || 99999);
+
+                // Show range status with usage from API
+                if (s.doc_usage) updateRangeStatuses(s.doc_usage);
+
                 loadGstSlabs(s.gst_slabs || '0,5,12,18,28');
                 $("#set-state-code").val(s.state_code || '');
                 $("#set-footer").val(s.invoice_footer || '');
@@ -638,6 +726,32 @@ $(document).ready(function() {
         gstSlabs = gstSlabs.filter(s => s !== val);
         renderGstTags();
     });
+
+    // Range status display
+    function updateRangeStatuses(usage) {
+        const docs = [
+            { key: 'invoice', el: '#inv-range-status', startEl: '#set-inv-start', endEl: '#set-inv-end' },
+            { key: 'quotation', el: '#qt-range-status', startEl: '#set-qt-start', endEl: '#set-qt-end' },
+            { key: 'purchase', el: '#po-range-status', startEl: '#set-po-start', endEl: '#set-po-end' },
+            { key: 'challan', el: '#dc-range-status', startEl: '#set-dc-start', endEl: '#set-dc-end' }
+        ];
+        docs.forEach(function(d) {
+            const used = usage[d.key] || 0;
+            const start = parseInt($(d.startEl).val()) || 1;
+            const end = parseInt($(d.endEl).val()) || 99999;
+            const total = end - start + 1;
+            const remaining = total - used;
+            const badge = $(d.el);
+
+            if (remaining <= 0) {
+                badge.removeClass('bg-light-primary bg-light-warning').addClass('bg-light-danger').html('<i class="fa-solid fa-circle-exclamation me-1"></i>LIMIT REACHED');
+            } else if (remaining <= 100) {
+                badge.removeClass('bg-light-primary bg-light-danger').addClass('bg-light-warning').html('<i class="fa-solid fa-triangle-exclamation me-1"></i>' + remaining + ' left!');
+            } else {
+                badge.removeClass('bg-light-warning bg-light-danger').addClass('bg-light-primary').text('Used: ' + used + ' / ' + total);
+            }
+        });
+    }
 
     // Hide Commit Changes button when Coupons tab is active
     $('button[data-bs-target="#coupons-pane"]').on('shown.bs.tab', function() { $('#settings-save-row').hide(); });

@@ -47,6 +47,22 @@ switch ($action) {
                     'upi_id' => ''
                 ];
             }
+            // Get document usage counts for range status
+            $year = date('Y');
+            try {
+                $invCount = (int)($db->query("SELECT COUNT(*) as c FROM invoices WHERE invoice_date LIKE ?", ["$year-%"])->fetch()['c'] ?? 0);
+                $qtCount = (int)($db->query("SELECT COUNT(*) as c FROM quotations WHERE quotation_date LIKE ?", ["$year-%"])->fetch()['c'] ?? 0);
+                $poCount = (int)($db->query("SELECT COUNT(*) as c FROM purchases WHERE purchase_date LIKE ?", ["$year-%"])->fetch()['c'] ?? 0);
+                $dcCount = (int)($db->query("SELECT COUNT(*) as c FROM challans WHERE challan_date LIKE ?", ["$year-%"])->fetch()['c'] ?? 0);
+            } catch (Exception $e) { $invCount = $qtCount = $poCount = $dcCount = 0; }
+
+            $settings['doc_usage'] = [
+                'invoice' => $invCount,
+                'quotation' => $qtCount,
+                'purchase' => $poCount,
+                'challan' => $dcCount
+            ];
+
             Helpers::jsonResponse(true, "Settings loaded", $settings);
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed to load settings: " . $e->getMessage());
@@ -66,6 +82,14 @@ switch ($action) {
         $quotation_prefix = trim($_POST['quotation_prefix'] ?? 'QT-');
         $purchase_prefix = trim($_POST['purchase_prefix'] ?? 'PO-');
         $challan_prefix = trim($_POST['challan_prefix'] ?? 'DC-');
+        $invoice_start = (int)($_POST['invoice_start'] ?? 1);
+        $invoice_end = (int)($_POST['invoice_end'] ?? 99999);
+        $quotation_start = (int)($_POST['quotation_start'] ?? 1);
+        $quotation_end = (int)($_POST['quotation_end'] ?? 99999);
+        $purchase_start = (int)($_POST['purchase_start'] ?? 1);
+        $purchase_end = (int)($_POST['purchase_end'] ?? 99999);
+        $challan_start = (int)($_POST['challan_start'] ?? 1);
+        $challan_end = (int)($_POST['challan_end'] ?? 99999);
         $gst_slabs = trim($_POST['gst_slabs'] ?? '0,5,12,18,28');
         $state_code = trim($_POST['state_code'] ?? '');
         $invoice_footer = trim($_POST['invoice_footer'] ?? '');
@@ -132,6 +156,8 @@ switch ($action) {
             $sql = "UPDATE company_settings
                 SET company_name = ?, gst_number = ?, email = ?, phone = ?, address = ?,
                     invoice_prefix = ?, quotation_prefix = ?, purchase_prefix = ?, challan_prefix = ?,
+                    invoice_start = ?, invoice_end = ?, quotation_start = ?, quotation_end = ?,
+                    purchase_start = ?, purchase_end = ?, challan_start = ?, challan_end = ?,
                     gst_slabs = ?, state_code = ?, invoice_footer = ?, invoice_terms = ?,
                     loyalty_enabled = ?, loyalty_points_per_100 = ?, loyalty_redeem_value = ?,
                     invoice_template = ?, thermal_width = ?,
@@ -139,6 +165,8 @@ switch ($action) {
             $params = [
                 $company_name, $gst_number, $email, $phone, $address,
                 $invoice_prefix, $quotation_prefix, $purchase_prefix, $challan_prefix,
+                $invoice_start, $invoice_end, $quotation_start, $quotation_end,
+                $purchase_start, $purchase_end, $challan_start, $challan_end,
                 $gst_slabs, $state_code, $invoice_footer, $invoice_terms,
                 $loyalty_enabled, $loyalty_points_per_100, $loyalty_redeem_value,
                 $invoice_template, $thermal_width,

@@ -127,11 +127,17 @@ switch ($action) {
 
                 $total_amount = $subtotal + $gst_amount - $discount;
 
-                $prefQ = $t->query("SELECT purchase_prefix FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+                $prefQ = $t->query("SELECT purchase_prefix, purchase_start, purchase_end FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
                 $prefix = $prefQ['purchase_prefix'] ?? 'PO-';
+                $startNum = (int)($prefQ['purchase_start'] ?? 1);
+                $endNum = (int)($prefQ['purchase_end'] ?? 99999);
                 $year = date('Y');
                 $countQuery = $t->query("SELECT COUNT(*) as count FROM purchases WHERE purchase_date LIKE ?", ["$year-%"])->fetch();
-                $seq = str_pad((int)($countQuery['count'] ?? 0) + 1, 5, '0', STR_PAD_LEFT);
+                $nextNum = $startNum + (int)($countQuery['count'] ?? 0);
+                if ($nextNum > $endNum) {
+                    throw new Exception("Purchase number limit reached ($endNum). Update range in Settings.");
+                }
+                $seq = str_pad($nextNum, 5, '0', STR_PAD_LEFT);
                 $purchase_no = $prefix . $year . '-' . $seq;
 
                 // 3. Save Purchase

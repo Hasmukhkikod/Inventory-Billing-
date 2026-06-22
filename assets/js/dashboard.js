@@ -61,6 +61,22 @@ $(document).ready(function() {
 
         // v2.0 KPIs
         $("#count-overdue").text(kpis.overdue_count || 0);
+
+        // Document range warnings
+        if (kpis.doc_warnings && kpis.doc_warnings.length > 0) {
+            let warningHtml = '';
+            kpis.doc_warnings.forEach(function(w) {
+                const color = w.remaining <= 0 ? 'danger' : 'warning';
+                const icon = w.remaining <= 0 ? 'circle-exclamation' : 'triangle-exclamation';
+                const msg = w.remaining <= 0
+                    ? w.name + ' number limit REACHED! Update range in Settings.'
+                    : 'Only ' + w.remaining + ' ' + w.name + ' numbers left (limit: ' + w.limit + ')';
+                warningHtml += '<div class="alert alert-' + color + ' alert-dismissible fade show border-0 py-2 small mb-2" role="alert">' +
+                    '<i class="fa-solid fa-' + icon + ' me-2"></i><strong>' + w.name + ':</strong> ' + msg +
+                    '<button type="button" class="btn-close py-2" data-bs-dismiss="alert"></button></div>';
+            });
+            $('#doc-range-warnings').html(warningHtml);
+        }
         $("#count-held").text(kpis.held_count || 0);
         $("#count-receivable").text(formatCurrency(kpis.receivable_total || 0));
         $("#count-expiring").text(kpis.expiring_count || 0);

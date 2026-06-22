@@ -51,6 +51,9 @@
     </div>
 </div>
 
+<!-- Document Range Warnings -->
+<div id="doc-range-warnings"></div>
+
 <!-- Quick Actions -->
 <div class="d-flex gap-2 mb-4 flex-wrap">
     <a href="<?php echo BASE_URL; ?>/billing/form.php" class="btn btn-primary btn-sm"><i class="fa-solid fa-cash-register me-1"></i>New Invoice</a>
