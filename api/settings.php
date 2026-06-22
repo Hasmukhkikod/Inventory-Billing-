@@ -63,6 +63,9 @@ switch ($action) {
         $phone = trim($_POST['company_phone'] ?? $_POST['phone'] ?? '');
         $address = trim($_POST['company_address'] ?? $_POST['address'] ?? '');
         $invoice_prefix = trim($_POST['invoice_prefix'] ?? 'INV-');
+        $quotation_prefix = trim($_POST['quotation_prefix'] ?? 'QT-');
+        $purchase_prefix = trim($_POST['purchase_prefix'] ?? 'PO-');
+        $challan_prefix = trim($_POST['challan_prefix'] ?? 'DC-');
         $gst_slabs = trim($_POST['gst_slabs'] ?? '0,5,12,18,28');
         $state_code = trim($_POST['state_code'] ?? '');
         $invoice_footer = trim($_POST['invoice_footer'] ?? '');
@@ -128,13 +131,15 @@ switch ($action) {
         try {
             $sql = "UPDATE company_settings
                 SET company_name = ?, gst_number = ?, email = ?, phone = ?, address = ?,
-                    invoice_prefix = ?, gst_slabs = ?, state_code = ?, invoice_footer = ?, invoice_terms = ?,
+                    invoice_prefix = ?, quotation_prefix = ?, purchase_prefix = ?, challan_prefix = ?,
+                    gst_slabs = ?, state_code = ?, invoice_footer = ?, invoice_terms = ?,
                     loyalty_enabled = ?, loyalty_points_per_100 = ?, loyalty_redeem_value = ?,
                     invoice_template = ?, thermal_width = ?,
                     bank_name = ?, bank_account_no = ?, bank_ifsc = ?, bank_branch = ?, upi_id = ?";
             $params = [
                 $company_name, $gst_number, $email, $phone, $address,
-                $invoice_prefix, $gst_slabs, $state_code, $invoice_footer, $invoice_terms,
+                $invoice_prefix, $quotation_prefix, $purchase_prefix, $challan_prefix,
+                $gst_slabs, $state_code, $invoice_footer, $invoice_terms,
                 $loyalty_enabled, $loyalty_points_per_100, $loyalty_redeem_value,
                 $invoice_template, $thermal_width,
                 $bank_name, $bank_account_no, $bank_ifsc, $bank_branch, $upi_id

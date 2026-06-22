@@ -51,8 +51,41 @@ $isEdit = !empty($customer);
 
                 <div class="col-md-6">
                     <label class="form-label">State</label>
-                    <input type="text" class="form-control" name="state" id="cust-state" placeholder="e.g. Maharashtra" value="<?php echo $isEdit ? \App\Models\Helpers::sanitize($customer['state'] ?? '') : ''; ?>">
-                    <small class="text-muted">Required for CGST/SGST vs IGST calculation</small>
+                    <select class="form-select" name="state" id="cust-state">
+                        <option value="">-- Select State --</option>
+                        <option value="Jammu & Kashmir" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Jammu & Kashmir') ? 'selected' : ''; ?>>Jammu & Kashmir</option>
+                        <option value="Himachal Pradesh" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Himachal Pradesh') ? 'selected' : ''; ?>>Himachal Pradesh</option>
+                        <option value="Punjab" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Punjab') ? 'selected' : ''; ?>>Punjab</option>
+                        <option value="Chandigarh" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Chandigarh') ? 'selected' : ''; ?>>Chandigarh</option>
+                        <option value="Uttarakhand" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Uttarakhand') ? 'selected' : ''; ?>>Uttarakhand</option>
+                        <option value="Haryana" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Haryana') ? 'selected' : ''; ?>>Haryana</option>
+                        <option value="Delhi" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Delhi') ? 'selected' : ''; ?>>Delhi</option>
+                        <option value="Rajasthan" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Rajasthan') ? 'selected' : ''; ?>>Rajasthan</option>
+                        <option value="Uttar Pradesh" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Uttar Pradesh') ? 'selected' : ''; ?>>Uttar Pradesh</option>
+                        <option value="Bihar" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Bihar') ? 'selected' : ''; ?>>Bihar</option>
+                        <option value="Sikkim" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Sikkim') ? 'selected' : ''; ?>>Sikkim</option>
+                        <option value="Arunachal Pradesh" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Arunachal Pradesh') ? 'selected' : ''; ?>>Arunachal Pradesh</option>
+                        <option value="Nagaland" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Nagaland') ? 'selected' : ''; ?>>Nagaland</option>
+                        <option value="Manipur" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Manipur') ? 'selected' : ''; ?>>Manipur</option>
+                        <option value="Mizoram" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Mizoram') ? 'selected' : ''; ?>>Mizoram</option>
+                        <option value="Tripura" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Tripura') ? 'selected' : ''; ?>>Tripura</option>
+                        <option value="Meghalaya" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Meghalaya') ? 'selected' : ''; ?>>Meghalaya</option>
+                        <option value="Assam" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Assam') ? 'selected' : ''; ?>>Assam</option>
+                        <option value="West Bengal" <?php echo ($isEdit && ($customer['state'] ?? '') === 'West Bengal') ? 'selected' : ''; ?>>West Bengal</option>
+                        <option value="Jharkhand" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Jharkhand') ? 'selected' : ''; ?>>Jharkhand</option>
+                        <option value="Odisha" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Odisha') ? 'selected' : ''; ?>>Odisha</option>
+                        <option value="Chhattisgarh" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Chhattisgarh') ? 'selected' : ''; ?>>Chhattisgarh</option>
+                        <option value="Madhya Pradesh" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Madhya Pradesh') ? 'selected' : ''; ?>>Madhya Pradesh</option>
+                        <option value="Gujarat" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Gujarat') ? 'selected' : ''; ?>>Gujarat</option>
+                        <option value="Maharashtra" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Maharashtra') ? 'selected' : ''; ?>>Maharashtra</option>
+                        <option value="Karnataka" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Karnataka') ? 'selected' : ''; ?>>Karnataka</option>
+                        <option value="Goa" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Goa') ? 'selected' : ''; ?>>Goa</option>
+                        <option value="Kerala" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Kerala') ? 'selected' : ''; ?>>Kerala</option>
+                        <option value="Tamil Nadu" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Tamil Nadu') ? 'selected' : ''; ?>>Tamil Nadu</option>
+                        <option value="Telangana" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Telangana') ? 'selected' : ''; ?>>Telangana</option>
+                        <option value="Andhra Pradesh" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Andhra Pradesh') ? 'selected' : ''; ?>>Andhra Pradesh</option>
+                    </select>
+                    <small class="text-muted">For CGST/SGST vs IGST calculation</small>
                 </div>
 
                 <div class="col-md-12">

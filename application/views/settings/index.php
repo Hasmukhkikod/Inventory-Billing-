@@ -92,9 +92,25 @@
                         <!-- BILLING & TAX DETAILS PANE -->
                         <div class="tab-pane fade" id="billing-pane" role="tabpanel" aria-labelledby="billing-tab" tabindex="0">
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Invoice Number Prefix</label>
+                                <div class="col-md-12 mb-2">
+                                    <h6 class="text-indigo mb-0"><i class="fa-solid fa-hashtag me-2"></i>Document Number Prefixes</h6>
+                                    <small class="text-muted">Customize the prefix for each document type. Numbers are auto-generated as PREFIX-YEAR-00001</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Invoice Prefix</label>
                                     <input type="text" class="form-control" name="invoice_prefix" id="set-prefix" placeholder="e.g. INV-">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Quotation Prefix</label>
+                                    <input type="text" class="form-control" name="quotation_prefix" id="set-qt-prefix" placeholder="e.g. QT-">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Purchase Prefix</label>
+                                    <input type="text" class="form-control" name="purchase_prefix" id="set-po-prefix" placeholder="e.g. PO-">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Challan Prefix</label>
+                                    <input type="text" class="form-control" name="challan_prefix" id="set-dc-prefix" placeholder="e.g. DC-">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">GST Tax Slabs (%)</label>
@@ -121,8 +137,47 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">State Code (for CGST/SGST)</label>
-                                    <input type="text" class="form-control" name="state_code" id="set-state-code" maxlength="5" placeholder="e.g. 27">
+                                    <label class="form-label">State (for CGST/SGST)</label>
+                                    <select class="form-select" name="state_code" id="set-state-code">
+                                        <option value="">-- Select State --</option>
+                                        <option value="01">01 - Jammu & Kashmir</option>
+                                        <option value="02">02 - Himachal Pradesh</option>
+                                        <option value="03">03 - Punjab</option>
+                                        <option value="04">04 - Chandigarh</option>
+                                        <option value="05">05 - Uttarakhand</option>
+                                        <option value="06">06 - Haryana</option>
+                                        <option value="07">07 - Delhi</option>
+                                        <option value="08">08 - Rajasthan</option>
+                                        <option value="09">09 - Uttar Pradesh</option>
+                                        <option value="10">10 - Bihar</option>
+                                        <option value="11">11 - Sikkim</option>
+                                        <option value="12">12 - Arunachal Pradesh</option>
+                                        <option value="13">13 - Nagaland</option>
+                                        <option value="14">14 - Manipur</option>
+                                        <option value="15">15 - Mizoram</option>
+                                        <option value="16">16 - Tripura</option>
+                                        <option value="17">17 - Meghalaya</option>
+                                        <option value="18">18 - Assam</option>
+                                        <option value="19">19 - West Bengal</option>
+                                        <option value="20">20 - Jharkhand</option>
+                                        <option value="21">21 - Odisha</option>
+                                        <option value="22">22 - Chhattisgarh</option>
+                                        <option value="23">23 - Madhya Pradesh</option>
+                                        <option value="24">24 - Gujarat</option>
+                                        <option value="25">25 - Daman & Diu</option>
+                                        <option value="26">26 - Dadra & Nagar Haveli</option>
+                                        <option value="27">27 - Maharashtra</option>
+                                        <option value="29">29 - Karnataka</option>
+                                        <option value="30">30 - Goa</option>
+                                        <option value="31">31 - Lakshadweep</option>
+                                        <option value="32">32 - Kerala</option>
+                                        <option value="33">33 - Tamil Nadu</option>
+                                        <option value="34">34 - Puducherry</option>
+                                        <option value="35">35 - Andaman & Nicobar</option>
+                                        <option value="36">36 - Telangana</option>
+                                        <option value="37">37 - Andhra Pradesh</option>
+                                        <option value="38">38 - Ladakh</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label">Invoice Footer Remarks</label>
@@ -358,7 +413,10 @@ $(document).ready(function() {
                 $("#set-email").val(s.email || '');
                 $("#set-phone").val(s.phone || '');
                 $("#set-address").val(s.address || '');
-                $("#set-prefix").val(s.invoice_prefix || '');
+                $("#set-prefix").val(s.invoice_prefix || 'INV-');
+                $("#set-qt-prefix").val(s.quotation_prefix || 'QT-');
+                $("#set-po-prefix").val(s.purchase_prefix || 'PO-');
+                $("#set-dc-prefix").val(s.challan_prefix || 'DC-');
                 loadGstSlabs(s.gst_slabs || '0,5,12,18,28');
                 $("#set-state-code").val(s.state_code || '');
                 $("#set-footer").val(s.invoice_footer || '');

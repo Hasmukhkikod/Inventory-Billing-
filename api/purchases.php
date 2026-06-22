@@ -127,11 +127,12 @@ switch ($action) {
 
                 $total_amount = $subtotal + $gst_amount - $discount;
 
-                // 2. Generate Purchase Number PO-YYYY-00001
+                $prefQ = $t->query("SELECT purchase_prefix FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+                $prefix = $prefQ['purchase_prefix'] ?? 'PO-';
                 $year = date('Y');
                 $countQuery = $t->query("SELECT COUNT(*) as count FROM purchases WHERE purchase_date LIKE ?", ["$year-%"])->fetch();
                 $seq = str_pad((int)($countQuery['count'] ?? 0) + 1, 5, '0', STR_PAD_LEFT);
-                $purchase_no = 'PO-' . $year . '-' . $seq;
+                $purchase_no = $prefix . $year . '-' . $seq;
 
                 // 3. Save Purchase
                 $purchaseId = $t->insert("

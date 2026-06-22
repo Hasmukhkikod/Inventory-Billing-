@@ -70,10 +70,12 @@ switch ($action) {
 
         try {
             $db->transaction(function($t) use ($customer_id, $challan_date, $transport_name, $vehicle_no, $notes, $invoice_id, $cart) {
+                $prefQ = $t->query("SELECT challan_prefix FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+                $prefix = $prefQ['challan_prefix'] ?? 'DC-';
                 $year = date('Y');
                 $count = $t->query("SELECT COUNT(*) as c FROM challans WHERE challan_date LIKE ?", ["$year-%"])->fetch();
                 $seq = str_pad((int)($count['c'] ?? 0) + 1, 5, '0', STR_PAD_LEFT);
-                $challan_no = 'DC-' . $year . '-' . $seq;
+                $challan_no = $prefix . $year . '-' . $seq;
 
                 $challanId = $t->insert("
                     INSERT INTO challans (challan_no, customer_id, invoice_id, challan_date, transport_name, vehicle_no, notes, created_by)
