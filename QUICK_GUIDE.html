@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grovixo IIMS - Quick Start Guide</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+
+        h1 { font-size: 2rem; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+        h2 { font-size: 1.4rem; font-weight: 700; color: #2563eb; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+        h3 { font-size: 1.1rem; font-weight: 600; color: #334155; margin: 20px 0 8px; }
+
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #2563eb, #6366f1); color: white; border-radius: 16px; margin-bottom: 40px; }
+        .header h1 { color: white; font-size: 2.2rem; }
+        .header p { opacity: 0.9; font-size: 1.1rem; margin-top: 8px; }
+
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+        .card-icon { font-size: 1.8rem; margin-bottom: 8px; }
+
+        .steps { counter-reset: step; }
+        .step { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start; }
+        .step-num { width: 36px; height: 36px; min-width: 36px; background: #2563eb; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; }
+        .step-body h3 { margin-top: 0; margin-bottom: 4px; }
+        .step-body p { color: #64748b; font-size: 0.95rem; }
+
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
+        .module-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; }
+        .module-card h3 { margin-top: 0; color: #2563eb; }
+        .module-card p { font-size: 0.9rem; color: #64748b; margin: 0; }
+        .module-card ul { font-size: 0.9rem; color: #475569; padding-left: 20px; margin: 8px 0 0; }
+        .module-card li { margin-bottom: 4px; }
+
+        .shortcut-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        .shortcut-table th { background: #f1f5f9; text-align: left; padding: 10px 16px; font-size: 0.85rem; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; }
+        .shortcut-table td { padding: 10px 16px; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; }
+        .shortcut-table kbd { background: #1e293b; color: white; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
+
+        .tip { background: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 0.9rem; color: #1e40af; }
+        .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 0.9rem; color: #92400e; }
+
+        .flow-arrow { text-align: center; color: #cbd5e1; font-size: 1.5rem; margin: 4px 0; }
+
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 0.85rem; }
+
+        @media print {
+            body { background: white; }
+            .container { padding: 20px; }
+            .header { padding: 20px; }
+            h2 { break-before: auto; }
+        }
+        @media (max-width: 640px) {
+            .module-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>Grovixo IIMS</h1>
+        <p>Quick Start Guide for Business Users</p>
+    </div>
+
+    <!-- ==================== GETTING STARTED ==================== -->
+    <h2>Getting Started</h2>
+
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+                <h3>Start the Software</h3>
+                <p>Double-click <strong>"START.bat"</strong> file. A black window opens — keep it open. Your browser will open automatically.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+                <h3>Login</h3>
+                <p>Enter your email and password on the login page. Contact your admin if you don't have credentials.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+                <h3>You're In!</h3>
+                <p>The Dashboard opens with your sales summary, charts, and quick action buttons. Use the sidebar menu to navigate.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="warning">
+        <strong>Important:</strong> Always keep the black command window open while using the software. To stop, just close that window.
+    </div>
+
+    <!-- ==================== FIRST TIME SETUP ==================== -->
+    <h2>First Time Setup (Do This First)</h2>
+
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+                <h3>Settings → Company Details</h3>
+                <p>Add your business name, logo, GSTIN, phone, email, and address. This appears on all invoices.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+                <h3>Settings → Invoice & Tax</h3>
+                <p>Set your invoice prefix (e.g. INV-), GST slabs (click "+" to add rates like 5%, 12%, 18%, 28%), and your state code for CGST/SGST.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+                <h3>Settings → Bank Details</h3>
+                <p>Add bank account details and UPI ID. These appear on printed invoices for customers to pay.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+                <h3>Add Products</h3>
+                <p>Go to <strong>Inventory → Add New Product</strong>. Add product name, SKU, HSN code, cost price, selling price, GST%, and opening stock. Use the "+" button to quickly add new categories, brands, or units.</p>
+            </div>
+        </div>
+        <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-body">
+                <h3>Add Customers & Suppliers</h3>
+                <p>Add your regular customers and suppliers. You can also quickly add them from the billing/purchase screens using the "+" button.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODULE GUIDE ==================== -->
+    <h2>All Modules Explained</h2>
+
+    <div class="module-grid">
+        <div class="module-card">
+            <div class="card-icon">📊</div>
+            <h3>Dashboard</h3>
+            <p>Your business overview at a glance</p>
+            <ul>
+                <li>Today's sales, purchases, expenses, profit</li>
+                <li>Charts: weekly sales, monthly revenue, expenses</li>
+                <li>Top selling products, payment mode breakdown</li>
+                <li>Low stock alerts, overdue invoices count</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">📦</div>
+            <h3>Inventory</h3>
+            <p>Manage your products and stock</p>
+            <ul>
+                <li>Add/edit products with SKU, barcode, HSN code</li>
+                <li>Set cost price, selling price, GST%</li>
+                <li>Track stock levels with alerts</li>
+                <li>Manage categories, brands, units (use "+" button)</li>
+                <li>Generate & print barcode labels</li>
+                <li>Stock adjustment (IN/OUT)</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">🛒</div>
+            <h3>Purchases</h3>
+            <p>Buy goods from suppliers</p>
+            <ul>
+                <li>Create purchase orders</li>
+                <li>Stock automatically increases</li>
+                <li>Track payment status (Paid/Partial/Unpaid)</li>
+                <li>Quick-add supplier with "+" button</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">🧾</div>
+            <h3>POS & Billing</h3>
+            <p>Create invoices — the main screen</p>
+            <ul>
+                <li>Search products or scan barcodes</li>
+                <li>Auto GST calculation (CGST+SGST or IGST)</li>
+                <li>Split payment (Cash + UPI + Card)</li>
+                <li>Apply coupon codes for discounts</li>
+                <li>Hold bill (F3) and recall later (F5)</li>
+                <li>Print: A4 invoice or thermal receipt</li>
+                <li>Share via WhatsApp</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">🔄</div>
+            <h3>Returns</h3>
+            <p>Handle sales & purchase returns</p>
+            <ul>
+                <li>Sales return: customer returns goods → stock restores</li>
+                <li>Purchase return: return goods to supplier → stock reduces</li>
+                <li>Linked to original invoice/purchase</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">📝</div>
+            <h3>Quotations</h3>
+            <p>Send estimates to customers</p>
+            <ul>
+                <li>Create quotation with products and prices</li>
+                <li>Set validity date</li>
+                <li>Print or share via WhatsApp</li>
+                <li>Convert accepted quotation to invoice</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">🚚</div>
+            <h3>Delivery Challans</h3>
+            <p>Dispatch goods without invoice</p>
+            <ul>
+                <li>Create challan with products + quantities</li>
+                <li>Add transport and vehicle details</li>
+                <li>Track status: Active → Delivered</li>
+                <li>Print dispatch document</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">👥</div>
+            <h3>Customers</h3>
+            <p>Your customer CRM</p>
+            <ul>
+                <li>Name, mobile, GSTIN, address, state</li>
+                <li>Credit limit management</li>
+                <li>Loyalty points balance</li>
+                <li>Payment history and outstanding balance</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">🏭</div>
+            <h3>Suppliers</h3>
+            <p>Your supplier directory</p>
+            <ul>
+                <li>Supplier details and contact info</li>
+                <li>Payment tracking (payables)</li>
+                <li>Purchase history</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">💰</div>
+            <h3>Expenses</h3>
+            <p>Track business expenses</p>
+            <ul>
+                <li>Log expenses with category (Rent, Salary, etc.)</li>
+                <li>Quick-add expense categories with "+"</li>
+                <li>Attach bill copy (PDF/image)</li>
+                <li>Payment method tracking</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">📈</div>
+            <h3>Reports</h3>
+            <p>Business analytics and data</p>
+            <ul>
+                <li>Profit & Loss summary</li>
+                <li>Sales ledger with date filter</li>
+                <li>GST report (CGST/SGST/IGST breakdown)</li>
+                <li>Stock valuation at cost and selling price</li>
+                <li>Customer receivables & supplier payables</li>
+                <li>Overdue invoices</li>
+                <li>Export all reports to CSV</li>
+            </ul>
+        </div>
+
+        <div class="module-card">
+            <div class="card-icon">⚙️</div>
+            <h3>Settings</h3>
+            <p>Configure your business</p>
+            <ul>
+                <li>Company details, logo upload</li>
+                <li>Invoice prefix, GST slabs, state code</li>
+                <li>Loyalty points on/off and config</li>
+                <li>Bank details for invoices</li>
+                <li>Create & manage discount coupons</li>
+                <li>Database backup & download</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ==================== DAILY WORKFLOW ==================== -->
+    <h2>Your Daily Workflow</h2>
+
+    <div class="card">
+        <h3>Morning</h3>
+        <p>1. Double-click START.bat → Login</p>
+        <p>2. Check Dashboard for yesterday's summary</p>
+        <p>3. Check low stock alerts → Create purchase orders if needed</p>
+    </div>
+    <div class="flow-arrow">▼</div>
+    <div class="card">
+        <h3>During Business Hours</h3>
+        <p>1. Open <strong>POS & Billing</strong> → Create invoices for walk-in / regular customers</p>
+        <p>2. Search product or scan barcode → Add to cart → Select payment → Generate Invoice</p>
+        <p>3. Use <strong>Hold Bill (F3)</strong> if customer needs to step away, <strong>Recall (F5)</strong> when they return</p>
+        <p>4. Handle <strong>Returns</strong> if any customer returns goods</p>
+        <p>5. Log any <strong>Expenses</strong> (rent, supplies, etc.)</p>
+    </div>
+    <div class="flow-arrow">▼</div>
+    <div class="card">
+        <h3>End of Day</h3>
+        <p>1. Go to <strong>POS & Billing → Day-End Report</strong></p>
+        <p>2. Review: total sales, payment mode breakdown, cash position</p>
+        <p>3. Print the report for your records</p>
+        <p>4. Go to <strong>Settings → Database Backups → Create Backup</strong></p>
+        <p>5. Close the black command window to stop the software</p>
+    </div>
+
+    <!-- ==================== POS SHORTCUTS ==================== -->
+    <h2>POS Keyboard Shortcuts</h2>
+    <table class="shortcut-table">
+        <thead><tr><th>Key</th><th>Action</th></tr></thead>
+        <tbody>
+            <tr><td><kbd>F2</kbd></td><td>Focus on product search bar</td></tr>
+            <tr><td><kbd>F3</kbd></td><td>Hold current bill (park for later)</td></tr>
+            <tr><td><kbd>F4</kbd></td><td>Generate / save invoice</td></tr>
+            <tr><td><kbd>F5</kbd></td><td>Open held bills panel (recall)</td></tr>
+            <tr><td><kbd>F6</kbd></td><td>Print last generated invoice</td></tr>
+            <tr><td><kbd>ESC</kbd></td><td>Cancel / clear cart</td></tr>
+            <tr><td><kbd>Enter</kbd></td><td>Add product from search (if exact match)</td></tr>
+        </tbody>
+    </table>
+
+    <!-- ==================== TIPS ==================== -->
+    <h2>Useful Tips</h2>
+
+    <div class="tip">
+        <strong>Quick Add:</strong> Every dropdown has a "+" button. You can add new customers, suppliers, categories, brands, units, and expense categories without leaving the current form.
+    </div>
+
+    <div class="tip">
+        <strong>Coupons:</strong> Go to Settings → Coupons tab to create discount codes. Cashiers can type the code at checkout to apply discounts automatically.
+    </div>
+
+    <div class="tip">
+        <strong>GST Auto-Calculation:</strong> Set your state code in Settings. If a customer is from the same state → CGST + SGST. Different state → IGST. Walk-in customers default to same state.
+    </div>
+
+    <div class="tip">
+        <strong>Split Payment:</strong> At billing checkout, click "Split" to pay with multiple methods. Example: ₹500 Cash + ₹300 UPI + ₹200 Card.
+    </div>
+
+    <div class="tip">
+        <strong>Barcode Labels:</strong> Open any product → Click "Generate Barcode" → Print labels for your products.
+    </div>
+
+    <div class="tip">
+        <strong>Backup:</strong> Go to Settings → Create Backup regularly. This saves your entire database. You can download the backup file to keep it safe.
+    </div>
+
+    <div class="warning">
+        <strong>Data Safety:</strong> Your data is stored locally on this computer. If you format the PC or delete the software folder, your data is gone. Always keep backups!
+    </div>
+
+    <!-- ==================== PRINTING ==================== -->
+    <h2>Printing Options</h2>
+    <div class="card">
+        <ul>
+            <li><strong>A4 Invoice</strong> — Professional layout with company branding, GST breakdown, bank details, signature area</li>
+            <li><strong>Thermal Receipt</strong> — 80mm compact receipt for POS printers (auto-prints when opened)</li>
+            <li><strong>Quotation Print</strong> — Professional quotation with terms and validity</li>
+            <li><strong>Challan Print</strong> — Delivery document with receiver signature area</li>
+            <li><strong>Barcode Labels</strong> — Print barcode stickers for products (3-column grid)</li>
+            <li><strong>WhatsApp</strong> — Share invoice/quotation details via WhatsApp with one click</li>
+        </ul>
+    </div>
+
+    <!-- ==================== USER ROLES ==================== -->
+    <h2>User Roles</h2>
+    <table class="shortcut-table">
+        <thead><tr><th>Role</th><th>Can Access</th></tr></thead>
+        <tbody>
+            <tr><td><strong>Super Admin</strong></td><td>Everything — full control</td></tr>
+            <tr><td><strong>Admin</strong></td><td>All modules except user management and backups</td></tr>
+            <tr><td><strong>Staff / Cashier</strong></td><td>Dashboard, Inventory, Billing, Customers, Quotations, Challans</td></tr>
+            <tr><td><strong>Accountant</strong></td><td>Dashboard, Expenses, Reports, Day-End Report</td></tr>
+        </tbody>
+    </table>
+
+    <div class="tip">
+        <strong>Create Users:</strong> Go to Users → Add New User. Assign a role and credentials. Each user can only access the modules their role allows.
+    </div>
+
+    <!-- ==================== TROUBLESHOOTING ==================== -->
+    <h2>Troubleshooting</h2>
+    <div class="card">
+        <h3>Software won't start?</h3>
+        <p>Make sure you're double-clicking START.bat (not any other file). Keep the black window open.</p>
+    </div>
+    <div class="card">
+        <h3>Browser shows blank page?</h3>
+        <p>Wait 5 seconds and refresh. Or manually go to <strong>http://localhost:8000</strong></p>
+    </div>
+    <div class="card">
+        <h3>Forgot password?</h3>
+        <p>Contact your admin. They can change your password from Users module.</p>
+    </div>
+    <div class="card">
+        <h3>"Windows protected your PC" popup?</h3>
+        <p>Click "More info" → Click "Run anyway". This is normal for new software.</p>
+    </div>
+
+    <div class="footer">
+        <p><strong>Grovixo IIMS v2.0</strong> — Invoice & Inventory Management System</p>
+        <p>For support, contact your software administrator</p>
+    </div>
+
+</div>
+</body>
+</html>
