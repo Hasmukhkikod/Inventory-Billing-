@@ -44,7 +44,7 @@ $gstSlabs = explode(',', $compSettings['gst_slabs'] ?? '0,5,12,18,28');
                 <div class="col-md-3">
                     <label class="form-label">Category</label>
                     <div class="input-group">
-                        <select class="form-select" name="category_id" id="prod-category">
+                        <select class="form-select searchable-select" name="category_id" id="prod-category">
                             <option value="">-- Choose --</option>
                         </select>
                         <button class="btn btn-outline-secondary" type="button" id="btn-add-category" title="Add New Category"><i class="fa-solid fa-plus"></i></button>
@@ -53,7 +53,7 @@ $gstSlabs = explode(',', $compSettings['gst_slabs'] ?? '0,5,12,18,28');
                 <div class="col-md-3">
                     <label class="form-label">Brand</label>
                     <div class="input-group">
-                        <select class="form-select" name="brand_id" id="prod-brand">
+                        <select class="form-select searchable-select" name="brand_id" id="prod-brand">
                             <option value="">-- Choose --</option>
                         </select>
                         <button class="btn btn-outline-secondary" type="button" id="btn-add-brand" title="Add New Brand"><i class="fa-solid fa-plus"></i></button>
@@ -85,7 +85,7 @@ $gstSlabs = explode(',', $compSettings['gst_slabs'] ?? '0,5,12,18,28');
                 <div class="col-md-3">
                     <label class="form-label">Measurement Unit</label>
                     <div class="input-group">
-                        <select class="form-select" name="unit_id" id="prod-unit">
+                        <select class="form-select searchable-select" name="unit_id" id="prod-unit">
                             <option value="">-- Choose --</option>
                         </select>
                         <button class="btn btn-outline-secondary" type="button" id="btn-add-unit" title="Add New Unit"><i class="fa-solid fa-plus"></i></button>

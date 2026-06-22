@@ -214,7 +214,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">State (for CGST/SGST)</label>
-                                    <select class="form-select" name="state_code" id="set-state-code">
+                                    <select class="form-select searchable-select" name="state_code" id="set-state-code">
                                         <option value="">-- Select State --</option>
                                         <option value="01">01 - Jammu & Kashmir</option>
                                         <option value="02">02 - Himachal Pradesh</option>

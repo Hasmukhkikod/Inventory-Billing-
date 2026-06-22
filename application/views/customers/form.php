@@ -51,7 +51,7 @@ $isEdit = !empty($customer);
 
                 <div class="col-md-6">
                     <label class="form-label">State</label>
-                    <select class="form-select" name="state" id="cust-state">
+                    <select class="form-select searchable-select" name="state" id="cust-state">
                         <option value="">-- Select State --</option>
                         <option value="Jammu & Kashmir" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Jammu & Kashmir') ? 'selected' : ''; ?>>Jammu & Kashmir</option>
                         <option value="Himachal Pradesh" <?php echo ($isEdit && ($customer['state'] ?? '') === 'Himachal Pradesh') ? 'selected' : ''; ?>>Himachal Pradesh</option>

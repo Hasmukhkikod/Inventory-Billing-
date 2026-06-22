@@ -16,7 +16,7 @@ $companyState = trim($compSettings['state'] ?? '');
         <!-- Top Search Bar -->
         <div class="pos-search-bar">
             <div class="d-flex align-items-center gap-2" style="width: 250px;">
-                <select class="form-select" id="pos-customer-select">
+                <select class="form-select searchable-select" id="pos-customer-select">
                     <option value="">-- Walk-in Customer --</option>
                 </select>
                 <button class="btn btn-outline-secondary py-2" id="btn-quick-customer" type="button" title="Add Customer">

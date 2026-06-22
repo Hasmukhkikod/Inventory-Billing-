@@ -26,7 +26,7 @@ $isEdit = !empty($quotation);
                     <div class="col-md-5">
                         <label class="form-label fw-semibold">Select Customer</label>
                         <div class="input-group">
-                            <select class="form-select" id="qt-customer-select">
+                            <select class="form-select searchable-select" id="qt-customer-select">
                                 <option value="">-- No Customer --</option>
                             </select>
                             <button class="btn btn-outline-secondary" type="button" id="btn-quick-customer" title="Add New Customer"><i class="fa-solid fa-plus"></i></button>

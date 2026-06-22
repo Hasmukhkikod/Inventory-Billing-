@@ -26,10 +26,19 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Select2 Searchable Dropdowns -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <!-- App Global Logic -->
 <script>
 $(document).ready(function() {
+    // Auto-apply Select2 to all searchable dropdowns
+    $('.searchable-select').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: $(this).data('placeholder') || 'Search...',
+        allowClear: true
+    });
     // Enable Bootstrap tooltips globally
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));

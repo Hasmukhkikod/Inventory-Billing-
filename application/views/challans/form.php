@@ -23,7 +23,7 @@ $isEdit = !empty($challan);
                     <div class="col-md-5">
                         <label class="form-label fw-semibold">Select Customer *</label>
                         <div class="input-group">
-                            <select class="form-select" id="dc-customer-select" required>
+                            <select class="form-select searchable-select" id="dc-customer-select" required>
                                 <option value="">-- Select Customer --</option>
                             </select>
                             <button class="btn btn-outline-secondary" type="button" id="btn-quick-customer" title="Add New Customer"><i class="fa-solid fa-plus"></i></button>

@@ -25,7 +25,7 @@ $isEdit = !empty($expense);
                 <div class="col-md-6">
                     <label class="form-label">Expense Category *</label>
                     <div class="input-group">
-                        <select class="form-select" name="category_id" id="exp-category" required>
+                        <select class="form-select searchable-select" name="category_id" id="exp-category" required>
                             <option value="">-- Choose Category --</option>
                         </select>
                         <button class="btn btn-outline-secondary" type="button" id="btn-quick-exp-category" title="Add New Category"><i class="fa-solid fa-plus"></i></button>

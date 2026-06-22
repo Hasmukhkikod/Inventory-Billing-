@@ -22,7 +22,7 @@
                     <div class="col-md-5">
                         <label class="form-label fw-semibold">Select Supplier *</label>
                         <div class="input-group">
-                            <select class="form-select" id="pur-supplier-select" required>
+                            <select class="form-select searchable-select" id="pur-supplier-select" required>
                                 <option value="">-- Select Supplier --</option>
                             </select>
                             <button class="btn btn-outline-secondary" type="button" id="btn-quick-supplier" title="Add New Supplier"><i class="fa-solid fa-plus"></i></button>
