@@ -25,12 +25,12 @@ $type = $_GET['type'] ?? 'SALES'; // SALES or PURCHASE
                     <div class="col-md-8">
                         <?php if ($type === 'SALES'): ?>
                             <label class="form-label fw-semibold">Select Original Invoice *</label>
-                            <select class="form-select" id="ret-doc-select" required>
+                            <select class="form-select searchable-select" id="ret-doc-select" required>
                                 <option value="">-- Choose Invoice --</option>
                             </select>
                         <?php else: ?>
                             <label class="form-label fw-semibold">Select Original Purchase Order *</label>
-                            <select class="form-select" id="ret-doc-select" required>
+                            <select class="form-select searchable-select" id="ret-doc-select" required>
                                 <option value="">-- Choose Purchase Order --</option>
                             </select>
                         <?php endif; ?>
@@ -70,12 +70,12 @@ $type = $_GET['type'] ?? 'SALES'; // SALES or PURCHASE
 
     <!-- Summary / Save Panel -->
     <div class="col-lg-4">
-        <div class="panel-card h-100">
+        <div class="panel-card" style="position: sticky; top: 1rem;">
             <div class="panel-header">
                 <h6 class="mb-0 text-dark"><i class="fa-solid fa-receipt me-2 text-indigo"></i>Return Summary</h6>
             </div>
-            
-            <div class="panel-body d-flex flex-column justify-content-between h-100">
+
+            <div class="panel-body">
                 <div>
                     <?php echo \App\Models\Helpers::csrfField(); ?>
                     <div class="mb-4">
