@@ -28,6 +28,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+<script>document.documentElement.setAttribute('data-theme', localStorage.getItem('grovixo-theme') || 'light');</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -247,6 +248,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <i class="fa-regular fa-clock me-1"></i> <?php echo date('d-M-Y H:i'); ?>
                 </div>
                 
+                <!-- Dark/Light Mode Toggle -->
+                <button class="btn btn-outline-secondary py-1.5 px-2.5 d-flex align-items-center" id="theme-toggle-btn" type="button" title="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-moon fs-5" id="theme-icon"></i>
+                </button>
+
                 <!-- Notification Bell Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary py-1.5 px-2.5 notification-bell-btn d-flex align-items-center" type="button" data-bs-toggle="dropdown" id="notificationDropdownBtn" aria-expanded="false">

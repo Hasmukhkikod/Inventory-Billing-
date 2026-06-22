@@ -41,6 +41,28 @@ $(document).ready(function() {
         placeholder: $(this).data('placeholder') || 'Search...',
         allowClear: true
     });
+    // ==================== DARK/LIGHT THEME TOGGLE ====================
+    const savedTheme = localStorage.getItem('grovixo-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    $('#theme-toggle-btn').on('click', function() {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = current === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('grovixo-theme', next);
+        updateThemeIcon(next);
+    });
+
+    function updateThemeIcon(theme) {
+        const icon = $('#theme-icon');
+        if (theme === 'dark') {
+            icon.removeClass('fa-moon').addClass('fa-sun');
+        } else {
+            icon.removeClass('fa-sun').addClass('fa-moon');
+        }
+    }
+
     // Enable Bootstrap tooltips globally
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));

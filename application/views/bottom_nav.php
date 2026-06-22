@@ -42,7 +42,7 @@ $currentModule = in_array($currentDir, $validModules) ? $currentDir : $currentPa
     left: 0;
     right: 0;
     height: 65px;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--bg-secondary);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid var(--border-color);
