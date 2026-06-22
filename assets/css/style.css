@@ -411,19 +411,20 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
 
 .sidebar-menu {
     list-style: none;
-    padding: 1.5rem 1rem;
-    flex-grow: 1;
+    padding: 1rem;
+    flex: 1 1 0;
+    min-height: 0;
     overflow-y: auto;
 }
 
 .sidebar-item {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .sidebar-link {
     display: flex;
     align-items: center;
-    padding: 0.8rem 1rem;
+    padding: 0.65rem 1rem;
     color: var(--text-secondary);
     text-decoration: none;
     border-radius: 10px;
