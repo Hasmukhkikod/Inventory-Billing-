@@ -80,12 +80,11 @@ class Auth {
         if (isset($_SESSION['user_id'])) {
             $userId = $_SESSION['user_id'];
             
-            // Update last logout log
+            // Update last logout log (subquery for SQLite compatibility)
             $this->db->query("
-                UPDATE login_logs 
-                SET logout_time = CURRENT_TIMESTAMP 
-                WHERE user_id = ? AND logout_time IS NULL 
-                ORDER BY login_time DESC LIMIT 1
+                UPDATE login_logs
+                SET logout_time = CURRENT_TIMESTAMP
+                WHERE id = (SELECT id FROM login_logs WHERE user_id = ? AND logout_time IS NULL ORDER BY login_time DESC LIMIT 1)
             ", [$userId]);
 
             Helpers::logActivity($this->db, "auth", "User logout", $userId);
