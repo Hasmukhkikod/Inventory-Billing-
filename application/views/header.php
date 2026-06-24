@@ -100,7 +100,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <li class="sidebar-item <?php echo $currentModule === 'billing' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/billing/index.php" class="sidebar-link">
                     <i class="fa-solid fa-file-invoice-dollar"></i>
-                    <span>POS & Billing</span>
+                    <span>Billing</span>
                 </a>
             </li>
             <?php endif; ?>
@@ -216,7 +216,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         $titleMap = [
                             'index.php' => 'Business Performance Dashboard',
                             'products' => 'Inventory Management',
-                            'billing' => 'POS Terminal & Invoicing',
+                            // 'billing' => 'POS Terminal & Invoicing',
                             'customers' => 'Customer CRM & Ledgers',
                             'suppliers' => 'Supplier Directory & Payables',
                             'expenses' => 'Expense Book Keeping',

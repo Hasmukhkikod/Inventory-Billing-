@@ -84,7 +84,8 @@ $(document).ready(function () {
                 id: product.id, product_name: product.product_name, sku: product.sku,
                 hsn_code: product.hsn_code || '', rate: parseFloat(product.selling_price),
                 gst_percentage: parseFloat(product.gst_percentage), qty: 1, discount: 0,
-                max_stock: parseFloat(product.current_stock)
+                max_stock: parseFloat(product.current_stock),
+                unit_name: product.unit_name || 'PCS'
             });
         }
         renderCart();
@@ -111,14 +112,15 @@ $(document).ready(function () {
             body.append(
                 '<tr data-index="' + idx + '">' +
                 '<td class="text-secondary">' + (idx + 1) + '</td>' +
-                '<td><strong class="text-dark">' + item.product_name + '</strong><div class="text-muted small">SKU: ' + item.sku + '</div></td>' +
-                '<td class="text-muted small">' + (item.hsn_code || '-') + '</td>' +
+                '<td><strong>' + item.product_name + '</strong><div class="text-muted small">Code: ' + item.sku + '</div></td>' +
+                '<td class="small">' + (item.hsn_code || '-') + '</td>' +
                 '<td><input type="number" step="1" min="1" max="' + item.max_stock + '" class="form-control form-control-sm py-1 cart-qty" value="' + item.qty + '"></td>' +
-                '<td><input type="number" step="0.01" class="form-control form-control-sm py-1 cart-rate" value="' + item.rate.toFixed(2) + '"></td>' +
-                '<td class="text-secondary small">' + item.gst_percentage + '%</td>' +
+                '<td class="text-muted small">' + (item.unit_name || 'PCS') + '</td>' +
+                '<td><input type="number" step="0.01" min="0" class="form-control form-control-sm py-1 cart-rate" value="' + item.rate.toFixed(2) + '"></td>' +
                 '<td><div class="input-group input-group-sm"><input type="number" min="0" max="100" class="form-control py-1 cart-discount" value="' + item.discount + '"><span class="input-group-text py-0">%</span></div></td>' +
-                '<td class="text-end fw-bold text-dark">₹' + total.toFixed(2) + '</td>' +
-                '<td class="text-end"><button class="btn btn-sm text-danger btn-remove-item"><i class="fa-solid fa-trash-can"></i></button></td>' +
+                '<td class="text-center small">' + item.gst_percentage + '%</td>' +
+                '<td class="text-end fw-bold">₹' + total.toFixed(2) + '</td>' +
+                '<td class="text-center"><button class="btn btn-sm text-danger btn-remove-item" title="Remove"><i class="fa-solid fa-trash-can"></i></button></td>' +
                 '</tr>'
             );
         });
@@ -560,6 +562,27 @@ $(document).ready(function () {
             }
         });
     }
+
+    // ==================== NEW UI BUTTONS ====================
+    $('#btn-focus-search').click(function () { $('#pos-product-search').focus(); });
+    $('#btn-clear-cart').click(function () {
+        if (cart.length === 0) return;
+        Swal.fire({
+            title: 'Clear All Items?', text: 'This will remove all products from the cart.', icon: 'warning',
+            showCancelButton: true, confirmButtonText: 'Yes, Clear', confirmButtonColor: '#dc2626',
+            background: '#ffffff', color: '#1e293b'
+        }).then(function (r) { if (r.isConfirmed) { cart = []; renderCart(); } });
+    });
+
+    // Auto-fill mobile when customer selected
+    $('#pos-customer-select').on('change', function () {
+        const id = $(this).val();
+        if (id && customerData[id]) {
+            $('#pos-customer-mobile').val(customerData[id].mobile || '');
+        } else {
+            $('#pos-customer-mobile').val('');
+        }
+    });
 
     // ==================== UTILITIES ====================
     function playBeep() {
