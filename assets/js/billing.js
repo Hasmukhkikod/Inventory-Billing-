@@ -119,13 +119,14 @@ $(document).ready(function () {
                 '<td><input type="number" step="1" min="1" max="' + item.max_stock + '" class="form-control form-control-sm py-1 text-center cart-qty" value="' + item.qty + '" style="width:70px;"></td>' +
                 '<td class="text-muted small">' + (item.unit_name || 'PCS') + '</td>' +
                 '<td><input type="number" step="0.01" min="0" class="form-control form-control-sm py-1 cart-rate" value="' + item.rate.toFixed(2) + '"></td>' +
-                '<td><div class="input-group input-group-sm">' +
-                '<select class="form-select py-1 cart-discount-type" style="width:50px;max-width:50px;font-size:0.8rem;">' +
+                '<td>' +
+                '<div class="d-flex align-items-center gap-1">' +
+                '<input type="number" min="0" class="form-control form-control-sm py-1 cart-discount-val" value="' + item.discount_val + '" style="width:55px;">' +
+                '<select class="form-select form-select-sm py-1 cart-discount-type" style="width:45px;padding:2px 4px;font-size:0.75rem;">' +
                 '<option value="pct"' + (item.discount_type === 'pct' ? ' selected' : '') + '>%</option>' +
                 '<option value="flat"' + (item.discount_type === 'flat' ? ' selected' : '') + '>₹</option></select>' +
-                '<input type="number" min="0" class="form-control py-1 cart-discount-val" value="' + item.discount_val + '" style="width:65px;">' +
                 '</div>' +
-                (disc > 0 ? '<div class="text-emerald small mt-1">- ₹' + disc.toFixed(2) + '</div>' : '') +
+                (disc > 0 ? '<div class="text-emerald small">₹' + disc.toFixed(2) + ' off</div>' : '') +
                 '</td>' +
                 '<td class="text-center small">' + item.gst_percentage + '%</td>' +
                 '<td class="text-end fw-bold">₹' + total.toFixed(2) + '</td>' +

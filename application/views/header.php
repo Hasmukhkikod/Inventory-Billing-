@@ -205,17 +205,44 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     <!-- Main Content Panel -->
     <main class="main-content">
-        <?php $isDashboard = ($currentModule === 'index.php'); ?>
+        <?php
+        $isDashboard = ($currentModule === 'index.php');
+        $isFormPage = in_array($currentPage, ['form.php', 'view.php', 'day_end.php']);
+        $showHeader = !$isFormPage; // Show header on dashboard + listing pages, hide on form/view/edit pages
+        ?>
 
-        <?php if ($isDashboard): ?>
-        <!-- Full Top Navbar (Dashboard only) -->
+        <?php if ($showHeader): ?>
+        <!-- Top Navbar (Dashboard + Listing pages) -->
         <header class="top-navbar d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
                 <button class="btn btn-outline-secondary d-lg-none py-1.5 px-2.5" id="sidebar-toggle-btn" type="button" aria-label="Toggle Menu">
                     <i class="fa-solid fa-bars fs-5"></i>
                 </button>
-                <h4 class="mb-0 d-none d-lg-block">Business Performance Dashboard</h4>
+                <?php if ($isDashboard): ?>
+                    <h4 class="mb-0 d-none d-lg-block">Business Performance Dashboard</h4>
+                <?php else: ?>
+                    <h4 class="mb-0 text-capitalize d-none d-lg-block">
+                        <?php
+                            $titleMap = [
+                                'products' => 'Inventory Management',
+                                'billing' => 'Invoices',
+                                'customers' => 'Customers',
+                                'suppliers' => 'Suppliers',
+                                'expenses' => 'Expenses',
+                                'reports' => 'Reports',
+                                'users' => 'Users',
+                                'settings' => 'Settings',
+                                'purchases' => 'Purchases',
+                                'returns' => 'Returns',
+                                'quotations' => 'Quotations',
+                                'challans' => 'Delivery Challans'
+                            ];
+                            echo $titleMap[$currentModule] ?? '';
+                        ?>
+                    </h4>
+                <?php endif; ?>
             </div>
+            <?php if ($isDashboard): ?>
             <div class="global-search-container mx-2 flex-grow-1 flex-sm-grow-0" style="max-width: 320px;">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text"><i class="fa-solid fa-magnifying-glass text-indigo"></i></span>
@@ -223,17 +250,22 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 </div>
                 <div class="global-search-results d-none" id="global-search-results-box"></div>
             </div>
+            <?php endif; ?>
             <div class="d-flex align-items-center gap-3">
+                <?php if ($isDashboard): ?>
                 <div class="text-secondary small d-none d-xl-block">
                     <i class="fa-regular fa-clock me-1"></i> <?php echo date('d-M-Y H:i'); ?>
                 </div>
+                <?php endif; ?>
         <?php else: ?>
-        <!-- Compact Header (All other pages) -->
-        <header class="top-navbar d-flex justify-content-end align-items-center" style="height:50px; margin-bottom:1rem;">
-            <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-outline-secondary d-lg-none py-1 px-2" id="sidebar-toggle-btn" type="button" aria-label="Toggle Menu" style="position:absolute;left:1rem;">
-                    <i class="fa-solid fa-bars fs-5"></i>
-                </button>
+        <!-- No header on form/view/edit pages — just mobile hamburger -->
+        <div class="d-lg-none mb-3">
+            <button class="btn btn-outline-secondary py-1 px-2" id="sidebar-toggle-btn" type="button" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars fs-5"></i>
+            </button>
+        </div>
+        <header class="d-none">
+            <div class="d-flex align-items-center gap-3">
         <?php endif; ?>
                 
                 <!-- Dark/Light Mode Toggle -->
