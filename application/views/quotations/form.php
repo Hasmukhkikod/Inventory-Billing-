@@ -1,128 +1,154 @@
 <?php
 /**
- * Invoice & Inventory Management System (IIMS)
- * Quotation Create/Edit Form View
+ * IIMS v2.0 - Create / Edit Quotation (Full-Width Layout)
  */
 $isEdit = !empty($quotation);
 ?>
 
-<div class="row g-4 text-dark">
-    <!-- Items Entry Panel -->
-    <div class="col-lg-8">
-        <div class="panel-card">
-            <div class="panel-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-dark">
-                    <i class="fa-solid fa-file-lines me-2 text-indigo"></i>
-                    <?php echo $isEdit ? 'Edit Quotation: ' . \App\Models\Helpers::sanitize($quotation['quotation_no']) : 'New Quotation / Estimate'; ?>
-                </h5>
-                <a href="<?php echo BASE_URL; ?>/quotations/index.php" class="btn btn-sm btn-outline-secondary">
-                    <i class="fa-solid fa-arrow-left me-1"></i> Back to List
-                </a>
-            </div>
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1"><i class="fa-solid fa-file-lines text-indigo me-2"></i><?php echo $isEdit ? 'Edit Quotation: ' . \App\Models\Helpers::sanitize($quotation['quotation_no']) : 'Create Quotation / Estimate'; ?></h4>
+        <nav class="text-muted small">Home / Quotations / <?php echo $isEdit ? 'Edit' : 'Create'; ?> Quotation</nav>
+    </div>
+    <div>
+        <a href="<?php echo BASE_URL; ?>/quotations/index.php" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>Back to List</a>
+    </div>
+</div>
 
-            <div class="panel-body">
-                <!-- Search row -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-5">
-                        <label class="form-label fw-semibold">Select Customer</label>
-                        <div class="input-group">
-                            <select class="form-select searchable-select" id="qt-customer-select">
-                                <option value="">-- No Customer --</option>
-                            </select>
-                            <button class="btn btn-outline-secondary" type="button" id="btn-quick-customer" title="Add New Customer"><i class="fa-solid fa-plus"></i></button>
-                        </div>
-                    </div>
-                    <div class="col-md-7 position-relative">
-                        <label class="form-label fw-semibold">Search Product to Add *</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-barcode text-indigo"></i></span>
-                            <input type="text" class="form-control" id="qt-product-search" placeholder="Search by name, SKU, or barcode..." autocomplete="off">
-                        </div>
-                        <div class="pos-product-search-results d-none w-100" id="qt-search-results-box" style="position: absolute; left: 0; right: 0; z-index: 1000; background: white; border: 1px solid #ddd; max-height: 250px; overflow-y: auto;">
-                            <!-- Results loaded via JS -->
-                        </div>
-                    </div>
+<!-- Section 1: Customer & Quotation Info -->
+<div class="panel-card mb-4">
+    <div class="panel-body py-3">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Customer Name</label>
+                <div class="input-group">
+                    <select class="form-select searchable-select" id="qt-customer-select">
+                        <option value="">-- No Customer --</option>
+                    </select>
+                    <button class="btn btn-outline-secondary" id="btn-quick-customer" type="button" title="Add Customer">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Quotation Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="qt-date" required value="<?php echo $isEdit ? $quotation['quotation_date'] : date('Y-m-d'); ?>">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Valid Until</label>
+                <input type="date" class="form-control" id="qt-valid-until" value="<?php echo $isEdit ? ($quotation['valid_until'] ?? '') : date('Y-m-d', strtotime('+30 days')); ?>">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Notes</label>
+                <input type="text" class="form-control" id="qt-notes-short" placeholder="Quick note..." value="<?php echo $isEdit ? htmlspecialchars($quotation['notes'] ?? '') : ''; ?>">
+            </div>
+        </div>
+    </div>
+</div>
 
-                <!-- Cart Table -->
-                <div class="table-responsive" style="min-height: 250px;">
-                    <table class="table table-hover align-middle mb-0" id="qt-cart-table">
-                        <thead>
-                            <tr class="bg-light text-dark">
-                                <th>#</th>
-                                <th>Product Details</th>
-                                <th style="width: 90px;">Qty</th>
-                                <th style="width: 130px;">Rate (₹)</th>
-                                <th style="width: 90px;">GST %</th>
-                                <th style="width: 90px;">Disc %</th>
-                                <th class="text-end" style="width: 130px;">Total (₹)</th>
-                                <th style="width: 50px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="cart-empty-row">
-                                <td colspan="8" class="text-center py-5 text-secondary">
-                                    <i class="fa-solid fa-basket-shopping fs-2 mb-3 d-block text-muted"></i>
-                                    Search and select products above to add them to the quotation.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+<!-- Section 2: Product Search & Cart -->
+<div class="panel-card mb-4">
+    <div class="panel-body">
+        <!-- Search Bar -->
+        <div class="d-flex gap-3 mb-4 align-items-end">
+            <div class="flex-grow-1 position-relative">
+                <label class="form-label fw-semibold">Search Product / Scan Barcode</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-magnifying-glass text-indigo"></i></span>
+                    <input type="text" class="form-control" id="qt-product-search" placeholder="Type product name, SKU, or scan barcode..." autocomplete="off">
+                    <span class="input-group-text"><i class="fa-solid fa-barcode"></i></span>
+                </div>
+                <div class="pos-product-search-results d-none" id="qt-search-results-box"></div>
+            </div>
+        </div>
+
+        <!-- Cart Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-0" id="qt-cart-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">#</th>
+                        <th>Product Name</th>
+                        <th style="width:100px;">HSN / SAC</th>
+                        <th style="width:80px;">Qty</th>
+                        <th style="width:100px;">Unit</th>
+                        <th style="width:120px;">Rate (&#8377;)</th>
+                        <th style="width:130px;">Discount</th>
+                        <th style="width:80px;">GST %</th>
+                        <th style="width:120px;" class="text-end">Total (&#8377;)</th>
+                        <th style="width:50px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="cart-empty-row">
+                        <td colspan="10" class="text-center py-4 text-secondary">
+                            <i class="fa-solid fa-basket-shopping fs-3 mb-2 d-block text-muted"></i>
+                            Search and select products above to add them to the quotation
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add Row / Clear -->
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-sm btn-outline-primary" id="btn-focus-search"><i class="fa-solid fa-plus me-1"></i>Add Product</button>
+            <button class="btn btn-sm btn-outline-danger" id="btn-clear-cart">Clear All</button>
+        </div>
+    </div>
+</div>
+
+<!-- Section 3: Notes + Summary -->
+<div class="row g-4 mb-4">
+    <!-- Left: Notes / Remarks -->
+    <div class="col-lg-5">
+        <div class="panel-card h-100">
+            <div class="panel-body">
+                <h6 class="fw-semibold mb-3"><i class="fa-solid fa-sticky-note text-indigo me-2"></i>Remarks</h6>
+                <div class="mb-3">
+                    <label class="form-label small">Quotation Notes</label>
+                    <textarea class="form-control form-control-sm" id="qt-notes" rows="4" placeholder="Additional notes for the customer..."><?php echo $isEdit ? \App\Models\Helpers::sanitize($quotation['notes'] ?? '') : ''; ?></textarea>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Summary / Save Panel -->
-    <div class="col-lg-4">
-        <div class="panel-card" style="position: sticky; top: 1rem;">
-            <div class="panel-header">
-                <h6 class="mb-0 text-dark"><i class="fa-solid fa-file-invoice-dollar me-2 text-indigo"></i>Quotation Summary</h6>
-            </div>
-
+    <!-- Right: Totals Summary -->
+    <div class="col-lg-7">
+        <div class="panel-card h-100">
             <div class="panel-body">
-                <div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Quotation Date *</label>
-                        <input type="date" class="form-control" id="qt-date" required value="<?php echo $isEdit ? $quotation['quotation_date'] : date('Y-m-d'); ?>">
-                    </div>
+                <h6 class="fw-semibold mb-3"><i class="fa-solid fa-calculator text-indigo me-2"></i>Quotation Summary</h6>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Valid Until</label>
-                        <input type="date" class="form-control" id="qt-valid-until" value="<?php echo $isEdit ? ($quotation['valid_until'] ?? '') : date('Y-m-d', strtotime('+30 days')); ?>">
-                    </div>
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <td class="text-secondary">Subtotal (Taxable)</td>
+                        <td class="text-end fw-bold" id="qt-subtotal">&#8377;0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary">GST Tax Amount</td>
+                        <td class="text-end" id="qt-tax">&#8377;0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary">Flat Discount (&#8377;)</td>
+                        <td class="text-end">
+                            <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end d-inline-block" style="width:100px;" id="qt-discount-input" value="<?php echo $isEdit ? number_format((float)$quotation['discount'], 2, '.', '') : '0.00'; ?>">
+                        </td>
+                    </tr>
+                </table>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Notes / Remarks</label>
-                        <textarea class="form-control" id="qt-notes" rows="3" placeholder="Additional notes for the customer..."><?php echo $isEdit ? \App\Models\Helpers::sanitize($quotation['notes'] ?? '') : ''; ?></textarea>
-                    </div>
-
-                    <div class="border-top border-secondary-subtle my-3"></div>
-
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-secondary">Subtotal (Taxable)</span>
-                        <strong id="qt-subtotal">₹0.00</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-secondary">GST Tax Amount</span>
-                        <strong id="qt-tax">₹0.00</strong>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-secondary">Flat Discount (₹)</span>
-                        <input type="number" step="0.01" min="0" class="form-control text-end py-1" style="width: 120px;" id="qt-discount-input" value="<?php echo $isEdit ? number_format((float)$quotation['discount'], 2, '.', '') : '0.00'; ?>">
-                    </div>
-
-                    <hr class="my-3 border-dark">
-
-                    <div class="d-flex justify-content-between fw-bold text-dark fs-5 mb-4">
-                        <span>Grand Total</span>
-                        <span id="qt-grand-total">₹0.00</span>
+                <!-- Grand Total -->
+                <div class="border-top mt-3 pt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 text-indigo fw-bold">Grand Total</h4>
+                        <h3 class="mb-0 text-indigo fw-bold" id="qt-grand-total">&#8377;0.00</h3>
                     </div>
                 </div>
 
-                <div>
+                <!-- Action Button -->
+                <div class="d-flex gap-2 mt-4">
                     <?php echo \App\Models\Helpers::csrfField(); ?>
-                    <button class="btn btn-success w-100 py-3 fs-5" id="btn-save-quotation">
+                    <button class="btn btn-success flex-grow-1 py-2 fs-5" id="btn-save-quotation">
                         <i class="fa-solid fa-circle-check me-2"></i><?php echo $isEdit ? 'Update Quotation' : 'Save Quotation'; ?>
                     </button>
                 </div>
@@ -136,33 +162,18 @@ $isEdit = !empty($quotation);
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2 text-indigo"></i>Add Customer</h5>
+                <h5 class="modal-title"><i class="fa-solid fa-user-plus text-indigo me-2"></i>Add Customer</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="quickCustomerForm">
                 <?php echo \App\Models\Helpers::csrfField(); ?>
                 <div class="modal-body">
                     <div class="row g-3">
-                        <div class="col-6">
-                            <label class="form-label">Customer Name *</label>
-                            <input type="text" class="form-control" name="customer_name" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">Mobile *</label>
-                            <input type="text" class="form-control" name="mobile" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">GST Number</label>
-                            <input type="text" class="form-control" name="gst_number">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">State</label>
-                            <input type="text" class="form-control" name="state" placeholder="e.g. Maharashtra">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Address</label>
-                            <textarea class="form-control" name="address" rows="2"></textarea>
-                        </div>
+                        <div class="col-6"><label class="form-label">Customer Name *</label><input type="text" class="form-control" name="customer_name" required></div>
+                        <div class="col-6"><label class="form-label">Mobile *</label><input type="text" class="form-control" name="mobile" required></div>
+                        <div class="col-6"><label class="form-label">GST Number</label><input type="text" class="form-control" name="gst_number"></div>
+                        <div class="col-6"><label class="form-label">State</label><input type="text" class="form-control" name="state" placeholder="e.g. Maharashtra"></div>
+                        <div class="col-12"><label class="form-label">Address</label><textarea class="form-control" name="address" rows="2"></textarea></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -181,6 +192,19 @@ $(document).ready(function() {
     const isEdit = <?php echo $isEdit ? 'true' : 'false'; ?>;
     const editId = <?php echo $isEdit ? (int)$quotation['id'] : 0; ?>;
     const editCustomerId = <?php echo $isEdit ? (int)($quotation['customer_id'] ?? 0) : 0; ?>;
+
+    // Focus search on Add Product click
+    $('#btn-focus-search').click(function() { $('#qt-product-search').focus(); });
+
+    // Clear All
+    $('#btn-clear-cart').click(function() {
+        if (cart.length === 0) return;
+        Swal.fire({
+            title: 'Clear All Items?', text: 'This will remove all products from the quotation.',
+            icon: 'warning', showCancelButton: true, confirmButtonText: 'Yes, Clear All',
+            background: '#ffffff', color: '#1e293b'
+        }).then(r => { if (r.isConfirmed) { cart = []; renderCart(); } });
+    });
 
     // Load Customers
     function loadCustomers(selectId) {
@@ -210,9 +234,9 @@ $(document).ready(function() {
             if (res.status) {
                 $('#quickCustomerModal').modal('hide');
                 loadCustomers(res.data.id);
-                Swal.fire({ icon: 'success', title: 'Customer Added', timer: 1500, showConfirmButton: false, background: '#ffffff', color: '#0f172a' });
+                Swal.fire({ icon: 'success', title: 'Customer Added', timer: 1500, showConfirmButton: false, background: '#ffffff', color: '#1e293b' });
             } else {
-                Swal.fire({ icon: 'error', title: 'Failed', text: res.message, background: '#ffffff', color: '#0f172a' });
+                Swal.fire({ icon: 'error', title: 'Failed', text: res.message, background: '#ffffff', color: '#1e293b' });
             }
         }, 'json');
     });
@@ -224,36 +248,35 @@ $(document).ready(function() {
             'id' => (int)$item['product_id'],
             'product_name' => $item['product_name'],
             'sku' => $item['sku'],
+            'hsn_code' => $item['hsn_code'] ?? '',
+            'unit_name' => $item['unit_name'] ?? 'PCS',
             'qty' => (float)$item['quantity'],
             'rate' => (float)$item['rate'],
             'gst_percentage' => (float)$item['gst'],
-            'discount_percentage' => (float)$item['discount']
+            'discount_value' => (float)$item['discount'],
+            'discount_type' => $item['discount_type'] ?? 'percent'
         ];
     }, $items)); ?>;
     renderCart();
     <?php endif; ?>
 
-    // Product search autocompletion
+    // Product search
     $("#qt-product-search").on('input', function() {
         const query = $(this).val().trim();
-        if (query.length < 2) {
-            $("#qt-search-results-box").addClass('d-none');
-            return;
-        }
+        if (query.length < 2) { $("#qt-search-results-box").addClass('d-none'); return; }
 
         $.ajax({
             url: BASE_URL + '/api/billing.php?action=search_product&q=' + encodeURIComponent(query),
-            type: 'GET',
-            dataType: 'json',
+            type: 'GET', dataType: 'json',
             success: function(res) {
                 const box = $("#qt-search-results-box");
                 box.empty();
                 if (res.status && res.data.length > 0) {
                     res.data.forEach(item => {
                         box.append(`
-                            <div class="search-result-item p-2 border-bottom" style="cursor: pointer;" data-id="${item.id}">
+                            <div class="search-result-item p-2 border-bottom" style="cursor:pointer;" data-id="${item.id}">
                                 <strong>${item.product_name}</strong> - <span class="text-indigo small">${item.sku}</span>
-                                <div class="text-secondary small">Sell Price: ₹${parseFloat(item.selling_price || 0).toFixed(2)} | Stock: ${item.current_stock}</div>
+                                <div class="text-secondary small">Sell: &#8377;${parseFloat(item.selling_price||0).toFixed(2)} | GST: ${item.gst_percentage}% | HSN: ${item.hsn_code||'-'}</div>
                             </div>
                         `);
                     });
@@ -265,20 +288,17 @@ $(document).ready(function() {
         });
     });
 
-    // Close search results on outside click
     $(document).on('click', function(e) {
         if (!$(e.target).closest('#qt-product-search, #qt-search-results-box').length) {
             $("#qt-search-results-box").addClass('d-none');
         }
     });
 
-    // Handle product selection from search
     $("#qt-search-results-box").on('click', '.search-result-item', function() {
         const id = $(this).data('id');
         $.ajax({
             url: BASE_URL + '/api/products.php?action=get&id=' + id,
-            type: 'GET',
-            dataType: 'json',
+            type: 'GET', dataType: 'json',
             success: function(res) {
                 if (res.status) {
                     addToCart(res.data);
@@ -298,10 +318,13 @@ $(document).ready(function() {
                 id: p.id,
                 product_name: p.product_name,
                 sku: p.sku,
+                hsn_code: p.hsn_code || '',
+                unit_name: p.unit_name || 'PCS',
                 qty: 1,
                 rate: parseFloat(p.selling_price || 0),
                 gst_percentage: parseFloat(p.gst_percentage || 0),
-                discount_percentage: 0
+                discount_value: 0,
+                discount_type: 'percent'
             });
         }
         renderCart();
@@ -316,12 +339,16 @@ $(document).ready(function() {
             calculateTotals();
             return;
         }
-
         $(".cart-empty-row").hide();
 
         cart.forEach((item, index) => {
             const base = item.qty * item.rate;
-            const disc_amt = base * (item.discount_percentage / 100);
+            let disc_amt = 0;
+            if (item.discount_type === 'percent') {
+                disc_amt = base * (item.discount_value / 100);
+            } else {
+                disc_amt = item.discount_value;
+            }
             const after_disc = base - disc_amt;
             const tax_amt = after_disc * (item.gst_percentage / 100);
             const row_total = after_disc + tax_amt;
@@ -333,19 +360,27 @@ $(document).ready(function() {
                         <strong>${item.product_name}</strong>
                         <span class="text-muted small d-block">SKU: ${item.sku}</span>
                     </td>
+                    <td class="small">${item.hsn_code || '-'}</td>
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width: 75px;" min="0.01">
+                        <input type="number" step="0.01" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width:70px;" min="0.01">
+                    </td>
+                    <td class="text-muted small">${item.unit_name || 'PCS'}</td>
+                    <td>
+                        <input type="number" step="0.01" class="form-control form-control-sm item-rate-input" data-index="${index}" value="${item.rate.toFixed(2)}" style="width:100px;" min="0">
                     </td>
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-rate-input" data-index="${index}" value="${item.rate.toFixed(2)}" style="width: 110px;" min="0.00">
+                        <div class="input-group input-group-sm" style="width:130px;">
+                            <input type="number" step="0.01" class="form-control item-disc-input" data-index="${index}" value="${item.discount_value}" min="0">
+                            <select class="form-select item-disc-type" data-index="${index}" style="max-width:50px;">
+                                <option value="percent" ${item.discount_type==='percent'?'selected':''}>%</option>
+                                <option value="amount" ${item.discount_type==='amount'?'selected':''}>&#8377;</option>
+                            </select>
+                        </div>
                     </td>
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-gst-input" data-index="${index}" value="${item.gst_percentage}" style="width: 75px;" min="0">
+                        <input type="number" step="0.01" class="form-control form-control-sm item-gst-input" data-index="${index}" value="${item.gst_percentage}" style="width:70px;" min="0">
                     </td>
-                    <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-disc-input" data-index="${index}" value="${item.discount_percentage}" style="width: 75px;" min="0" max="100">
-                    </td>
-                    <td class="text-end fw-bold text-dark font-monospace">₹${row_total.toFixed(2)}</td>
+                    <td class="text-end fw-bold font-monospace">&#8377;${row_total.toFixed(2)}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-outline-danger btn-remove-item" data-index="${index}"><i class="fa-solid fa-trash"></i></button>
                     </td>
@@ -358,66 +393,42 @@ $(document).ready(function() {
 
     // Cart event handlers
     $("#qt-cart-table").on('input', '.item-qty-input', function() {
-        const idx = $(this).data('index');
-        const val = parseFloat($(this).val());
-        if (val > 0) {
-            cart[idx].qty = val;
-            renderCart();
-        }
+        const idx = $(this).data('index'), val = parseFloat($(this).val());
+        if (val > 0) { cart[idx].qty = val; renderCart(); }
     });
-
     $("#qt-cart-table").on('input', '.item-rate-input', function() {
-        const idx = $(this).data('index');
-        const val = parseFloat($(this).val());
-        if (val >= 0) {
-            cart[idx].rate = val;
-            renderCart();
-        }
+        const idx = $(this).data('index'), val = parseFloat($(this).val());
+        if (val >= 0) { cart[idx].rate = val; renderCart(); }
     });
-
     $("#qt-cart-table").on('input', '.item-gst-input', function() {
-        const idx = $(this).data('index');
-        const val = parseFloat($(this).val());
-        if (val >= 0) {
-            cart[idx].gst_percentage = val;
-            renderCart();
-        }
+        const idx = $(this).data('index'), val = parseFloat($(this).val());
+        if (val >= 0) { cart[idx].gst_percentage = val; renderCart(); }
     });
-
     $("#qt-cart-table").on('input', '.item-disc-input', function() {
-        const idx = $(this).data('index');
-        const val = parseFloat($(this).val());
-        if (val >= 0 && val <= 100) {
-            cart[idx].discount_percentage = val;
-            renderCart();
-        }
+        const idx = $(this).data('index'), val = parseFloat($(this).val());
+        if (val >= 0) { cart[idx].discount_value = val; renderCart(); }
     });
-
-    $("#qt-cart-table").on('click', '.btn-remove-item', function() {
+    $("#qt-cart-table").on('change', '.item-disc-type', function() {
         const idx = $(this).data('index');
-        cart.splice(idx, 1);
+        cart[idx].discount_type = $(this).val();
         renderCart();
     });
-
-    $("#qt-discount-input").on('input', function() {
-        calculateTotals();
+    $("#qt-cart-table").on('click', '.btn-remove-item', function() {
+        cart.splice($(this).data('index'), 1); renderCart();
     });
+    $("#qt-discount-input").on('input', function() { calculateTotals(); });
 
     function calculateTotals() {
-        let subtotal = 0;
-        let tax = 0;
-
+        let subtotal = 0, tax = 0;
         cart.forEach(item => {
             const base = item.qty * item.rate;
-            const disc_amt = base * (item.discount_percentage / 100);
+            let disc_amt = item.discount_type === 'percent' ? base * (item.discount_value / 100) : item.discount_value;
             const after_disc = base - disc_amt;
             subtotal += after_disc;
             tax += after_disc * (item.gst_percentage / 100);
         });
-
         const discount = parseFloat($("#qt-discount-input").val()) || 0;
         const grand = subtotal + tax - discount;
-
         $("#qt-subtotal").text('₹' + subtotal.toFixed(2));
         $("#qt-tax").text('₹' + tax.toFixed(2));
         $("#qt-grand-total").text('₹' + (grand > 0 ? grand.toFixed(2) : '0.00'));
@@ -428,16 +439,15 @@ $(document).ready(function() {
         const customerId = $("#qt-customer-select").val();
         const quotationDate = $("#qt-date").val();
         const validUntil = $("#qt-valid-until").val();
-        const notes = $("#qt-notes").val();
+        const notes = $("#qt-notes").val() || $("#qt-notes-short").val();
         const discount = parseFloat($("#qt-discount-input").val()) || 0;
 
         if (cart.length === 0) {
-            Swal.fire({ icon: 'warning', title: 'Cart Empty', text: 'Please add products to the quotation.', background: '#ffffff', color: '#0f172a' });
+            Swal.fire({ icon: 'warning', title: 'Cart Empty', text: 'Please add products to the quotation.', background: '#ffffff', color: '#1e293b' });
             return;
         }
-
         if (!quotationDate) {
-            Swal.fire({ icon: 'warning', title: 'Date Required', text: 'Please set the quotation date.', background: '#ffffff', color: '#0f172a' });
+            Swal.fire({ icon: 'warning', title: 'Date Required', text: 'Please set the quotation date.', background: '#ffffff', color: '#1e293b' });
             return;
         }
 
@@ -450,45 +460,23 @@ $(document).ready(function() {
             discount: discount,
             cart: JSON.stringify(cart)
         };
-
-        if (isEdit) {
-            postData.quotation_id = editId;
-        }
+        if (isEdit) { postData.quotation_id = editId; }
 
         $.ajax({
             url: BASE_URL + '/api/quotations.php?action=save',
-            type: 'POST',
-            data: postData,
-            dataType: 'json',
+            type: 'POST', data: postData, dataType: 'json',
             success: function(res) {
                 if (res.status) {
                     Swal.fire({
-                        icon: 'success',
-                        title: isEdit ? 'Quotation Updated' : 'Quotation Created',
-                        text: res.message,
-                        background: '#ffffff',
-                        color: '#0f172a'
-                    }).then(() => {
-                        window.location.href = BASE_URL + '/quotations/view.php?id=' + res.data.quotation_id;
-                    });
+                        icon: 'success', title: isEdit ? 'Quotation Updated' : 'Quotation Created',
+                        text: res.message, background: '#ffffff', color: '#1e293b'
+                    }).then(() => { window.location.href = BASE_URL + '/quotations/view.php?id=' + res.data.quotation_id; });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: res.message,
-                        background: '#ffffff',
-                        color: '#0f172a'
-                    });
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#1e293b' });
                 }
             },
             error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Network Error',
-                    text: 'Could not reach the server. Please try again.',
-                    background: '#ffffff',
-                    color: '#0f172a'
-                });
+                Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server. Please try again.', background: '#ffffff', color: '#1e293b' });
             }
         });
     });

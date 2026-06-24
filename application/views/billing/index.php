@@ -13,7 +13,7 @@
                 <i class="fa-solid fa-chart-column me-1"></i> Day-End Report
             </a>
             <a href="<?php echo BASE_URL; ?>/billing/form.php" class="btn btn-primary btn-sm">
-                <i class="fa-solid fa-cash-register me-1"></i> Open POS Terminal
+                <i class="fa-solid fa-cash-register me-1"></i> Create Bill 
             </a>
         </div>
     </div>

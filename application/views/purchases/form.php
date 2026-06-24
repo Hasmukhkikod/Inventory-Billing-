@@ -1,122 +1,152 @@
 <?php
 /**
- * Invoice & Inventory Management System (IIMS)
- * Purchase Order Creation / Checkout View
+ * IIMS v2.0 - New Purchase Order (Full-Width Layout)
  */
 ?>
 
-<div class="row g-4 text-dark">
-    <!-- Items Entry Panel -->
-    <div class="col-lg-8">
-        <div class="panel-card">
-            <div class="panel-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-dark"><i class="fa-solid fa-cart-flatbed me-2 text-indigo"></i>New Purchase Order</h5>
-                <a href="<?php echo BASE_URL; ?>/purchases/index.php" class="btn btn-sm btn-outline-secondary">
-                    <i class="fa-solid fa-arrow-left me-1"></i> Back to List
-                </a>
-            </div>
-            
-            <div class="panel-body">
-                <!-- Search row -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-5">
-                        <label class="form-label fw-semibold">Select Supplier *</label>
-                        <div class="input-group">
-                            <select class="form-select searchable-select" id="pur-supplier-select" required>
-                                <option value="">-- Select Supplier --</option>
-                            </select>
-                            <button class="btn btn-outline-secondary" type="button" id="btn-quick-supplier" title="Add New Supplier"><i class="fa-solid fa-plus"></i></button>
-                        </div>
-                    </div>
-                    <div class="col-md-7 position-relative">
-                        <label class="form-label fw-semibold">Search Product to Add *</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-barcode text-indigo"></i></span>
-                            <input type="text" class="form-control" id="pur-product-search" placeholder="Search by name, SKU, or barcode..." autocomplete="off">
-                        </div>
-                        <div class="pos-product-search-results d-none w-100" id="pur-search-results-box" style="position: absolute; left: 0; right: 0; z-index: 1000; background: white; border: 1px solid #ddd; max-height: 250px; overflow-y: auto;">
-                            <!-- Results loaded via JS -->
-                        </div>
-                    </div>
-                </div>
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1"><i class="fa-solid fa-cart-flatbed text-indigo me-2"></i>New Purchase Order</h4>
+        <nav class="text-muted small">Home / Purchases / New Purchase Order</nav>
+    </div>
+    <div>
+        <a href="<?php echo BASE_URL; ?>/purchases/index.php" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>Back to List</a>
+    </div>
+</div>
 
-                <!-- Cart Table -->
-                <div class="table-responsive" style="min-height: 250px;">
-                    <table class="table table-hover align-middle mb-0" id="pur-cart-table">
-                        <thead>
-                            <tr class="bg-light text-dark">
-                                <th>#</th>
-                                <th>Product Details</th>
-                                <th style="width: 100px;">Qty</th>
-                                <th style="width: 140px;">Cost Price (₹)</th>
-                                <th style="width: 100px;">GST %</th>
-                                <th class="text-end" style="width: 140px;">Total (₹)</th>
-                                <th style="width: 50px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="cart-empty-row">
-                                <td colspan="7" class="text-center py-5 text-secondary">
-                                    <i class="fa-solid fa-basket-shopping fs-2 mb-3 d-block text-muted"></i>
-                                    Search and select products above to add them to the purchase order.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+<!-- Section 1: Supplier & Purchase Info -->
+<div class="panel-card mb-4">
+    <div class="panel-body py-3">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Supplier Name <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <select class="form-select searchable-select" id="pur-supplier-select" required>
+                        <option value="">-- Select Supplier --</option>
+                    </select>
+                    <button class="btn btn-outline-secondary" id="btn-quick-supplier" type="button" title="Add Supplier">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Purchase Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="pur-date" required value="<?php echo date('Y-m-d'); ?>">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Payment Status</label>
+                <select class="form-select" id="pur-payment-status">
+                    <option value="UNPAID" selected>UNPAID</option>
+                    <option value="PARTIAL">PARTIAL</option>
+                    <option value="PAID">PAID</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Product Search & Cart -->
+<div class="panel-card mb-4">
+    <div class="panel-body">
+        <!-- Search Bar -->
+        <div class="d-flex gap-3 mb-4 align-items-end">
+            <div class="flex-grow-1 position-relative">
+                <label class="form-label fw-semibold">Search Product / Scan Barcode</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-magnifying-glass text-indigo"></i></span>
+                    <input type="text" class="form-control" id="pur-product-search" placeholder="Type product name, SKU, or scan barcode..." autocomplete="off">
+                    <span class="input-group-text"><i class="fa-solid fa-barcode"></i></span>
+                </div>
+                <div class="pos-product-search-results d-none" id="pur-search-results-box"></div>
+            </div>
+        </div>
+
+        <!-- Cart Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-0" id="pur-cart-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">#</th>
+                        <th>Product Name</th>
+                        <th style="width:100px;">HSN / SAC</th>
+                        <th style="width:80px;">Qty</th>
+                        <th style="width:100px;">Unit</th>
+                        <th style="width:130px;">Cost Price (&#8377;)</th>
+                        <th style="width:80px;">GST %</th>
+                        <th style="width:120px;" class="text-end">Total (&#8377;)</th>
+                        <th style="width:50px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="cart-empty-row">
+                        <td colspan="9" class="text-center py-4 text-secondary">
+                            <i class="fa-solid fa-basket-shopping fs-3 mb-2 d-block text-muted"></i>
+                            Search and select products above to add them to the purchase order
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add Row / Clear -->
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-sm btn-outline-primary" id="btn-focus-search"><i class="fa-solid fa-plus me-1"></i>Add Product</button>
+            <button class="btn btn-sm btn-outline-danger" id="btn-clear-cart">Clear All</button>
+        </div>
+    </div>
+</div>
+
+<!-- Section 3: Notes + Summary -->
+<div class="row g-4 mb-4">
+    <!-- Left: Notes -->
+    <div class="col-lg-5">
+        <div class="panel-card h-100">
+            <div class="panel-body">
+                <h6 class="fw-semibold mb-3"><i class="fa-solid fa-sticky-note text-indigo me-2"></i>Notes</h6>
+                <div class="mb-3">
+                    <label class="form-label small">Purchase Notes</label>
+                    <textarea class="form-control form-control-sm" id="pur-notes" rows="4" placeholder="Optional remarks..."></textarea>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Summary / Save Panel -->
-    <div class="col-lg-4">
-        <div class="panel-card" style="position: sticky; top: 1rem;">
-            <div class="panel-header">
-                <h6 class="mb-0 text-dark"><i class="fa-solid fa-file-invoice-dollar me-2 text-indigo"></i>Checkout Summary</h6>
-            </div>
+    <!-- Right: Totals Summary -->
+    <div class="col-lg-7">
+        <div class="panel-card h-100">
+            <div class="panel-body">
+                <h6 class="fw-semibold mb-3"><i class="fa-solid fa-calculator text-indigo me-2"></i>Purchase Summary</h6>
 
-            <div class="panel-body d-flex flex-column justify-content-between">
-                <div>
-                    <?php echo \App\Models\Helpers::csrfField(); ?>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Purchase Date *</label>
-                        <input type="date" class="form-control" id="pur-date" required value="<?php echo date('Y-m-d'); ?>">
-                    </div>
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <td class="text-secondary">Subtotal (Taxable)</td>
+                        <td class="text-end fw-bold" id="pur-subtotal">&#8377;0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary">GST Tax Amount</td>
+                        <td class="text-end" id="pur-tax">&#8377;0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-secondary">Flat Discount (&#8377;)</td>
+                        <td class="text-end">
+                            <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end d-inline-block" style="width:100px;" id="pur-discount-input" value="0.00">
+                        </td>
+                    </tr>
+                </table>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Payment Status</label>
-                        <select class="form-select" id="pur-payment-status">
-                            <option value="UNPAID" selected>UNPAID</option>
-                            <option value="PARTIAL">PARTIAL</option>
-                            <option value="PAID">PAID</option>
-                        </select>
-                    </div>
-
-                    <div class="border-top border-secondary-subtle my-3"></div>
-
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-secondary">Subtotal (Taxable)</span>
-                        <strong id="pur-subtotal">₹0.00</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-secondary">GST Tax Amount</span>
-                        <strong id="pur-tax">₹0.00</strong>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-secondary">Flat Discount (₹)</span>
-                        <input type="number" step="0.01" min="0" class="form-control text-end py-1" style="width: 120px;" id="pur-discount-input" value="0.00">
-                    </div>
-
-                    <hr class="my-3 border-dark">
-
-                    <div class="d-flex justify-content-between fw-bold text-dark fs-5 mb-4">
-                        <span>Grand Total</span>
-                        <span id="pur-grand-total">₹0.00</span>
+                <!-- Grand Total -->
+                <div class="border-top mt-3 pt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 text-indigo fw-bold">Grand Total</h4>
+                        <h3 class="mb-0 text-indigo fw-bold" id="pur-grand-total">&#8377;0.00</h3>
                     </div>
                 </div>
 
-                <div class="pb-4">
-                    <button class="btn btn-success w-100 py-3 fs-5" id="btn-save-purchase">
+                <!-- Action Button -->
+                <div class="d-flex gap-2 mt-4">
+                    <?php echo \App\Models\Helpers::csrfField(); ?>
+                    <button class="btn btn-success flex-grow-1 py-2 fs-5" id="btn-save-purchase">
                         <i class="fa-solid fa-circle-check me-2"></i>Generate PO Entry
                     </button>
                 </div>
@@ -130,33 +160,18 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fa-solid fa-truck-field me-2 text-indigo"></i>Add Supplier</h5>
+                <h5 class="modal-title"><i class="fa-solid fa-truck-field text-indigo me-2"></i>Add Supplier</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="quickSupplierForm">
                 <?php echo \App\Models\Helpers::csrfField(); ?>
                 <div class="modal-body">
                     <div class="row g-3">
-                        <div class="col-6">
-                            <label class="form-label">Supplier Name *</label>
-                            <input type="text" class="form-control" name="supplier_name" id="qs-name" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">Mobile *</label>
-                            <input type="text" class="form-control" name="mobile" id="qs-mobile" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">Contact Person</label>
-                            <input type="text" class="form-control" name="contact_person" id="qs-contact">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">GST Number</label>
-                            <input type="text" class="form-control" name="gst_number" id="qs-gst">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Address</label>
-                            <textarea class="form-control" name="address" id="qs-address" rows="2"></textarea>
-                        </div>
+                        <div class="col-6"><label class="form-label">Supplier Name *</label><input type="text" class="form-control" name="supplier_name" id="qs-name" required></div>
+                        <div class="col-6"><label class="form-label">Mobile *</label><input type="text" class="form-control" name="mobile" id="qs-mobile" required></div>
+                        <div class="col-6"><label class="form-label">Contact Person</label><input type="text" class="form-control" name="contact_person" id="qs-contact"></div>
+                        <div class="col-6"><label class="form-label">GST Number</label><input type="text" class="form-control" name="gst_number" id="qs-gst"></div>
+                        <div class="col-12"><label class="form-label">Address</label><textarea class="form-control" name="address" id="qs-address" rows="2"></textarea></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -173,40 +188,74 @@ $(document).ready(function() {
     let cart = [];
     const csrfToken = $('input[name="csrf_token"]').val();
 
-    // Load Suppliers
-    $.ajax({
-        url: BASE_URL + '/api/suppliers.php?action=list',
-        type: 'GET',
-        dataType: 'json',
-        success: function(res) {
-            const select = $("#pur-supplier-select");
-            if (res.status) {
-                res.data.forEach(s => select.append(`<option value="${s.id}">${s.supplier_name} (${s.mobile})</option>`));
-            }
-        }
+    // Focus search on Add Product click
+    $('#btn-focus-search').click(function() { $('#pur-product-search').focus(); });
+
+    // Clear All
+    $('#btn-clear-cart').click(function() {
+        if (cart.length === 0) return;
+        Swal.fire({
+            title: 'Clear All Items?', text: 'This will remove all products from the purchase order.',
+            icon: 'warning', showCancelButton: true, confirmButtonText: 'Yes, Clear All',
+            background: '#ffffff', color: '#1e293b'
+        }).then(r => { if (r.isConfirmed) { cart = []; renderCart(); } });
     });
 
-    // Product search autocompletion
+    // Load Suppliers
+    function loadSuppliers(selectId) {
+        $.ajax({
+            url: BASE_URL + '/api/suppliers.php?action=list',
+            type: 'GET', dataType: 'json',
+            success: function(res) {
+                const select = $("#pur-supplier-select");
+                select.find('option:not(:first)').remove();
+                if (res.status) {
+                    res.data.forEach(s => {
+                        const sel = (selectId && s.id == selectId) ? ' selected' : '';
+                        select.append(`<option value="${s.id}"${sel}>${s.supplier_name} (${s.mobile})</option>`);
+                    });
+                }
+            }
+        });
+    }
+    loadSuppliers();
+
+    // Quick Add Supplier
+    $("#btn-quick-supplier").click(function() { $("#quickSupplierForm")[0].reset(); $("#quickSupplierModal").modal('show'); });
+    $("#quickSupplierForm").submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: BASE_URL + '/api/suppliers.php?action=save',
+            type: 'POST', data: $(this).serialize(), dataType: 'json',
+            success: function(res) {
+                if (res.status) {
+                    $("#quickSupplierModal").modal('hide');
+                    loadSuppliers(res.data ? res.data.id : null);
+                    Swal.fire({ icon: 'success', title: 'Supplier Added', text: res.message, timer: 1500, showConfirmButton: false, background: '#ffffff', color: '#1e293b' });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#1e293b' });
+                }
+            }
+        });
+    });
+
+    // Product search
     $("#pur-product-search").on('input', function() {
         const query = $(this).val().trim();
-        if (query.length < 2) {
-            $("#pur-search-results-box").addClass('d-none');
-            return;
-        }
+        if (query.length < 2) { $("#pur-search-results-box").addClass('d-none'); return; }
 
         $.ajax({
             url: BASE_URL + '/api/billing.php?action=search_product&q=' + encodeURIComponent(query),
-            type: 'GET',
-            dataType: 'json',
+            type: 'GET', dataType: 'json',
             success: function(res) {
                 const box = $("#pur-search-results-box");
                 box.empty();
                 if (res.status && res.data.length > 0) {
                     res.data.forEach(item => {
                         box.append(`
-                            <div class="search-result-item p-2 border-bottom" style="cursor: pointer;" data-id="${item.id}">
+                            <div class="search-result-item p-2 border-bottom" style="cursor:pointer;" data-id="${item.id}">
                                 <strong>${item.product_name}</strong> - <span class="text-indigo small">${item.sku}</span>
-                                <div class="text-secondary small">Cost Price: ₹${parseFloat(item.cost_price || 0).toFixed(2)} | Stock: ${item.current_stock}</div>
+                                <div class="text-secondary small">Cost: &#8377;${parseFloat(item.cost_price||0).toFixed(2)} | Stock: ${item.current_stock} | HSN: ${item.hsn_code||'-'}</div>
                             </div>
                         `);
                     });
@@ -218,13 +267,17 @@ $(document).ready(function() {
         });
     });
 
-    // Handle product selection from search
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#pur-product-search, #pur-search-results-box').length) {
+            $("#pur-search-results-box").addClass('d-none');
+        }
+    });
+
     $("#pur-search-results-box").on('click', '.search-result-item', function() {
         const id = $(this).data('id');
         $.ajax({
             url: BASE_URL + '/api/products.php?action=get&id=' + id,
-            type: 'GET',
-            dataType: 'json',
+            type: 'GET', dataType: 'json',
             success: function(res) {
                 if (res.status) {
                     addToCart(res.data);
@@ -244,6 +297,8 @@ $(document).ready(function() {
                 id: p.id,
                 product_name: p.product_name,
                 sku: p.sku,
+                hsn_code: p.hsn_code || '',
+                unit_name: p.unit_name || 'PCS',
                 qty: 1,
                 cost_price: parseFloat(p.cost_price || 0),
                 gst_percentage: parseFloat(p.gst_percentage || 18)
@@ -255,15 +310,14 @@ $(document).ready(function() {
     function renderCart() {
         const body = $("#pur-cart-table tbody");
         body.find('tr:not(.cart-empty-row)').remove();
-        
+
         if (cart.length === 0) {
             $(".cart-empty-row").show();
             calculateTotals();
             return;
         }
-        
         $(".cart-empty-row").hide();
-        
+
         cart.forEach((item, index) => {
             const row_total = item.qty * item.cost_price * (1 + item.gst_percentage / 100);
             body.append(`
@@ -273,121 +327,73 @@ $(document).ready(function() {
                         <strong>${item.product_name}</strong>
                         <span class="text-muted small d-block">SKU: ${item.sku}</span>
                     </td>
+                    <td class="small">${item.hsn_code || '-'}</td>
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width: 80px;" min="0.01">
+                        <input type="number" step="0.01" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width:70px;" min="0.01">
+                    </td>
+                    <td class="text-muted small">${item.unit_name || 'PCS'}</td>
+                    <td>
+                        <input type="number" step="0.01" class="form-control form-control-sm item-cost-input" data-index="${index}" value="${item.cost_price.toFixed(2)}" style="width:110px;" min="0">
                     </td>
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-cost-input" data-index="${index}" value="${item.cost_price.toFixed(2)}" style="width: 120px;" min="0.00">
+                        <input type="number" step="0.01" class="form-control form-control-sm item-gst-input" data-index="${index}" value="${item.gst_percentage}" style="width:70px;" min="0">
                     </td>
-                    <td>${item.gst_percentage}%</td>
-                    <td class="text-end fw-bold text-dark font-monospace">₹${row_total.toFixed(2)}</td>
+                    <td class="text-end fw-bold font-monospace">&#8377;${row_total.toFixed(2)}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-outline-danger btn-remove-item" data-index="${index}"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `);
         });
-        
+
         calculateTotals();
     }
 
+    // Cart event handlers
     $("#pur-cart-table").on('input', '.item-qty-input', function() {
-        const idx = $(this).data('index');
-        const val = parseFloat($(this).val());
-        if (val > 0) {
-            cart[idx].qty = val;
-            renderCart();
-        }
+        const idx = $(this).data('index'), val = parseFloat($(this).val());
+        if (val > 0) { cart[idx].qty = val; renderCart(); }
     });
-
     $("#pur-cart-table").on('input', '.item-cost-input', function() {
-        const idx = $(this).data('index');
-        const val = parseFloat($(this).val());
-        if (val >= 0) {
-            cart[idx].cost_price = val;
-            renderCart();
-        }
+        const idx = $(this).data('index'), val = parseFloat($(this).val());
+        if (val >= 0) { cart[idx].cost_price = val; renderCart(); }
     });
-
+    $("#pur-cart-table").on('input', '.item-gst-input', function() {
+        const idx = $(this).data('index'), val = parseFloat($(this).val());
+        if (val >= 0) { cart[idx].gst_percentage = val; renderCart(); }
+    });
     $("#pur-cart-table").on('click', '.btn-remove-item', function() {
-        const idx = $(this).data('index');
-        cart.splice(idx, 1);
-        renderCart();
+        cart.splice($(this).data('index'), 1); renderCart();
     });
-
-    $("#pur-discount-input").on('input', function() {
-        calculateTotals();
-    });
+    $("#pur-discount-input").on('input', function() { calculateTotals(); });
 
     function calculateTotals() {
-        let subtotal = 0;
-        let tax = 0;
-        
+        let subtotal = 0, tax = 0;
         cart.forEach(item => {
             const base = item.qty * item.cost_price;
             subtotal += base;
             tax += base * (item.gst_percentage / 100);
         });
-        
         const discount = parseFloat($("#pur-discount-input").val()) || 0;
         const grand = subtotal + tax - discount;
-        
         $("#pur-subtotal").text('₹' + subtotal.toFixed(2));
         $("#pur-tax").text('₹' + tax.toFixed(2));
         $("#pur-grand-total").text('₹' + (grand > 0 ? grand.toFixed(2) : '0.00'));
     }
 
-    // Quick Add Supplier
-    $("#btn-quick-supplier").click(function() {
-        $("#quickSupplierForm")[0].reset();
-        $("#quickSupplierModal").modal('show');
-    });
-
-    $("#quickSupplierForm").submit(function(e) {
-        e.preventDefault();
-        $.ajax({
-            url: BASE_URL + '/api/suppliers.php?action=save',
-            type: 'POST',
-            data: $(this).serialize(),
-            dataType: 'json',
-            success: function(res) {
-                if (res.status) {
-                    // Reload suppliers and select the new one
-                    const select = $("#pur-supplier-select");
-                    $.ajax({
-                        url: BASE_URL + '/api/suppliers.php?action=list',
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function(r) {
-                            select.find('option:not(:first)').remove();
-                            if (r.status) {
-                                r.data.forEach(s => select.append(`<option value="${s.id}">${s.supplier_name} (${s.mobile})</option>`));
-                                // Select the last added supplier
-                                select.val(select.find('option:last').val());
-                            }
-                        }
-                    });
-                    $("#quickSupplierModal").modal('hide');
-                    Swal.fire({ icon: 'success', title: 'Supplier Added', text: res.message, timer: 1500, showConfirmButton: false });
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Error', text: res.message });
-                }
-            }
-        });
-    });
-
+    // Save Purchase Order
     $("#btn-save-purchase").click(function() {
         const supplierId = $("#pur-supplier-select").val();
         const purchaseDate = $("#pur-date").val();
         const paymentStatus = $("#pur-payment-status").val();
         const discount = parseFloat($("#pur-discount-input").val()) || 0;
-        
+
         if (!supplierId) {
-            Swal.fire({ icon: 'warning', title: 'Supplier Missing', text: 'Please select a supplier.' });
+            Swal.fire({ icon: 'warning', title: 'Supplier Missing', text: 'Please select a supplier.', background: '#ffffff', color: '#1e293b' });
             return;
         }
         if (cart.length === 0) {
-            Swal.fire({ icon: 'warning', title: 'Cart Empty', text: 'Please add products to checkout.' });
+            Swal.fire({ icon: 'warning', title: 'Cart Empty', text: 'Please add products to checkout.', background: '#ffffff', color: '#1e293b' });
             return;
         }
 
@@ -405,22 +411,14 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(res) {
                 if (res.status) {
-                    Swal.fire({ 
-                        icon: 'success', 
-                        title: 'Purchase Order Logged', 
-                        text: res.message, 
-                        background: '#ffffff', 
-                        color: '#0f172a' 
-                    }).then(() => {
-                        window.location.href = BASE_URL + '/purchases/index.php';
-                    });
+                    Swal.fire({
+                        icon: 'success', title: 'Purchase Order Logged', text: res.message,
+                        background: '#ffffff', color: '#1e293b'
+                    }).then(() => { window.location.href = BASE_URL + '/purchases/index.php'; });
                 } else {
-                    Swal.fire({ 
-                        icon: 'error', 
-                        title: 'Error Saving PO', 
-                        text: res.message, 
-                        background: '#ffffff', 
-                        color: '#0f172a' 
+                    Swal.fire({
+                        icon: 'error', title: 'Error Saving PO', text: res.message,
+                        background: '#ffffff', color: '#1e293b'
                     });
                 }
             }
