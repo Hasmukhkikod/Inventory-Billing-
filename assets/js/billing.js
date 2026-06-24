@@ -83,7 +83,8 @@ $(document).ready(function () {
             cart.push({
                 id: product.id, product_name: product.product_name, sku: product.sku,
                 hsn_code: product.hsn_code || '', rate: parseFloat(product.selling_price),
-                gst_percentage: parseFloat(product.gst_percentage), qty: 1, discount: 0,
+                gst_percentage: parseFloat(product.gst_percentage), qty: 1,
+                discount: 0, discount_val: 0, discount_type: 'pct',
                 max_stock: parseFloat(product.current_stock),
                 unit_name: product.unit_name || 'PCS'
             });
@@ -104,8 +105,9 @@ $(document).ready(function () {
 
         cart.forEach(function (item, idx) {
             const base = item.qty * item.rate;
-            const disc = base * (item.discount / 100);
-            const taxable = base - disc;
+            const disc = item.discount_type === 'flat' ? item.discount_val : base * (item.discount_val / 100);
+            item.discount = disc;
+            const taxable = Math.max(0, base - disc);
             const tax = taxable * (item.gst_percentage / 100);
             const total = taxable + tax;
 
@@ -114,10 +116,17 @@ $(document).ready(function () {
                 '<td class="text-secondary">' + (idx + 1) + '</td>' +
                 '<td><strong>' + item.product_name + '</strong><div class="text-muted small">Code: ' + item.sku + '</div></td>' +
                 '<td class="small">' + (item.hsn_code || '-') + '</td>' +
-                '<td><input type="number" step="1" min="1" max="' + item.max_stock + '" class="form-control form-control-sm py-1 cart-qty" value="' + item.qty + '"></td>' +
+                '<td><input type="number" step="1" min="1" max="' + item.max_stock + '" class="form-control form-control-sm py-1 text-center cart-qty" value="' + item.qty + '" style="width:70px;"></td>' +
                 '<td class="text-muted small">' + (item.unit_name || 'PCS') + '</td>' +
                 '<td><input type="number" step="0.01" min="0" class="form-control form-control-sm py-1 cart-rate" value="' + item.rate.toFixed(2) + '"></td>' +
-                '<td><div class="input-group input-group-sm"><input type="number" min="0" max="100" class="form-control py-1 cart-discount" value="' + item.discount + '"><span class="input-group-text py-0">%</span></div></td>' +
+                '<td><div class="input-group input-group-sm">' +
+                '<select class="form-select py-1 cart-discount-type" style="width:50px;max-width:50px;font-size:0.8rem;">' +
+                '<option value="pct"' + (item.discount_type === 'pct' ? ' selected' : '') + '>%</option>' +
+                '<option value="flat"' + (item.discount_type === 'flat' ? ' selected' : '') + '>₹</option></select>' +
+                '<input type="number" min="0" class="form-control py-1 cart-discount-val" value="' + item.discount_val + '" style="width:65px;">' +
+                '</div>' +
+                (disc > 0 ? '<div class="text-emerald small mt-1">- ₹' + disc.toFixed(2) + '</div>' : '') +
+                '</td>' +
                 '<td class="text-center small">' + item.gst_percentage + '%</td>' +
                 '<td class="text-end fw-bold">₹' + total.toFixed(2) + '</td>' +
                 '<td class="text-center"><button class="btn btn-sm text-danger btn-remove-item" title="Remove"><i class="fa-solid fa-trash-can"></i></button></td>' +
@@ -144,12 +153,18 @@ $(document).ready(function () {
         renderCart();
     });
 
-    $('#pos-cart-table').on('change', '.cart-discount', function () {
+    $('#pos-cart-table').on('change', '.cart-discount-val', function () {
         const idx = $(this).closest('tr').data('index');
         let v = parseFloat($(this).val());
         if (isNaN(v) || v < 0) v = 0;
-        if (v > 100) v = 100;
-        cart[idx].discount = v;
+        if (cart[idx].discount_type === 'pct' && v > 100) v = 100;
+        cart[idx].discount_val = v;
+        renderCart();
+    });
+
+    $('#pos-cart-table').on('change', '.cart-discount-type', function () {
+        const idx = $(this).closest('tr').data('index');
+        cart[idx].discount_type = $(this).val();
         renderCart();
     });
 
@@ -176,8 +191,8 @@ $(document).ready(function () {
 
         cart.forEach(function (item) {
             const base = item.qty * item.rate;
-            const disc = base * (item.discount / 100);
-            const taxable = base - disc;
+            const disc = item.discount_type === 'flat' ? item.discount_val : base * (item.discount_val / 100);
+            const taxable = Math.max(0, base - disc);
             const tax = taxable * (item.gst_percentage / 100);
             subtotal += taxable;
             totalTax += tax;

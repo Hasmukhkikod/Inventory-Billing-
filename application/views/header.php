@@ -205,35 +205,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
     <!-- Main Content Panel -->
     <main class="main-content">
-        <!-- Top Navbar -->
+        <?php $isDashboard = ($currentModule === 'index.php'); ?>
+
+        <?php if ($isDashboard): ?>
+        <!-- Full Top Navbar (Dashboard only) -->
         <header class="top-navbar d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-outline-secondary d-lg-none py-1.5 px-2.5" id="sidebar-toggle-btn" type="button" aria-label="Toggle Menu" style="margin-bottom: 0;">
+                <button class="btn btn-outline-secondary d-lg-none py-1.5 px-2.5" id="sidebar-toggle-btn" type="button" aria-label="Toggle Menu">
                     <i class="fa-solid fa-bars fs-5"></i>
                 </button>
-                <h4 class="mb-0 text-capitalize d-none d-lg-block">
-                    <?php
-                        $titleMap = [
-                            'index.php' => 'Business Performance Dashboard',
-                            'products' => 'Inventory Management',
-                            // 'billing' => 'POS Terminal & Invoicing',
-                            'customers' => 'Customer CRM & Ledgers',
-                            'suppliers' => 'Supplier Directory & Payables',
-                            'expenses' => 'Expense Book Keeping',
-                            'reports' => 'Analytics & Reports Hub',
-                            'users' => 'User Directory & Permissions',
-                            'settings' => 'System Configurations',
-                            'purchases' => 'Supplier Purchases Ledger',
-                            'returns' => 'Sales & Purchase Returns',
-                            'quotations' => 'Quotations & Estimates',
-                            'challans' => 'Delivery Challans'
-                        ];
-                        echo $titleMap[$currentModule] ?? 'Grovixo';
-                    ?>
-                </h4>
+                <h4 class="mb-0 d-none d-lg-block">Business Performance Dashboard</h4>
             </div>
-
-            <!-- Global Search box centered -->
             <div class="global-search-container mx-2 flex-grow-1 flex-sm-grow-0" style="max-width: 320px;">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text"><i class="fa-solid fa-magnifying-glass text-indigo"></i></span>
@@ -241,12 +223,18 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 </div>
                 <div class="global-search-results d-none" id="global-search-results-box"></div>
             </div>
-
-            <!-- Header actions (Clock, Notification, Profile dropdown) -->
             <div class="d-flex align-items-center gap-3">
                 <div class="text-secondary small d-none d-xl-block">
                     <i class="fa-regular fa-clock me-1"></i> <?php echo date('d-M-Y H:i'); ?>
                 </div>
+        <?php else: ?>
+        <!-- Compact Header (All other pages) -->
+        <header class="top-navbar d-flex justify-content-end align-items-center" style="height:50px; margin-bottom:1rem;">
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-outline-secondary d-lg-none py-1 px-2" id="sidebar-toggle-btn" type="button" aria-label="Toggle Menu" style="position:absolute;left:1rem;">
+                    <i class="fa-solid fa-bars fs-5"></i>
+                </button>
+        <?php endif; ?>
                 
                 <!-- Dark/Light Mode Toggle -->
                 <button class="btn btn-outline-secondary py-1.5 px-2.5 d-flex align-items-center" id="theme-toggle-btn" type="button" title="Toggle Dark/Light Mode">
