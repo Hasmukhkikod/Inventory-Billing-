@@ -50,6 +50,11 @@
                 <div class="col-6 text-end">
                     <h6 class="fw-bold text-dark mb-2">ORDER META:</h6>
                     <p class="mb-1 text-secondary"><strong>Payment Status:</strong> <span class="badge bg-light-primary"><?php echo \App\Models\Helpers::sanitize($purchase['payment_status']); ?></span></p>
+                    <?php
+                        $orderStatus = $purchase['order_status'] ?? 'PENDING';
+                        $orderBadgeClass = $orderStatus === 'COMPLETED' ? 'bg-light-success text-success' : 'bg-light-warning text-warning';
+                    ?>
+                    <p class="mb-1 text-secondary"><strong>Order Status:</strong> <span class="badge <?php echo $orderBadgeClass; ?>"><?php echo \App\Models\Helpers::sanitize($orderStatus); ?></span></p>
                     <p class="mb-1 text-secondary"><strong>Logged By:</strong> <?php echo \App\Models\Helpers::sanitize($purchase['creator_name'] ?: 'System'); ?></p>
                 </div>
             </div>

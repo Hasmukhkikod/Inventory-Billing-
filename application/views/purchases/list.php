@@ -37,6 +37,7 @@
                         <th>Supplier</th>
                         <th>Purchase Date</th>
                         <th>Payment Status</th>
+                        <th>Order Status</th>
                         <th>Subtotal (₹)</th>
                         <th>GST (₹)</th>
                         <th>Discount (₹)</th>
@@ -50,8 +51,10 @@
     </div>
 </div>
 
+<?php echo \App\Models\Helpers::csrfField(); ?>
 <script>
 $(document).ready(function() {
+    const csrfToken = $('input[name="csrf_token"]').val();
     $('#purchasesTable').DataTable({
         ajax: {
             url: BASE_URL + '/api/purchases.php?action=list',
@@ -74,7 +77,7 @@ $(document).ready(function() {
                 }
             },
             { data: 'supplier_name' },
-            { 
+            {
                 data: 'purchase_date',
                 render: function(data) {
                     if(!data) return '-';
@@ -82,7 +85,7 @@ $(document).ready(function() {
                     return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
                 }
             },
-            { 
+            {
                 data: 'payment_status',
                 render: function(data) {
                     const statusMap = {
@@ -94,6 +97,16 @@ $(document).ready(function() {
                     return `<span class="badge ${cls}">${data}</span>`;
                 }
             },
+            {
+                data: 'order_status',
+                render: function(data, type, row) {
+                    const status = data || 'PENDING';
+                    if (status === 'COMPLETED') {
+                        return `<span class="badge bg-light-success text-success"><i class="fa-solid fa-circle-check me-1"></i>COMPLETED</span>`;
+                    }
+                    return `<span class="badge bg-light-warning text-warning" style="cursor:pointer;" onclick="updateOrderStatus(${row.id}, 'COMPLETED')" title="Click to mark as Completed"><i class="fa-solid fa-clock me-1"></i>PENDING</span>`;
+                }
+            },
             { data: 'subtotal', render: d => '₹' + parseFloat(d).toFixed(2), className: 'text-end font-monospace' },
             { data: 'gst_amount', render: d => '₹' + parseFloat(d).toFixed(2), className: 'text-end font-monospace' },
             { data: 'discount', render: d => '₹' + parseFloat(d).toFixed(2), className: 'text-end font-monospace text-success' },
@@ -103,17 +116,52 @@ $(document).ready(function() {
                 className: 'text-end',
                 orderable: false,
                 render: function(data, type, row) {
-                    return `
-                        <div class="btn-group">
+                    let actions = `<div class="btn-group">
                             <a href="${BASE_URL}/purchases/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
-                                <i class="fa-solid fa-eye"></i> View
+                                <i class="fa-solid fa-eye"></i>
                             </a>
-                        </div>
-                    `;
+                            <a href="${BASE_URL}/purchases/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Edit">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                        </div>`;
+                    return actions;
                 }
             }
         ],
         order: [[1, 'desc']]
     });
+
+    window.updateOrderStatus = function(purchaseId, newStatus) {
+        Swal.fire({
+            title: 'Mark as Completed?',
+            text: 'This will add all items from this PO to inventory. This action can be reversed.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Complete',
+            cancelButtonText: 'Cancel',
+            background: '#ffffff',
+            color: '#1e293b'
+        }).then(result => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: BASE_URL + '/api/purchases.php?action=update_status',
+                    type: 'POST',
+                    data: { csrf_token: csrfToken, id: purchaseId, order_status: newStatus },
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.status) {
+                            Swal.fire({ icon: 'success', title: 'Status Updated', text: res.message, timer: 1500, showConfirmButton: false, background: '#ffffff', color: '#1e293b' });
+                            $('#purchasesTable').DataTable().ajax.reload(null, false);
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#1e293b' });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to update status. Please try again.', background: '#ffffff', color: '#1e293b' });
+                    }
+                });
+            }
+        });
+    };
 });
 </script>

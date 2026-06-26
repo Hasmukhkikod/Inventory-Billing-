@@ -110,6 +110,9 @@ $(document).ready(function() {
 
                     if (row.challan_status !== 'CANCELLED' && row.challan_status !== 'DELIVERED') {
                         actions += `
+                            <a href="${BASE_URL}/challans/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Edit">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
                             <button class="btn btn-sm btn-outline-success py-1 px-2 btn-mark-delivered" data-id="${row.id}" title="Mark Delivered">
                                 <i class="fa-solid fa-check"></i>
                             </button>

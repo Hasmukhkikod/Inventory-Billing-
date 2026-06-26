@@ -1,14 +1,15 @@
 <?php
 /**
- * IIMS v2.0 - New Purchase Order (Full-Width Layout)
+ * IIMS v2.0 - Create / Edit Purchase Order (Full-Width Layout)
  */
+$isEdit = !empty($purchase);
 ?>
 
 <!-- Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="mb-1"><i class="fa-solid fa-cart-flatbed text-indigo me-2"></i>New Purchase Order</h4>
-        <nav class="text-muted small">Home / Purchases / New Purchase Order</nav>
+        <h4 class="mb-1"><i class="fa-solid fa-cart-flatbed text-indigo me-2"></i><?php echo $isEdit ? 'Edit Purchase Order: ' . \App\Models\Helpers::sanitize($purchase['purchase_no']) : 'New Purchase Order'; ?></h4>
+        <nav class="text-muted small">Home / Purchases / <?php echo $isEdit ? 'Edit' : 'New'; ?> Purchase Order</nav>
     </div>
     <div>
         <a href="<?php echo BASE_URL; ?>/purchases/index.php" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>Back to List</a>
@@ -32,15 +33,24 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Purchase Date <span class="text-danger">*</span></label>
-                <input type="date" class="form-control" id="pur-date" required value="<?php echo date('Y-m-d'); ?>">
+                <input type="date" class="form-control" id="pur-date" required value="<?php echo $isEdit ? date('Y-m-d', strtotime($purchase['purchase_date'])) : date('Y-m-d'); ?>">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label fw-semibold">Payment Status</label>
                 <select class="form-select" id="pur-payment-status">
-                    <option value="UNPAID" selected>UNPAID</option>
-                    <option value="PARTIAL">PARTIAL</option>
-                    <option value="PAID">PAID</option>
+                    <option value="UNPAID" <?php echo ($isEdit && $purchase['payment_status'] === 'UNPAID') ? 'selected' : (!$isEdit ? 'selected' : ''); ?>>UNPAID</option>
+                    <option value="PARTIAL" <?php echo ($isEdit && $purchase['payment_status'] === 'PARTIAL') ? 'selected' : ''; ?>>PARTIAL</option>
+                    <option value="PAID" <?php echo ($isEdit && $purchase['payment_status'] === 'PAID') ? 'selected' : ''; ?>>PAID</option>
                 </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Order Status</label>
+                <?php $editOrderStatus = $isEdit ? ($purchase['order_status'] ?? 'PENDING') : 'PENDING'; ?>
+                <select class="form-select" id="pur-order-status">
+                    <option value="PENDING" <?php echo $editOrderStatus === 'PENDING' ? 'selected' : ''; ?>>PENDING</option>
+                    <option value="COMPLETED" <?php echo $editOrderStatus === 'COMPLETED' ? 'selected' : ''; ?>>COMPLETED</option>
+                </select>
+                <small class="text-muted">Inventory updates only when Completed</small>
             </div>
         </div>
     </div>
@@ -130,7 +140,7 @@
                     <tr>
                         <td class="text-secondary">Flat Discount (&#8377;)</td>
                         <td class="text-end">
-                            <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end d-inline-block" style="width:100px;" id="pur-discount-input" value="0.00">
+                            <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end d-inline-block" style="width:100px;" id="pur-discount-input" value="<?php echo $isEdit ? number_format((float)$purchase['discount'], 2, '.', '') : '0.00'; ?>">
                         </td>
                     </tr>
                 </table>
@@ -146,8 +156,11 @@
                 <!-- Action Button -->
                 <div class="d-flex gap-2 mt-4">
                     <?php echo \App\Models\Helpers::csrfField(); ?>
+                    <?php if ($isEdit): ?>
+                        <input type="hidden" id="pur-edit-id" value="<?php echo (int)$purchase['id']; ?>">
+                    <?php endif; ?>
                     <button class="btn btn-success flex-grow-1 py-2 fs-5" id="btn-save-purchase">
-                        <i class="fa-solid fa-circle-check me-2"></i>Generate PO Entry
+                        <i class="fa-solid fa-circle-check me-2"></i><?php echo $isEdit ? 'Update Purchase Order' : 'Generate PO Entry'; ?>
                     </button>
                 </div>
             </div>
@@ -187,6 +200,7 @@
 $(document).ready(function() {
     let cart = [];
     const csrfToken = $('input[name="csrf_token"]').val();
+    const editId = $('#pur-edit-id').val() || 0;
 
     // Focus search on Add Product click
     $('#btn-focus-search').click(function() { $('#pur-product-search').focus(); });
@@ -218,7 +232,33 @@ $(document).ready(function() {
             }
         });
     }
+    <?php if ($isEdit): ?>
+    loadSuppliers(<?php echo (int)$purchase['supplier_id']; ?>);
+    // Load existing cart items for editing
+    $.ajax({
+        url: BASE_URL + '/api/purchases.php?action=get&id=<?php echo (int)$purchase['id']; ?>',
+        type: 'GET', dataType: 'json',
+        success: function(res) {
+            if (res.status && res.data.items) {
+                res.data.items.forEach(function(item) {
+                    cart.push({
+                        id: parseInt(item.product_id),
+                        product_name: item.product_name,
+                        sku: item.sku,
+                        hsn_code: item.hsn_code || '',
+                        unit_name: item.unit_name || 'PCS',
+                        qty: parseFloat(item.quantity),
+                        cost_price: parseFloat(item.cost_price),
+                        gst_percentage: parseFloat(item.gst)
+                    });
+                });
+                renderCart();
+            }
+        }
+    });
+    <?php else: ?>
     loadSuppliers();
+    <?php endif; ?>
 
     // Quick Add Supplier
     $("#btn-quick-supplier").click(function() { $("#quickSupplierForm")[0].reset(); $("#quickSupplierModal").modal('show'); });
@@ -386,6 +426,7 @@ $(document).ready(function() {
         const supplierId = $("#pur-supplier-select").val();
         const purchaseDate = $("#pur-date").val();
         const paymentStatus = $("#pur-payment-status").val();
+        const orderStatus = $("#pur-order-status").val();
         const discount = parseFloat($("#pur-discount-input").val()) || 0;
 
         if (!supplierId) {
@@ -402,9 +443,11 @@ $(document).ready(function() {
             type: 'POST',
             data: {
                 csrf_token: csrfToken,
+                id: editId,
                 supplier_id: supplierId,
                 purchase_date: purchaseDate,
                 payment_status: paymentStatus,
+                order_status: orderStatus,
                 discount: discount,
                 cart: JSON.stringify(cart)
             },
@@ -412,7 +455,7 @@ $(document).ready(function() {
             success: function(res) {
                 if (res.status) {
                     Swal.fire({
-                        icon: 'success', title: 'Purchase Order Logged', text: res.message,
+                        icon: 'success', title: editId > 0 ? 'Purchase Order Updated' : 'Purchase Order Logged', text: res.message,
                         background: '#ffffff', color: '#1e293b'
                     }).then(() => { window.location.href = BASE_URL + '/purchases/index.php'; });
                 } else {

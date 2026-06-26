@@ -58,6 +58,7 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, 'Method not allowed');
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, 'CSRF verification failed');
 
+        $challan_id = (int)($_POST['id'] ?? 0);
         $customer_id = !empty($_POST['customer_id']) ? (int)$_POST['customer_id'] : null;
         $challan_date = $_POST['challan_date'] ?? date('Y-m-d');
         $transport_name = trim($_POST['transport_name'] ?? '');
@@ -69,36 +70,65 @@ switch ($action) {
         if (empty($cart)) Helpers::jsonResponse(false, 'Add items to the challan');
 
         try {
-            $result = $db->transaction(function($t) use ($customer_id, $challan_date, $transport_name, $vehicle_no, $notes, $invoice_id, $cart) {
-                $prefQ = $t->query("SELECT challan_prefix, challan_start, challan_end FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
-                $prefix = $prefQ['challan_prefix'] ?? 'DC-';
-                $startNum = (int)($prefQ['challan_start'] ?? 1);
-                $endNum = (int)($prefQ['challan_end'] ?? 99999);
-                $year = date('Y');
-                $count = $t->query("SELECT COUNT(*) as c FROM challans WHERE challan_date LIKE ?", ["$year-%"])->fetch();
-                $nextNum = $startNum + (int)($count['c'] ?? 0);
-                if ($nextNum > $endNum) {
-                    throw new Exception("Challan number limit reached ($endNum). Update range in Settings.");
+            $result = $db->transaction(function($t) use ($db, $challan_id, $customer_id, $challan_date, $transport_name, $vehicle_no, $notes, $invoice_id, $cart) {
+
+                if ($challan_id > 0) {
+                    // UPDATE existing challan
+                    $existing = $t->query("SELECT * FROM challans WHERE id = ? LIMIT 1", [$challan_id])->fetch();
+                    if (!$existing) throw new Exception("Challan not found for update.");
+                    if (in_array($existing['status'], ['DELIVERED', 'CANCELLED'])) {
+                        throw new Exception("Cannot edit a " . strtolower($existing['status']) . " challan.");
+                    }
+
+                    $t->query("UPDATE challans SET customer_id = ?, challan_date = ?, transport_name = ?, vehicle_no = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                        [$customer_id, $challan_date, $transport_name, $vehicle_no, $notes, $challan_id]);
+
+                    // Remove old items and insert new
+                    $t->query("DELETE FROM challan_items WHERE challan_id = ?", [$challan_id]);
+                    foreach ($cart as $item) {
+                        $pid = (int)($item['product_id'] ?? $item['id'] ?? 0);
+                        $qty = (float)($item['quantity'] ?? $item['qty'] ?? 0);
+                        $t->insert("INSERT INTO challan_items (challan_id, product_id, quantity, created_by) VALUES (?,?,?,?)",
+                            [$challan_id, $pid, $qty, $_SESSION['user_id']]);
+                    }
+
+                    Helpers::logActivity($db, 'challans', "Updated challan: " . $existing['challan_no'], $challan_id);
+                    return ['challan_id' => $challan_id, 'challan_no' => $existing['challan_no'], 'action' => 'updated'];
+
+                } else {
+                    // CREATE new challan
+                    $prefQ = $t->query("SELECT challan_prefix, challan_start, challan_end FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+                    $prefix = $prefQ['challan_prefix'] ?? 'DC-';
+                    $startNum = (int)($prefQ['challan_start'] ?? 1);
+                    $endNum = (int)($prefQ['challan_end'] ?? 99999);
+                    $year = date('Y');
+                    $count = $t->query("SELECT COUNT(*) as c FROM challans WHERE challan_date LIKE ?", ["$year-%"])->fetch();
+                    $nextNum = $startNum + (int)($count['c'] ?? 0);
+                    if ($nextNum > $endNum) {
+                        throw new Exception("Challan number limit reached ($endNum). Update range in Settings.");
+                    }
+                    $seq = str_pad($nextNum, 5, '0', STR_PAD_LEFT);
+                    $challan_no = $prefix . $year . '-' . $seq;
+
+                    $newId = $t->insert("
+                        INSERT INTO challans (challan_no, customer_id, invoice_id, challan_date, transport_name, vehicle_no, notes, created_by)
+                        VALUES (?,?,?,?,?,?,?,?)
+                    ", [$challan_no, $customer_id, $invoice_id, $challan_date, $transport_name, $vehicle_no, $notes, $_SESSION['user_id']]);
+
+                    foreach ($cart as $item) {
+                        $pid = (int)($item['product_id'] ?? $item['id'] ?? 0);
+                        $qty = (float)($item['quantity'] ?? $item['qty'] ?? 0);
+                        $t->insert("INSERT INTO challan_items (challan_id, product_id, quantity, created_by) VALUES (?,?,?,?)",
+                            [$newId, $pid, $qty, $_SESSION['user_id']]);
+                    }
+
+                    Helpers::logActivity($db, 'challans', "Created challan: $challan_no", (int)$newId);
+                    return ['challan_id' => $newId, 'challan_no' => $challan_no, 'action' => 'created'];
                 }
-                $seq = str_pad($nextNum, 5, '0', STR_PAD_LEFT);
-                $challan_no = $prefix . $year . '-' . $seq;
-
-                $challanId = $t->insert("
-                    INSERT INTO challans (challan_no, customer_id, invoice_id, challan_date, transport_name, vehicle_no, notes, created_by)
-                    VALUES (?,?,?,?,?,?,?,?)
-                ", [$challan_no, $customer_id, $invoice_id, $challan_date, $transport_name, $vehicle_no, $notes, $_SESSION['user_id']]);
-
-                foreach ($cart as $item) {
-                    $t->insert("INSERT INTO challan_items (challan_id, product_id, quantity, created_by) VALUES (?,?,?,?)",
-                        [$challanId, (int)$item['id'], (float)$item['qty'], $_SESSION['user_id']]);
-                }
-
-                Helpers::logActivity($t, 'challans', "Created challan: $challan_no", (int)$challanId);
-
-                return ['id' => $challanId, 'challan_no' => $challan_no];
             });
 
-            Helpers::jsonResponse(true, 'Delivery challan created: ' . $result['challan_no'], $result);
+            $msg = ($result['action'] ?? '') === 'updated' ? 'Challan updated successfully.' : 'Delivery challan created: ' . $result['challan_no'];
+            Helpers::jsonResponse(true, $msg, $result);
         } catch (Exception $e) {
             Helpers::jsonResponse(false, 'Failed: ' . $e->getMessage());
         }

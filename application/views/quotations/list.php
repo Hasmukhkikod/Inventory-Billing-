@@ -122,9 +122,17 @@ $(document).ready(function() {
                     let actions = `
                         <div class="btn-group">
                             <a href="${BASE_URL}/quotations/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
-                                <i class="fa-solid fa-eye"></i> View
+                                <i class="fa-solid fa-eye"></i>
                             </a>
                     `;
+
+                    if (row.status !== 'CONVERTED') {
+                        actions += `
+                            <a href="${BASE_URL}/quotations/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Edit">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                        `;
+                    }
 
                     if (row.status === 'ACCEPTED') {
                         actions += `
