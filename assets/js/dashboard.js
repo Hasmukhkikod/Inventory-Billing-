@@ -42,16 +42,20 @@ $(document).ready(function() {
     
     function populateKPIs(kpis) {
         $("#kpi-sales").text(formatCurrency(kpis.today_sales));
+        $("#kpi-sales-card").text(formatCurrency(kpis.today_sales));
         $("#kpi-purchases").text(formatCurrency(kpis.today_purchases));
         $("#kpi-expenses").text(formatCurrency(kpis.today_expenses));
         
         const profitVal = parseFloat(kpis.today_profit);
-        const profitEl = $("#kpi-profit");
-        profitEl.text(formatCurrency(profitVal));
+        const profitHeroEl = $("#kpi-profit");
+        const profitCardEl = $("#kpi-profit-card");
+        profitHeroEl.add(profitCardEl).text(formatCurrency(profitVal));
         if (profitVal < 0) {
-            profitEl.removeClass('text-white').addClass('text-rose');
+            profitHeroEl.removeClass('text-white').addClass('text-rose');
+            profitCardEl.addClass('text-rose');
         } else {
-            profitEl.removeClass('text-rose').addClass('text-white');
+            profitHeroEl.removeClass('text-rose').addClass('text-white');
+            profitCardEl.removeClass('text-rose');
         }
         
         $("#count-customers").text(kpis.total_customers);
@@ -78,7 +82,7 @@ $(document).ready(function() {
             $('#doc-range-warnings').html(warningHtml);
         }
         $("#count-held").text(kpis.held_count || 0);
-        $("#count-receivable").text(formatCurrency(kpis.receivable_total || 0));
+        $("#count-receivable, #count-receivable-card").text(formatCurrency(kpis.receivable_total || 0));
         $("#count-expiring").text(kpis.expiring_count || 0);
     }
     
@@ -98,7 +102,7 @@ $(document).ready(function() {
                 
                 invoicesBody.append(`
                     <tr>
-                        <td class="fw-semibold text-white" data-label="Invoice No">${inv.invoice_no}</td>
+                        <td class="fw-semibold" data-label="Invoice No">${inv.invoice_no}</td>
                         <td data-label="Customer">${inv.customer_name || 'Walk-in Customer'}</td>
                         <td data-label="Date">${formatDate(inv.invoice_date)}</td>
                         <td class="fw-bold" data-label="Amount">${formatCurrency(inv.grand_total)}</td>
@@ -124,7 +128,7 @@ $(document).ready(function() {
                 paymentsBody.append(`
                     <tr>
                         <td data-label="Party Name">
-                            <div class="fw-semibold text-white">${pay.party_name || 'System Transaction'}</div>
+                            <div class="fw-semibold">${pay.party_name || 'System Transaction'}</div>
                         </td>
                         <td data-label="Type">${typeBadge}</td>
                         <td data-label="Date">${formatDate(pay.transaction_date)}</td>
@@ -145,8 +149,11 @@ $(document).ready(function() {
     }
     
     function renderCharts(charts) {
-        const gridColor = 'rgba(255, 255, 255, 0.05)';
-        const textMuted = '#9ca3af';
+        const rootStyles = getComputedStyle(document.documentElement);
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(100, 116, 139, 0.14)';
+        const textMuted = rootStyles.getPropertyValue('--text-secondary').trim() || '#64748b';
+        const panelBorder = rootStyles.getPropertyValue('--border-color').trim() || '#e5e7eb';
         
         // 1. Daily Sales Chart (Line)
         const ctxDaily = document.getElementById('chart-daily-sales').getContext('2d');
@@ -238,9 +245,9 @@ $(document).ready(function() {
                     labels: ['No Expenses logged'],
                     datasets: [{
                         data: [1],
-                        backgroundColor: ['#1f2937'],
+                        backgroundColor: [isDark ? '#1f2937' : '#e2e8f0'],
                         borderWidth: 1,
-                        borderColor: '#2e3b52'
+                        borderColor: panelBorder
                     }]
                 },
                 options: {
@@ -260,7 +267,7 @@ $(document).ready(function() {
                         data: charts.expenses_by_category.map(item => item.total),
                         backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#8b5cf6', '#f43f5e'],
                         borderWidth: 2,
-                        borderColor: '#111827'
+                        borderColor: panelBorder
                     }]
                 },
                 options: {
@@ -305,7 +312,7 @@ $(document).ready(function() {
                     datasets: [{
                         data: charts.payment_modes.map(i => parseFloat(i.total)),
                         backgroundColor: ['#10b981', '#6366f1', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6'],
-                        borderWidth: 2, borderColor: '#ffffff'
+                        borderWidth: 2, borderColor: panelBorder
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textMuted } } } }
