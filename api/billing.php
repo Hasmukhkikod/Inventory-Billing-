@@ -72,7 +72,7 @@ switch ($action) {
         }
 
         try {
-            $db->transaction(function($t) use ($customer_id, $invoice_type, $discount_amount, $coupon_id, $coupon_discount, $loyalty_points_redeemed, $loyalty_discount, $due_date, $notes, $is_igst, $payments, $cart) {
+            $result = $db->transaction(function($t) use ($customer_id, $invoice_type, $discount_amount, $coupon_id, $coupon_discount, $loyalty_points_redeemed, $loyalty_discount, $due_date, $notes, $is_igst, $payments, $cart) {
                 $sub_total = 0.00;
                 $total_tax = 0.00;
                 $total_cgst = 0.00;
@@ -260,8 +260,11 @@ switch ($action) {
                     ["Invoice Generated", "Invoice $invoice_number - Total: " . Helpers::formatCurrency($rounded_total)]);
 
                 Helpers::logActivity($t, 'billing', "Created invoice: $invoice_number (₹$rounded_total)", (int)$invoiceId);
-                Helpers::jsonResponse(true, 'Invoice created: ' . $invoice_number, ['invoice_id' => $invoiceId, 'invoice_number' => $invoice_number]);
+
+                return ['invoice_id' => $invoiceId, 'invoice_number' => $invoice_number];
             });
+
+            Helpers::jsonResponse(true, 'Invoice created: ' . $result['invoice_number'], $result);
         } catch (Exception $e) {
             Helpers::jsonResponse(false, 'Invoice failed: ' . $e->getMessage());
         }

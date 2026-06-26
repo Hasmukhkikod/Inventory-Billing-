@@ -286,6 +286,104 @@ switch ($action) {
         readfile($filePath);
         exit;
 
+    case 'delete_backup':
+        $auth->requirePermission('Run Backups');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed.");
+
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) Helpers::jsonResponse(false, "Invalid backup ID.");
+
+        try {
+            $backup = $db->query("SELECT * FROM backup_logs WHERE id = ? LIMIT 1", [$id])->fetch();
+            if (!$backup) Helpers::jsonResponse(false, "Backup record not found.");
+
+            $filePath = BACKUP_DIR . '/' . $backup['backup_file'];
+            if (file_exists($filePath) && is_file($filePath)) {
+                @unlink($filePath);
+            }
+
+            $db->query("DELETE FROM backup_logs WHERE id = ?", [$id]);
+            Helpers::logActivity($db, "backups", "Deleted backup: " . $backup['backup_file']);
+            Helpers::jsonResponse(true, "Backup deleted successfully.");
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed to delete backup: " . $e->getMessage());
+        }
+        break;
+
+    case 'purge_all':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed.");
+
+        $roleId = $_SESSION['role_id'] ?? null;
+        if ($roleId != 1) {
+            Helpers::jsonResponse(false, "Only Super Admin can perform this action.");
+        }
+
+        $password = $_POST['password'] ?? '';
+        if (empty($password)) {
+            Helpers::jsonResponse(false, "Password is required to confirm this action.");
+        }
+
+        $userId = $_SESSION['user_id'] ?? null;
+        $user = $db->query("SELECT password FROM users WHERE id = ? LIMIT 1", [$userId])->fetch();
+        if (!$user || !password_verify($password, $user['password'])) {
+            Helpers::jsonResponse(false, "Incorrect password. Action cancelled.");
+        }
+
+        try {
+            $db->transaction(function($db) {
+                $tables = [
+                    'loyalty_transactions',
+                    'coupons',
+                    'challan_items',
+                    'challans',
+                    'quotation_items',
+                    'quotations',
+                    'invoice_payments',
+                    'held_bills',
+                    'purchase_return_items',
+                    'purchase_returns',
+                    'sales_return_items',
+                    'sales_returns',
+                    'backup_logs',
+                    'login_logs',
+                    'activity_logs',
+                    'notifications',
+                    'report_logs',
+                    'payments',
+                    'expense_categories',
+                    'expenses',
+                    'invoice_items',
+                    'invoices',
+                    'customer_payments',
+                    'customers',
+                    'purchase_items',
+                    'purchases',
+                    'supplier_payments',
+                    'suppliers',
+                    'stock_transactions',
+                    'product_images',
+                    'product_batches',
+                    'products',
+                    'units',
+                    'brands',
+                    'categories',
+                ];
+
+                foreach ($tables as $table) {
+                    $db->query("DELETE FROM $table");
+                }
+
+                $db->query("DELETE FROM users WHERE role_id != 1");
+            });
+
+            Helpers::jsonResponse(true, "All records have been deleted successfully. Admin accounts preserved.");
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed to purge records: " . $e->getMessage());
+        }
+        break;
+
     default:
         Helpers::jsonResponse(false, "Action not found: " . $action);
 }

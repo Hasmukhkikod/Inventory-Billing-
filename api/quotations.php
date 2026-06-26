@@ -77,7 +77,7 @@ switch ($action) {
         }
 
         try {
-            $db->transaction(function($t) use ($quotation_id, $customer_id, $quotation_date, $valid_until, $notes, $discount, $cart) {
+            $result = $db->transaction(function($t) use ($quotation_id, $customer_id, $quotation_date, $valid_until, $notes, $discount, $cart) {
                 // 1. Calculate values
                 $subtotal = 0.00;
                 $gst_amount = 0.00;
@@ -154,7 +154,8 @@ switch ($action) {
                     }
 
                     Helpers::logActivity($db, "quotations", "Updated quotation: " . $existing['quotation_no'], $quotation_id);
-                    Helpers::jsonResponse(true, "Quotation updated successfully.", ['quotation_id' => $quotation_id, 'quotation_no' => $existing['quotation_no']]);
+
+                    return ['quotation_id' => $quotation_id, 'quotation_no' => $existing['quotation_no'], 'action' => 'updated'];
 
                 } else {
                     // CREATE new quotation
@@ -197,9 +198,13 @@ switch ($action) {
                     }
 
                     Helpers::logActivity($db, "quotations", "Created quotation: $quotation_no (Total: $grand_total)", $qId);
-                    Helpers::jsonResponse(true, "Quotation created successfully.", ['quotation_id' => $qId, 'quotation_no' => $quotation_no]);
+
+                    return ['quotation_id' => $qId, 'quotation_no' => $quotation_no, 'action' => 'created'];
                 }
             });
+
+            $msg = $result['action'] === 'updated' ? "Quotation updated successfully." : "Quotation created successfully.";
+            Helpers::jsonResponse(true, $msg, $result);
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Quotation save failed: " . $e->getMessage());
         }

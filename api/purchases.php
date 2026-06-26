@@ -81,7 +81,7 @@ switch ($action) {
         }
 
         try {
-            $db->transaction(function($t) use ($supplier_id, $purchase_date, $payment_status, $discount, $cart) {
+            $result = $db->transaction(function($t) use ($supplier_id, $purchase_date, $payment_status, $discount, $cart) {
                 // 1. Calculate values
                 $subtotal = 0.00;
                 $gst_amount = 0.00;
@@ -169,9 +169,11 @@ switch ($action) {
                 // Supplier outstanding payable is calculated dynamically via purchases vs supplier_payments,
                 // but let's log the transaction activity
                 Helpers::logActivity($db, "purchases", "Created purchase entry: $purchase_no (Total: $total_amount)", $purchaseId);
-                
-                Helpers::jsonResponse(true, "Purchase entry saved successfully.", ['purchase_id' => $purchaseId, 'purchase_no' => $purchase_no]);
+
+                return ['purchase_id' => $purchaseId, 'purchase_no' => $purchase_no];
             });
+
+            Helpers::jsonResponse(true, "Purchase entry saved successfully.", $result);
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Purchase commit failed: " . $e->getMessage());
         }

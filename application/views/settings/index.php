@@ -453,7 +453,7 @@
                 </button>
                 <?php endif; ?>
             </div>
-            
+
             <div class="panel-body p-0 text-dark">
                 <div class="table-responsive" style="max-height: 420px;">
                     <table class="table table-hover align-middle mb-0" id="backupsTable">
@@ -471,6 +471,20 @@
                 </div>
             </div>
         </div>
+
+        <?php if (($_SESSION['role_id'] ?? 0) == 1): ?>
+        <div class="panel-card mt-3">
+            <div class="panel-header">
+                <h6 class="mb-0 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Danger Zone</h6>
+            </div>
+            <div class="panel-body">
+                <p class="text-muted small mb-3">Permanently delete all records from the system. Only admin user accounts will be preserved. This action cannot be undone.</p>
+                <button type="button" class="btn btn-danger w-100" id="btn-purge-all">
+                    <i class="fa-solid fa-trash-can me-2"></i>Delete All Records
+                </button>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -639,11 +653,13 @@ $(document).ready(function() {
                     res.data.forEach(function(b) {
                         const date = new Date(b.created_at).toLocaleString('en-IN', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
                         
-                        let actionsCell = `<span class="text-rose small fw-semibold">Failed</span>`;
+                        let downloadBtn = '';
                         if (b.status === 'SUCCESS') {
-                            actionsCell = `<a href="${BASE_URL}/api/settings.php?action=download_backup&file=${encodeURIComponent(b.backup_file)}" class="btn btn-sm btn-outline-secondary py-0.5 px-2 text-indigo fw-semibold" title="Download DB file"><i class="fa-solid fa-download"></i> Get</a>`;
+                            downloadBtn = `<a href="${BASE_URL}/api/settings.php?action=download_backup&file=${encodeURIComponent(b.backup_file)}" class="btn btn-sm btn-outline-secondary py-0 px-2 text-indigo fw-semibold" title="Download"><i class="fa-solid fa-download"></i></a>`;
+                        } else {
+                            downloadBtn = `<span class="text-rose small fw-semibold">Failed</span>`;
                         }
-                        
+
                         body.append(`
                             <tr>
                                 <td>
@@ -651,7 +667,12 @@ $(document).ready(function() {
                                     <div class="text-secondary" style="font-size: 0.75rem;">${date} | By: ${b.creator_name || 'System'}</div>
                                 </td>
                                 <td><span class="small text-secondary">${b.backup_size}</span></td>
-                                <td>${actionsCell}</td>
+                                <td>
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        ${downloadBtn}
+                                        <button class="btn btn-sm btn-outline-danger py-0 px-2 btn-delete-backup" data-id="${b.id}" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                </td>
                             </tr>
                         `);
                     });
@@ -661,6 +682,36 @@ $(document).ready(function() {
             }
         });
     }
+
+    // Delete backup
+    $(document).on('click', '.btn-delete-backup', function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Delete Backup?',
+            text: 'This backup file will be permanently removed.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Delete',
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            background: '#ffffff',
+            color: '#0f172a'
+        }).then(function(r) {
+            if (r.isConfirmed) {
+                $.post(BASE_URL + '/api/settings.php?action=delete_backup', {
+                    csrf_token: $('input[name="csrf_token"]').val(),
+                    id: id
+                }, function(res) {
+                    if (res.status) {
+                        loadBackupsList();
+                        Swal.fire({ icon: 'success', title: 'Deleted', text: res.message, timer: 1500, showConfirmButton: false, background: '#ffffff', color: '#0f172a' });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#0f172a' });
+                    }
+                }, 'json');
+            }
+        });
+    });
 
     // ==================== GST SLAB TAG MANAGER ====================
     let gstSlabs = [];
@@ -756,6 +807,74 @@ $(document).ready(function() {
     // Hide Commit Changes button when Coupons tab is active
     $('button[data-bs-target="#coupons-pane"]').on('shown.bs.tab', function() { $('#settings-save-row').hide(); });
     $('#settingsTabs button:not([data-bs-target="#coupons-pane"])').on('shown.bs.tab', function() { $('#settings-save-row').show(); });
+
+    // ==================== PURGE ALL RECORDS ====================
+    $('#btn-purge-all').click(function() {
+        Swal.fire({
+            title: 'Delete All Records?',
+            html: '<p class="mb-2">This will <strong>permanently delete</strong> all data including:</p>' +
+                  '<p class="text-start small text-muted mb-0">Invoices, Quotations, Purchases, Challans, Products, Customers, Suppliers, Expenses, Payments, Returns, Logs, and more.</p>' +
+                  '<p class="mt-2 fw-semibold text-danger">Only admin accounts will be kept. This cannot be undone!</p>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Continue',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            background: '#ffffff',
+            color: '#0f172a'
+        }).then((firstResult) => {
+            if (!firstResult.isConfirmed) return;
+
+            Swal.fire({
+                title: 'Enter Your Password',
+                text: 'Confirm your admin password to proceed with deletion.',
+                input: 'password',
+                inputPlaceholder: 'Enter your password',
+                inputAttributes: { autocomplete: 'current-password' },
+                icon: 'lock',
+                showCancelButton: true,
+                confirmButtonText: 'Delete Everything',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                background: '#ffffff',
+                color: '#0f172a',
+                inputValidator: (value) => {
+                    if (!value) return 'Password is required';
+                }
+            }).then((passResult) => {
+                if (!passResult.isConfirmed) return;
+
+                Swal.fire({
+                    title: 'Deleting all records...',
+                    text: 'Please wait while all data is being removed.',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); },
+                    background: '#ffffff',
+                    color: '#0f172a'
+                });
+                $.post(BASE_URL + '/api/settings.php?action=purge_all', {
+                    csrf_token: $('input[name="csrf_token"]').val(),
+                    password: passResult.value
+                }, function(res) {
+                    if (res.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'All Records Deleted',
+                            text: res.message,
+                            background: '#ffffff',
+                            color: '#0f172a'
+                        }).then(function() {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Failed', text: res.message, background: '#ffffff', color: '#0f172a' });
+                    }
+                }, 'json');
+            });
+        });
+    });
 
     // ==================== COUPON MANAGEMENT ====================
     const couponCsrf = $('input[name="csrf_token"]').val();

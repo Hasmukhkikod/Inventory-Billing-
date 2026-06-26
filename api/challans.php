@@ -69,7 +69,7 @@ switch ($action) {
         if (empty($cart)) Helpers::jsonResponse(false, 'Add items to the challan');
 
         try {
-            $db->transaction(function($t) use ($customer_id, $challan_date, $transport_name, $vehicle_no, $notes, $invoice_id, $cart) {
+            $result = $db->transaction(function($t) use ($customer_id, $challan_date, $transport_name, $vehicle_no, $notes, $invoice_id, $cart) {
                 $prefQ = $t->query("SELECT challan_prefix, challan_start, challan_end FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
                 $prefix = $prefQ['challan_prefix'] ?? 'DC-';
                 $startNum = (int)($prefQ['challan_start'] ?? 1);
@@ -94,8 +94,11 @@ switch ($action) {
                 }
 
                 Helpers::logActivity($t, 'challans', "Created challan: $challan_no", (int)$challanId);
-                Helpers::jsonResponse(true, 'Delivery challan created: ' . $challan_no, ['id' => $challanId, 'challan_no' => $challan_no]);
+
+                return ['id' => $challanId, 'challan_no' => $challan_no];
             });
+
+            Helpers::jsonResponse(true, 'Delivery challan created: ' . $result['challan_no'], $result);
         } catch (Exception $e) {
             Helpers::jsonResponse(false, 'Failed: ' . $e->getMessage());
         }
