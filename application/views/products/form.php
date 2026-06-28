@@ -91,6 +91,21 @@ $gstSlabs = explode(',', $compSettings['gst_slabs'] ?? '0,5,12,18,28');
                         <button class="btn btn-outline-secondary" type="button" id="btn-add-unit" title="Add New Unit"><i class="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
+                <div class="col-md-3" id="secondary-unit-group" style="display:none;">
+                    <label class="form-label">Secondary Unit</label>
+                    <select class="form-select" name="secondary_unit_id" id="prod-secondary-unit">
+                        <option value="">-- None --</option>
+                    </select>
+                </div>
+                <div class="col-md-3" id="conversion-factor-group" style="display:none;">
+                    <label class="form-label">Conversion Factor</label>
+                    <div class="input-group">
+                        <span class="input-group-text" id="conversion-label">1 Unit =</span>
+                        <input type="number" step="0.0001" min="0.0001" class="form-control" name="conversion_factor" id="prod-conversion-factor" placeholder="e.g. 12">
+                        <span class="input-group-text" id="conversion-unit-label"></span>
+                    </div>
+                    <small class="text-muted" id="conversion-preview"></small>
+                </div>
 
                 <?php if (!$isEdit): ?>
                 <div class="col-md-4">
@@ -183,6 +198,9 @@ $(document).ready(function() {
     const selectedCategory = '<?php echo $isEdit ? (int)$product['category_id'] : ''; ?>';
     const selectedBrand = '<?php echo $isEdit ? (int)$product['brand_id'] : ''; ?>';
     const selectedUnit = '<?php echo $isEdit ? (int)$product['unit_id'] : ''; ?>';
+    const selectedSecondaryUnit = '<?php echo $isEdit ? (int)($product['secondary_unit_id'] ?? 0) : '0'; ?>';
+    const savedConversionFactor = '<?php echo $isEdit ? (float)($product['conversion_factor'] ?? 0) : '0'; ?>';
+    let allUnits = [];
 
     loadCategories();
     loadBrands();
@@ -259,13 +277,80 @@ $(document).ready(function() {
             const sel = $("#prod-unit");
             sel.find('option:not(:first)').remove();
             if (res.status) {
+                allUnits = res.data;
                 res.data.forEach(function(u) {
                     const s = (selectId ? u.id == selectId : u.id == selectedUnit) ? 'selected' : '';
                     sel.append('<option value="' + u.id + '" ' + s + '>' + u.unit_name + ' (' + u.short_name + ')</option>');
                 });
+                updateSecondaryUnitDropdown();
             }
         });
     }
+
+    function updateSecondaryUnitDropdown() {
+        const primaryId = $('#prod-unit').val();
+        const secSel = $('#prod-secondary-unit');
+        secSel.find('option:not(:first)').remove();
+
+        if (!primaryId) {
+            $('#secondary-unit-group').hide();
+            $('#conversion-factor-group').hide();
+            return;
+        }
+
+        $('#secondary-unit-group').show();
+        const primaryUnit = allUnits.find(u => u.id == primaryId);
+        allUnits.forEach(function(u) {
+            if (u.id == primaryId) return;
+            const s = (u.id == selectedSecondaryUnit) ? 'selected' : '';
+            secSel.append('<option value="' + u.id + '" ' + s + '>' + u.unit_name + ' (' + u.short_name + ')</option>');
+        });
+
+        updateConversionUI(primaryUnit);
+    }
+
+    function updateConversionUI(primaryUnit) {
+        const secId = $('#prod-secondary-unit').val();
+        if (!secId) {
+            $('#conversion-factor-group').hide();
+            $('#prod-conversion-factor').val('');
+            return;
+        }
+
+        const secUnit = allUnits.find(u => u.id == secId);
+        $('#conversion-factor-group').show();
+        $('#conversion-label').text('1 ' + (primaryUnit ? primaryUnit.short_name : 'Unit') + ' =');
+        $('#conversion-unit-label').text(secUnit ? secUnit.short_name : '');
+
+        if (savedConversionFactor > 0 && selectedSecondaryUnit == secId) {
+            $('#prod-conversion-factor').val(savedConversionFactor);
+        } else {
+            $.getJSON(BASE_URL + '/api/products.php?action=get_conversion&primary_unit_id=' + $('#prod-unit').val() + '&secondary_unit_id=' + secId, function(res) {
+                if (res.status && res.data) {
+                    $('#prod-conversion-factor').val(res.data.conversion_factor);
+                }
+            });
+        }
+        updateConversionPreview();
+    }
+
+    function updateConversionPreview() {
+        const factor = parseFloat($('#prod-conversion-factor').val()) || 0;
+        const primaryUnit = allUnits.find(u => u.id == $('#prod-unit').val());
+        const secUnit = allUnits.find(u => u.id == $('#prod-secondary-unit').val());
+        if (factor > 0 && primaryUnit && secUnit) {
+            $('#conversion-preview').text('1 ' + primaryUnit.short_name + ' = ' + factor + ' ' + secUnit.short_name);
+        } else {
+            $('#conversion-preview').text('');
+        }
+    }
+
+    $('#prod-unit').on('change', function() { updateSecondaryUnitDropdown(); });
+    $('#prod-secondary-unit').on('change', function() {
+        const primaryUnit = allUnits.find(u => u.id == $('#prod-unit').val());
+        updateConversionUI(primaryUnit);
+    });
+    $('#prod-conversion-factor').on('input', function() { updateConversionPreview(); });
 
     // ===== Quick Add Category =====
     $('#btn-add-category').click(function() { $('#new-category-name').val(''); $('#addCategoryModal').modal('show'); });

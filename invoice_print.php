@@ -27,7 +27,8 @@ try {
     if (!$invoice) die("Invoice not found");
 
     $items = $db->query("
-        SELECT ii.*, p.product_name, p.sku, p.hsn_code, un.short_name as unit_name
+        SELECT ii.*, p.product_name, p.sku, p.hsn_code, un.short_name as unit_name,
+               COALESCE(ii.billing_unit_name, un.short_name, 'Pcs') as display_unit, ii.primary_qty
         FROM invoice_items ii JOIN products p ON ii.product_id = p.id LEFT JOIN units un ON p.unit_id = un.id
         WHERE ii.invoice_id = ?
     ", [$id])->fetchAll();
@@ -157,7 +158,7 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
                     <td class="text-center"><?php echo $idx + 1; ?></td>
                     <td><strong><?php echo Helpers::sanitize($item['product_name']); ?></strong><br><span class="text-muted" style="font-size:10px;">SKU: <?php echo Helpers::sanitize($item['sku']); ?></span></td>
                     <td class="small"><?php echo Helpers::sanitize($item['hsn_code'] ?: '-'); ?></td>
-                    <td class="text-center"><?php echo (float)$item['quantity'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?></td>
+                    <td class="text-center"><?php echo (float)$item['quantity'] . ' ' . $item['display_unit']; ?><?php if (!empty($item['primary_qty']) && (float)$item['primary_qty'] != (float)$item['quantity']): ?><br><span class="text-muted" style="font-size:10px;">(<?php echo (float)$item['primary_qty'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?>)</span><?php endif; ?></td>
                     <td class="text-end"><?php echo Helpers::formatCurrency($item['rate']); ?></td>
                     <td class="text-end"><?php echo (float)$item['discount'] > 0 ? Helpers::formatCurrency($item['discount']) : '-'; ?></td>
                     <td class="text-end"><?php echo Helpers::formatCurrency($taxable); ?></td>

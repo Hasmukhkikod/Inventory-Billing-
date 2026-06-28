@@ -86,7 +86,7 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
                             <td class="text-center"><?php echo $idx + 1; ?></td>
                             <td><strong><?php echo \App\Models\Helpers::sanitize($item['product_name']); ?></strong><br><span class="text-muted small">SKU: <?php echo \App\Models\Helpers::sanitize($item['sku']); ?></span></td>
                             <td class="small"><?php echo \App\Models\Helpers::sanitize($item['hsn_code'] ?? '-'); ?></td>
-                            <td class="text-center"><?php echo (float)$item['quantity'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?></td>
+                            <td class="text-center"><?php echo (float)$item['quantity'] . ' ' . $item['display_unit']; ?><?php if (!empty($item['primary_qty']) && (float)$item['primary_qty'] != (float)$item['quantity']): ?><br><span class="text-muted small">(<?php echo (float)$item['primary_qty'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?>)</span><?php endif; ?></td>
                             <td class="text-end">₹<?php echo number_format($item['rate'], 2); ?></td>
                             <td class="text-center"><?php echo (float)$item['gst']; ?>%</td>
                             <td class="text-end"><?php echo (float)$item['discount'] > 0 ? '₹' . number_format($item['discount'], 2) : '-'; ?></td>

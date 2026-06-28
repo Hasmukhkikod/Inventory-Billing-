@@ -63,7 +63,8 @@ class PurchaseController {
         }
 
         $items = $db->query("
-            SELECT pi.*, p.product_name, p.sku, un.short_name as unit_name
+            SELECT pi.*, p.product_name, p.sku, un.short_name as unit_name,
+                   COALESCE(pi.billing_unit_name, un.short_name, 'Pcs') as display_unit, pi.primary_qty
             FROM purchase_items pi
             JOIN products p ON pi.product_id = p.id
             LEFT JOIN units un ON p.unit_id = un.id

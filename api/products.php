@@ -21,11 +21,13 @@ switch ($action) {
     case 'list':
         try {
             $stmt = $db->query("
-                SELECT p.*, c.category_name, b.brand_name, u.short_name as unit_name 
-                FROM products p 
-                LEFT JOIN categories c ON p.category_id = c.id 
-                LEFT JOIN brands b ON p.brand_id = b.id 
-                LEFT JOIN units u ON p.unit_id = u.id 
+                SELECT p.*, c.category_name, b.brand_name, u.short_name as unit_name,
+                       su.short_name as secondary_unit_name
+                FROM products p
+                LEFT JOIN categories c ON p.category_id = c.id
+                LEFT JOIN brands b ON p.brand_id = b.id
+                LEFT JOIN units u ON p.unit_id = u.id
+                LEFT JOIN units su ON p.secondary_unit_id = su.id
                 WHERE p.status = 'ACTIVE' AND (p.deleted_at IS NULL)
                 ORDER BY p.product_name ASC
             ");
@@ -38,7 +40,13 @@ switch ($action) {
     case 'get':
         $id = (int)($_GET['id'] ?? 0);
         try {
-            $product = $db->query("SELECT * FROM products WHERE id = ? LIMIT 1", [$id])->fetch();
+            $product = $db->query("
+                SELECT p.*, u.short_name as unit_name, su.short_name as secondary_unit_name
+                FROM products p
+                LEFT JOIN units u ON p.unit_id = u.id
+                LEFT JOIN units su ON p.secondary_unit_id = su.id
+                WHERE p.id = ? LIMIT 1
+            ", [$id])->fetch();
             if ($product) {
                 Helpers::jsonResponse(true, "Product loaded", $product);
             } else {
@@ -61,6 +69,13 @@ switch ($action) {
         $category_id = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
         $brand_id = !empty($_POST['brand_id']) ? (int)$_POST['brand_id'] : null;
         $unit_id = !empty($_POST['unit_id']) ? (int)$_POST['unit_id'] : null;
+        $secondary_unit_id = !empty($_POST['secondary_unit_id']) ? (int)$_POST['secondary_unit_id'] : null;
+        $conversion_factor = !empty($_POST['conversion_factor']) ? (float)$_POST['conversion_factor'] : null;
+        if ($secondary_unit_id && $unit_id && $secondary_unit_id === $unit_id) {
+            $secondary_unit_id = null;
+            $conversion_factor = null;
+        }
+        if (!$secondary_unit_id) $conversion_factor = null;
         $cost_price = (float)($_POST['cost_price'] ?? 0);
         $selling_price = (float)($_POST['selling_price'] ?? 0);
         $gst_percentage = (float)($_POST['gst_percentage'] ?? 0);
@@ -120,21 +135,22 @@ switch ($action) {
                 // Update
                 $db->query("
                     UPDATE products
-                    SET category_id = ?, brand_id = ?, unit_id = ?, sku = ?, barcode = ?, hsn_code = ?,
+                    SET category_id = ?, brand_id = ?, unit_id = ?, secondary_unit_id = ?, conversion_factor = ?,
+                        sku = ?, barcode = ?, hsn_code = ?,
                         product_name = ?, cost_price = ?, selling_price = ?, gst_percentage = ?,
                         minimum_stock = ?, image = ?, updated_at = CURRENT_TIMESTAMP
                     WHERE id = ?
-                ", [$category_id, $brand_id, $unit_id, $sku, $barcode, $hsn_code, $name, $cost_price, $selling_price, $gst_percentage, $minimum_stock, $imagePath, $id]);
+                ", [$category_id, $brand_id, $unit_id, $secondary_unit_id, $conversion_factor, $sku, $barcode, $hsn_code, $name, $cost_price, $selling_price, $gst_percentage, $minimum_stock, $imagePath, $id]);
 
                 Helpers::logActivity($db, "inventory", "Updated product ID: $id ($name)", $id);
                 Helpers::jsonResponse(true, "Product details updated.");
             } else {
                 // Insert Product & Transaction
-                $db->transaction(function($t) use ($category_id, $brand_id, $unit_id, $sku, $barcode, $hsn_code, $name, $cost_price, $selling_price, $gst_percentage, $initial_stock, $minimum_stock, $imagePath) {
+                $db->transaction(function($t) use ($category_id, $brand_id, $unit_id, $secondary_unit_id, $conversion_factor, $sku, $barcode, $hsn_code, $name, $cost_price, $selling_price, $gst_percentage, $initial_stock, $minimum_stock, $imagePath) {
                     $productId = $t->insert("
-                        INSERT INTO products (category_id, brand_id, unit_id, sku, barcode, hsn_code, product_name, cost_price, selling_price, gst_percentage, opening_stock, current_stock, minimum_stock, image, status, created_by)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?)
-                    ", [$category_id, $brand_id, $unit_id, $sku, $barcode, $hsn_code, $name, $cost_price, $selling_price, $gst_percentage, $initial_stock, $initial_stock, $minimum_stock, $imagePath, $_SESSION['user_id']]);
+                        INSERT INTO products (category_id, brand_id, unit_id, secondary_unit_id, conversion_factor, sku, barcode, hsn_code, product_name, cost_price, selling_price, gst_percentage, opening_stock, current_stock, minimum_stock, image, status, created_by)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?)
+                    ", [$category_id, $brand_id, $unit_id, $secondary_unit_id, $conversion_factor, $sku, $barcode, $hsn_code, $name, $cost_price, $selling_price, $gst_percentage, $initial_stock, $initial_stock, $minimum_stock, $imagePath, $_SESSION['user_id']]);
 
                     if ($initial_stock > 0) {
                         $t->insert("
@@ -296,6 +312,88 @@ switch ($action) {
             }
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
+        }
+        break;
+
+    // UNIT CONVERSIONS CRUD
+    case 'unit_conversions_list':
+        try {
+            $stmt = $db->query("
+                SELECT uc.*, pu.unit_name as primary_unit_name, pu.short_name as primary_short_name,
+                       su.unit_name as secondary_unit_name, su.short_name as secondary_short_name
+                FROM unit_conversions uc
+                JOIN units pu ON uc.primary_unit_id = pu.id
+                JOIN units su ON uc.secondary_unit_id = su.id
+                WHERE uc.deleted_at IS NULL
+                ORDER BY pu.unit_name ASC
+            ");
+            Helpers::jsonResponse(true, "Unit conversions loaded", $stmt->fetchAll());
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, $e->getMessage());
+        }
+        break;
+
+    case 'unit_conversion_save':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
+
+        $id = (int)($_POST['id'] ?? 0);
+        $primary_uid = (int)($_POST['primary_unit_id'] ?? 0);
+        $secondary_uid = (int)($_POST['secondary_unit_id'] ?? 0);
+        $factor = (float)($_POST['conversion_factor'] ?? 0);
+
+        if ($primary_uid <= 0 || $secondary_uid <= 0 || $factor <= 0) {
+            Helpers::jsonResponse(false, "All fields are required and conversion factor must be > 0.");
+        }
+        if ($primary_uid === $secondary_uid) {
+            Helpers::jsonResponse(false, "Primary and secondary units must be different.");
+        }
+
+        try {
+            if ($id > 0) {
+                $db->query("UPDATE unit_conversions SET primary_unit_id = ?, secondary_unit_id = ?, conversion_factor = ? WHERE id = ?",
+                    [$primary_uid, $secondary_uid, $factor, $id]);
+                Helpers::jsonResponse(true, "Conversion updated.", ['id' => $id]);
+            } else {
+                $existing = $db->query("SELECT id FROM unit_conversions WHERE primary_unit_id = ? AND secondary_unit_id = ? AND deleted_at IS NULL LIMIT 1",
+                    [$primary_uid, $secondary_uid])->fetch();
+                if ($existing) {
+                    Helpers::jsonResponse(false, "This unit conversion pair already exists.");
+                }
+                $newId = $db->insert("INSERT INTO unit_conversions (primary_unit_id, secondary_unit_id, conversion_factor, created_by) VALUES (?, ?, ?, ?)",
+                    [$primary_uid, $secondary_uid, $factor, $_SESSION['user_id']]);
+                Helpers::jsonResponse(true, "Conversion added.", ['id' => (int)$newId]);
+            }
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
+        }
+        break;
+
+    case 'unit_conversion_delete':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) Helpers::jsonResponse(false, "Invalid ID.");
+        try {
+            $db->query("UPDATE unit_conversions SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?", [$id]);
+            Helpers::jsonResponse(true, "Conversion deleted.");
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
+        }
+        break;
+
+    case 'get_conversion':
+        $primary_uid = (int)($_GET['primary_unit_id'] ?? 0);
+        $secondary_uid = (int)($_GET['secondary_unit_id'] ?? 0);
+        try {
+            $conv = $db->query("SELECT * FROM unit_conversions WHERE primary_unit_id = ? AND secondary_unit_id = ? AND deleted_at IS NULL LIMIT 1",
+                [$primary_uid, $secondary_uid])->fetch();
+            if ($conv) {
+                Helpers::jsonResponse(true, "Conversion found", $conv);
+            } else {
+                Helpers::jsonResponse(false, "No conversion found");
+            }
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, $e->getMessage());
         }
         break;
 

@@ -250,6 +250,14 @@ $(document).ready(function() {
             'sku' => $item['sku'],
             'hsn_code' => $item['hsn_code'] ?? '',
             'unit_name' => $item['unit_name'] ?? 'PCS',
+            'unit_id' => $item['unit_id'] ?? null,
+            'secondary_unit_name' => $item['secondary_unit_name'] ?? null,
+            'secondary_unit_id' => $item['secondary_unit_id'] ?? null,
+            'conversion_factor' => isset($item['conversion_factor']) ? (float)$item['conversion_factor'] : null,
+            'billing_unit_id' => $item['billing_unit_id'] ?? ($item['unit_id'] ?? null),
+            'billing_unit_name' => $item['billing_unit_name'] ?? ($item['unit_name'] ?? 'PCS'),
+            'is_secondary_unit' => (int)($item['is_secondary_unit'] ?? 0),
+            'original_rate' => (float)($item['original_rate'] ?? $item['rate']),
             'qty' => (float)$item['quantity'],
             'rate' => (float)$item['rate'],
             'gst_percentage' => (float)$item['gst'],
@@ -273,9 +281,15 @@ $(document).ready(function() {
                 box.empty();
                 if (res.status && res.data.length > 0) {
                     res.data.forEach(item => {
+                        let stockDisplay = parseFloat(item.current_stock || 0) + ' ' + (item.unit_name || 'PCS');
+                        if (item.secondary_unit_name && item.conversion_factor) {
+                            const secStock = parseFloat((parseFloat(item.current_stock || 0) * parseFloat(item.conversion_factor)).toFixed(2));
+                            stockDisplay += ' (' + secStock + ' ' + item.secondary_unit_name + ')';
+                        }
                         box.append(`
                             <div class="search-result-item p-2 border-bottom" style="cursor:pointer;" data-id="${item.id}">
                                 <strong>${item.product_name}</strong> - <span class="text-indigo small">${item.sku}</span>
+                                <span class="float-end small text-success">${stockDisplay}</span>
                                 <div class="text-secondary small">Sell: &#8377;${parseFloat(item.selling_price||0).toFixed(2)} | GST: ${item.gst_percentage}% | HSN: ${item.hsn_code||'-'}</div>
                             </div>
                         `);
@@ -320,6 +334,14 @@ $(document).ready(function() {
                 sku: p.sku,
                 hsn_code: p.hsn_code || '',
                 unit_name: p.unit_name || 'PCS',
+                unit_id: p.unit_id || null,
+                secondary_unit_name: p.secondary_unit_name || null,
+                secondary_unit_id: p.secondary_unit_id || null,
+                conversion_factor: p.conversion_factor ? parseFloat(p.conversion_factor) : null,
+                billing_unit_id: p.unit_id || null,
+                billing_unit_name: p.unit_name || 'PCS',
+                is_secondary_unit: 0,
+                original_rate: parseFloat(p.selling_price || 0),
                 qty: 1,
                 rate: parseFloat(p.selling_price || 0),
                 gst_percentage: parseFloat(p.gst_percentage || 0),
@@ -353,8 +375,26 @@ $(document).ready(function() {
             const tax_amt = after_disc * (item.gst_percentage / 100);
             const row_total = after_disc + tax_amt;
 
+            let unitCell;
+            if (item.secondary_unit_name && item.conversion_factor) {
+                unitCell = '<td><select class="form-select form-select-sm py-1 cart-unit-select" data-index="' + index + '" style="width:90px;">' +
+                    '<option value="primary"' + (item.is_secondary_unit === 0 ? ' selected' : '') + '>' + (item.unit_name || 'PCS') + '</option>' +
+                    '<option value="secondary"' + (item.is_secondary_unit === 1 ? ' selected' : '') + '>' + item.secondary_unit_name + '</option>' +
+                    '</select>';
+                if (item.is_secondary_unit === 0) {
+                    const secQty = parseFloat((item.qty * item.conversion_factor).toFixed(2));
+                    unitCell += '<div class="text-muted small mt-1">= ' + secQty + ' ' + item.secondary_unit_name + '</div>';
+                } else {
+                    const priQty = parseFloat((item.qty / item.conversion_factor).toFixed(4));
+                    unitCell += '<div class="text-muted small mt-1">= ' + priQty + ' ' + (item.unit_name || 'PCS') + '</div>';
+                }
+                unitCell += '</td>';
+            } else {
+                unitCell = '<td class="text-muted small">' + (item.billing_unit_name || item.unit_name || 'PCS') + '</td>';
+            }
+
             body.append(`
-                <tr>
+                <tr data-index="${index}">
                     <td>${index + 1}</td>
                     <td>
                         <strong>${item.product_name}</strong>
@@ -364,7 +404,7 @@ $(document).ready(function() {
                     <td>
                         <input type="number" step="0.01" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width:70px;" min="0.01">
                     </td>
-                    <td class="text-muted small">${item.unit_name || 'PCS'}</td>
+                    ${unitCell}
                     <td>
                         <input type="number" step="0.01" class="form-control form-control-sm item-rate-input" data-index="${index}" value="${item.rate.toFixed(2)}" style="width:100px;" min="0">
                     </td>
@@ -415,6 +455,25 @@ $(document).ready(function() {
     });
     $("#qt-cart-table").on('click', '.btn-remove-item', function() {
         cart.splice($(this).data('index'), 1); renderCart();
+    });
+    $("#qt-cart-table").on('change', '.cart-unit-select', function () {
+        const idx = $(this).data('index');
+        const selectedValue = $(this).val();
+        const item = cart[idx];
+        if (selectedValue === 'secondary' && item.is_secondary_unit === 0) {
+            item.qty = parseFloat((item.qty * item.conversion_factor).toFixed(2));
+            item.rate = parseFloat((item.original_rate / item.conversion_factor).toFixed(2));
+            item.is_secondary_unit = 1;
+            item.billing_unit_id = item.secondary_unit_id;
+            item.billing_unit_name = item.secondary_unit_name;
+        } else if (selectedValue === 'primary' && item.is_secondary_unit === 1) {
+            item.qty = parseFloat((item.qty / item.conversion_factor).toFixed(4));
+            item.rate = item.original_rate;
+            item.is_secondary_unit = 0;
+            item.billing_unit_id = item.unit_id;
+            item.billing_unit_name = item.unit_name;
+        }
+        renderCart();
     });
     $("#qt-discount-input").on('input', function() { calculateTotals(); });
 

@@ -68,7 +68,8 @@ class ChallanController {
         }
 
         $items = $db->query("
-            SELECT ci.*, p.product_name, p.sku, un.short_name as unit_name
+            SELECT ci.*, p.product_name, p.sku, un.short_name as unit_name,
+                   COALESCE(ci.billing_unit_name, un.short_name, 'Pcs') as display_unit, ci.primary_qty
             FROM challan_items ci
             JOIN products p ON ci.product_id = p.id
             LEFT JOIN units un ON p.unit_id = un.id

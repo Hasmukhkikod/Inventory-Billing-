@@ -25,7 +25,8 @@ $challan = $db->query("
 if (!$challan) die("Challan not found");
 
 $items = $db->query("
-    SELECT ci.*, p.product_name, p.sku, p.hsn_code, un.short_name as unit_name
+    SELECT ci.*, p.product_name, p.sku, p.hsn_code, un.short_name as unit_name,
+           COALESCE(ci.billing_unit_name, un.short_name, 'Pcs') as display_unit, ci.primary_qty
     FROM challan_items ci JOIN products p ON ci.product_id = p.id LEFT JOIN units un ON p.unit_id = un.id
     WHERE ci.challan_id = ?
 ", [$id])->fetchAll();
@@ -88,7 +89,7 @@ if (!$company) $company = ['company_name' => 'Grovixo', 'phone' => '', 'email' =
                     <td><?php echo $idx + 1; ?></td>
                     <td><strong><?php echo Helpers::sanitize($item['product_name']); ?></strong><br><span class="text-muted" style="font-size:10px;">SKU: <?php echo Helpers::sanitize($item['sku']); ?></span></td>
                     <td class="small"><?php echo Helpers::sanitize($item['hsn_code'] ?: '-'); ?></td>
-                    <td class="text-center fw-bold"><?php echo (float)$item['quantity'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?></td>
+                    <td class="text-center fw-bold"><?php echo (float)$item['quantity'] . ' ' . $item['display_unit']; ?><?php if (!empty($item['primary_qty']) && (float)$item['primary_qty'] != (float)$item['quantity']): ?><br><span class="text-muted" style="font-size:10px;">(<?php echo (float)$item['primary_qty'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?>)</span><?php endif; ?></td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

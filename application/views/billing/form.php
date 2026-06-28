@@ -64,22 +64,9 @@ $companyState = trim($compSettings['state'] ?? '');
     </div>
 </div>
 
-<!-- Section 2: Product Search & Cart -->
+<!-- Section 2: Product Cart -->
 <div class="panel-card mb-4">
     <div class="panel-body">
-        <!-- Search Bar -->
-        <div class="d-flex gap-3 mb-4 align-items-end">
-            <div class="flex-grow-1 position-relative">
-                <label class="form-label fw-semibold">Search Product / Scan Barcode</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-magnifying-glass text-indigo"></i></span>
-                    <input type="text" class="form-control" id="pos-product-search" placeholder="Type product name, SKU, or scan barcode..." autocomplete="off">
-                    <span class="input-group-text"><i class="fa-solid fa-barcode"></i></span>
-                </div>
-                <div class="pos-product-search-results d-none" id="search-results-box"></div>
-            </div>
-        </div>
-
         <!-- Cart Table -->
         <div class="table-responsive">
             <table class="table table-bordered align-middle mb-0" id="pos-cart-table">
@@ -98,6 +85,13 @@ $companyState = trim($compSettings['state'] ?? '');
                     </tr>
                 </thead>
                 <tbody>
+                    <tr class="cart-add-row">
+                        <td colspan="10" class="py-2">
+                            <select class="form-select" id="cart-product-select" style="width:100%;">
+                                <option value="">Add Product</option>
+                            </select>
+                        </td>
+                    </tr>
                     <tr class="cart-empty-row">
                         <td colspan="10" class="text-center py-4 text-secondary">
                             <i class="fa-solid fa-basket-shopping fs-3 mb-2 d-block text-muted"></i>
@@ -124,19 +118,6 @@ $companyState = trim($compSettings['state'] ?? '');
             <div class="panel-body">
                 <h6 class="fw-semibold mb-3"><i class="fa-solid fa-receipt text-indigo me-2"></i>Additional Details</h6>
 
-                <!-- Coupon -->
-                <div class="mb-3">
-                    <label class="form-label small">Coupon Code</label>
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control text-uppercase" id="coupon-code-input" placeholder="Enter promo code">
-                        <button class="btn btn-outline-secondary" id="btn-apply-coupon" type="button">Apply</button>
-                    </div>
-                    <div class="d-none mt-2 p-2 rounded bg-light-success small" id="coupon-discount-row">
-                        <span class="text-emerald"><i class="fa-solid fa-tag me-1"></i><span id="coupon-label">Coupon</span>: <strong id="bill-coupon-discount">-₹0</strong></span>
-                        <button class="btn btn-sm text-danger p-0 ms-2" id="btn-remove-coupon"><i class="fa-solid fa-xmark"></i></button>
-                    </div>
-                </div>
-
                 <!-- Loyalty -->
                 <?php if ($loyaltyEnabled): ?>
                 <div class="d-none mb-3 p-2 rounded border" id="loyalty-panel">
@@ -157,12 +138,6 @@ $companyState = trim($compSettings['state'] ?? '');
                     </div>
                 </div>
                 <?php endif; ?>
-
-                <!-- Notes -->
-                <div class="mb-3">
-                    <label class="form-label small">Invoice Notes</label>
-                    <textarea class="form-control form-control-sm" id="bill-notes" rows="2" placeholder="Optional remarks..."></textarea>
-                </div>
 
                 <!-- Payment Mode -->
                 <div>

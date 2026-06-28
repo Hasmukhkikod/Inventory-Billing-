@@ -64,7 +64,8 @@ class BillingController {
         }
 
         $items = $db->query("
-            SELECT ii.*, p.product_name, p.sku, p.hsn_code, un.short_name as unit_name
+            SELECT ii.*, p.product_name, p.sku, p.hsn_code, un.short_name as unit_name,
+                   COALESCE(ii.billing_unit_name, un.short_name, 'Pcs') as display_unit, ii.primary_qty
             FROM invoice_items ii
             JOIN products p ON ii.product_id = p.id
             LEFT JOIN units un ON p.unit_id = un.id

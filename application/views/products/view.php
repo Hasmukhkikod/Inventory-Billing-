@@ -47,9 +47,19 @@
                         <div class="col-6 text-dark fw-semibold"><?php echo \App\Models\Helpers::sanitize($product['brand_name'] ?: 'Generic'); ?></div>
                     </div>
                     <div class="row g-2 small mb-2">
-                        <div class="col-6 text-secondary">Unit Code:</div>
+                        <div class="col-6 text-secondary">Primary Unit:</div>
                         <div class="col-6 text-dark fw-semibold"><?php echo \App\Models\Helpers::sanitize($product['unit_name'] ?: 'Pcs'); ?></div>
                     </div>
+                    <?php if (!empty($product['secondary_unit_name'])): ?>
+                    <div class="row g-2 small mb-2">
+                        <div class="col-6 text-secondary">Secondary Unit:</div>
+                        <div class="col-6 text-dark fw-semibold"><?php echo \App\Models\Helpers::sanitize($product['secondary_unit_name']); ?></div>
+                    </div>
+                    <div class="row g-2 small mb-2">
+                        <div class="col-6 text-secondary">Conversion Factor:</div>
+                        <div class="col-6 text-dark fw-semibold">1 <?php echo \App\Models\Helpers::sanitize($product['unit_short_name'] ?: $product['unit_name'] ?: 'Pcs'); ?> = <?php echo (float)$product['conversion_factor']; ?> <?php echo \App\Models\Helpers::sanitize($product['secondary_unit_short_name'] ?: $product['secondary_unit_name']); ?></div>
+                    </div>
+                    <?php endif; ?>
                     <div class="row g-2 small mb-2">
                         <div class="col-6 text-secondary">GST slab:</div>
                         <div class="col-6 text-dark fw-semibold"><?php echo (float)$product['gst_percentage']; ?>%</div>
@@ -69,10 +79,13 @@
                     <?php
                         $stock = (float)$product['current_stock'];
                         $min = (float)$product['minimum_stock'];
-                        if ($stock <= $min) {
-                            echo '<span class="badge bg-light-danger fw-bold fs-6">' . $stock . '</span>';
-                        } else {
-                            echo '<span class="badge bg-light-success fw-bold fs-6">' . $stock . '</span>';
+                        $stockUnit = $product['unit_short_name'] ?: ($product['unit_name'] ?: 'Pcs');
+                        $badgeClass = $stock <= $min ? 'bg-light-danger' : 'bg-light-success';
+                        echo '<span class="badge ' . $badgeClass . ' fw-bold fs-6">' . $stock . ' ' . \App\Models\Helpers::sanitize($stockUnit) . '</span>';
+                        if (!empty($product['secondary_unit_name']) && (float)$product['conversion_factor'] > 0) {
+                            $secondaryStock = round($stock / (float)$product['conversion_factor'], 2);
+                            $secUnit = $product['secondary_unit_short_name'] ?: $product['secondary_unit_name'];
+                            echo ' <span class="badge bg-light-primary fw-bold fs-6 ms-1">' . $secondaryStock . ' ' . \App\Models\Helpers::sanitize($secUnit) . '</span>';
                         }
                     ?>
                 </div>

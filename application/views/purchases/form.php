@@ -292,10 +292,16 @@ $(document).ready(function() {
                 box.empty();
                 if (res.status && res.data.length > 0) {
                     res.data.forEach(item => {
+                        const stock = parseFloat(item.current_stock);
+                        let stockDisplay = stock + ' ' + (item.unit_name || 'PCS');
+                        if (item.secondary_unit_name && item.conversion_factor) {
+                            const secStock = parseFloat((stock * parseFloat(item.conversion_factor)).toFixed(2));
+                            stockDisplay += ' (' + secStock + ' ' + item.secondary_unit_name + ')';
+                        }
                         box.append(`
                             <div class="search-result-item p-2 border-bottom" style="cursor:pointer;" data-id="${item.id}">
                                 <strong>${item.product_name}</strong> - <span class="text-indigo small">${item.sku}</span>
-                                <div class="text-secondary small">Cost: &#8377;${parseFloat(item.cost_price||0).toFixed(2)} | Stock: ${item.current_stock} | HSN: ${item.hsn_code||'-'}</div>
+                                <div class="text-secondary small">Cost: &#8377;${parseFloat(item.cost_price||0).toFixed(2)} | Stock: ${stockDisplay} | HSN: ${item.hsn_code||'-'}</div>
                             </div>
                         `);
                     });
@@ -341,7 +347,15 @@ $(document).ready(function() {
                 unit_name: p.unit_name || 'PCS',
                 qty: 1,
                 cost_price: parseFloat(p.cost_price || 0),
-                gst_percentage: parseFloat(p.gst_percentage || 18)
+                gst_percentage: parseFloat(p.gst_percentage || 18),
+                unit_id: p.unit_id || null,
+                secondary_unit_name: p.secondary_unit_name || null,
+                secondary_unit_id: p.secondary_unit_id || null,
+                conversion_factor: p.conversion_factor ? parseFloat(p.conversion_factor) : null,
+                billing_unit_id: p.unit_id || null,
+                billing_unit_name: p.unit_name || 'PCS',
+                is_secondary_unit: 0,
+                original_rate: parseFloat(p.cost_price)
             });
         }
         renderCart();
@@ -360,8 +374,27 @@ $(document).ready(function() {
 
         cart.forEach((item, index) => {
             const row_total = item.qty * item.cost_price * (1 + item.gst_percentage / 100);
+
+            let unitCell = '';
+            if (item.secondary_unit_name && item.conversion_factor) {
+                unitCell = '<td><select class="form-select form-select-sm py-1 cart-unit-select" style="width:90px;">' +
+                    '<option value="primary"' + (item.is_secondary_unit === 0 ? ' selected' : '') + '>' + (item.unit_name || 'PCS') + '</option>' +
+                    '<option value="secondary"' + (item.is_secondary_unit === 1 ? ' selected' : '') + '>' + item.secondary_unit_name + '</option>' +
+                    '</select>';
+                if (item.is_secondary_unit === 0) {
+                    const secQty = parseFloat((item.qty * item.conversion_factor).toFixed(2));
+                    unitCell += '<div class="text-muted small mt-1">= ' + secQty + ' ' + item.secondary_unit_name + '</div>';
+                } else {
+                    const priQty = parseFloat((item.qty / item.conversion_factor).toFixed(4));
+                    unitCell += '<div class="text-muted small mt-1">= ' + priQty + ' ' + (item.unit_name || 'PCS') + '</div>';
+                }
+                unitCell += '</td>';
+            } else {
+                unitCell = '<td class="text-muted small">' + (item.billing_unit_name || item.unit_name || 'PCS') + '</td>';
+            }
+
             body.append(`
-                <tr>
+                <tr data-index="${index}">
                     <td>${index + 1}</td>
                     <td>
                         <strong>${item.product_name}</strong>
@@ -371,7 +404,7 @@ $(document).ready(function() {
                     <td>
                         <input type="number" step="0.01" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width:70px;" min="0.01">
                     </td>
-                    <td class="text-muted small">${item.unit_name || 'PCS'}</td>
+                    ${unitCell}
                     <td>
                         <input type="number" step="0.01" class="form-control form-control-sm item-cost-input" data-index="${index}" value="${item.cost_price.toFixed(2)}" style="width:110px;" min="0">
                     </td>
@@ -404,6 +437,25 @@ $(document).ready(function() {
     });
     $("#pur-cart-table").on('click', '.btn-remove-item', function() {
         cart.splice($(this).data('index'), 1); renderCart();
+    });
+    $("#pur-cart-table").on('change', '.cart-unit-select', function () {
+        const idx = $(this).closest('tr').data('index');
+        const selectedValue = $(this).val();
+        const item = cart[idx];
+        if (selectedValue === 'secondary' && item.is_secondary_unit === 0) {
+            item.qty = parseFloat((item.qty * item.conversion_factor).toFixed(2));
+            item.cost_price = parseFloat((item.original_rate / item.conversion_factor).toFixed(2));
+            item.is_secondary_unit = 1;
+            item.billing_unit_id = item.secondary_unit_id;
+            item.billing_unit_name = item.secondary_unit_name;
+        } else if (selectedValue === 'primary' && item.is_secondary_unit === 1) {
+            item.qty = parseFloat((item.qty / item.conversion_factor).toFixed(4));
+            item.cost_price = item.original_rate;
+            item.is_secondary_unit = 0;
+            item.billing_unit_id = item.unit_id;
+            item.billing_unit_name = item.unit_name;
+        }
+        renderCart();
     });
     $("#pur-discount-input").on('input', function() { calculateTotals(); });
 

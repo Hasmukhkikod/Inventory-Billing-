@@ -71,7 +71,8 @@ class QuotationController {
         }
 
         $items = $db->query("
-            SELECT qi.*, p.product_name, p.sku, un.short_name as unit_name
+            SELECT qi.*, p.product_name, p.sku, un.short_name as unit_name,
+                   COALESCE(qi.billing_unit_name, un.short_name, 'Pcs') as display_unit, qi.primary_qty
             FROM quotation_items qi
             JOIN products p ON qi.product_id = p.id
             LEFT JOIN units un ON p.unit_id = un.id

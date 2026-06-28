@@ -135,12 +135,30 @@ CREATE TABLE IF NOT EXISTS units (
     deleted_at TIMESTAMP NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 8b. Unit Conversions (Master table for reusable conversion pairs)
+CREATE TABLE IF NOT EXISTS unit_conversions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    primary_unit_id INT NOT NULL,
+    secondary_unit_id INT NOT NULL,
+    conversion_factor DECIMAL(15,4) NOT NULL DEFAULT 1.0000,
+    status VARCHAR(20) DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by INT NULL,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    FOREIGN KEY (primary_unit_id) REFERENCES units(id) ON DELETE CASCADE,
+    FOREIGN KEY (secondary_unit_id) REFERENCES units(id) ON DELETE CASCADE,
+    UNIQUE(primary_unit_id, secondary_unit_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 9. Products
 CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT NULL,
     brand_id INT NULL,
     unit_id INT NULL,
+    secondary_unit_id INT NULL,
+    conversion_factor DECIMAL(15,4) NULL,
     sku VARCHAR(100) NOT NULL UNIQUE,
     barcode VARCHAR(100) NULL UNIQUE,
     hsn_code VARCHAR(20) NULL,
@@ -161,7 +179,8 @@ CREATE TABLE IF NOT EXISTS products (
     deleted_at TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
     FOREIGN KEY (brand_id) REFERENCES brands(id) ON DELETE SET NULL,
-    FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL
+    FOREIGN KEY (unit_id) REFERENCES units(id) ON DELETE SET NULL,
+    FOREIGN KEY (secondary_unit_id) REFERENCES units(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 10. Product Images
@@ -256,7 +275,10 @@ CREATE TABLE IF NOT EXISTS purchase_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     purchase_id INT NOT NULL,
     product_id INT NOT NULL,
+    billing_unit_id INT NULL,
+    billing_unit_name VARCHAR(10) NULL,
     quantity DECIMAL(15, 2) NOT NULL,
+    primary_qty DECIMAL(15, 2) NULL,
     cost_price DECIMAL(15, 2) NOT NULL,
     gst DECIMAL(5, 2) NOT NULL DEFAULT 0.00,
     amount DECIMAL(15, 2) NOT NULL,
@@ -346,8 +368,11 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     invoice_id INT NOT NULL,
     product_id INT NOT NULL,
+    billing_unit_id INT NULL,
+    billing_unit_name VARCHAR(10) NULL,
     hsn_code VARCHAR(20) NULL,
     quantity DECIMAL(15, 2) NOT NULL,
+    primary_qty DECIMAL(15, 2) NULL,
     rate DECIMAL(15, 2) NOT NULL,
     gst DECIMAL(5, 2) NOT NULL DEFAULT 0.00,
     cgst DECIMAL(5, 2) NOT NULL DEFAULT 0.00,
@@ -615,7 +640,10 @@ CREATE TABLE IF NOT EXISTS quotation_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     quotation_id INT NOT NULL,
     product_id INT NOT NULL,
+    billing_unit_id INT NULL,
+    billing_unit_name VARCHAR(10) NULL,
     quantity DECIMAL(15, 2) NOT NULL,
+    primary_qty DECIMAL(15, 2) NULL,
     rate DECIMAL(15, 2) NOT NULL,
     gst DECIMAL(5, 2) DEFAULT 0.00,
     discount DECIMAL(5, 2) DEFAULT 0.00,
@@ -653,7 +681,10 @@ CREATE TABLE IF NOT EXISTS challan_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     challan_id INT NOT NULL,
     product_id INT NOT NULL,
+    billing_unit_id INT NULL,
+    billing_unit_name VARCHAR(10) NULL,
     quantity DECIMAL(15, 2) NOT NULL,
+    primary_qty DECIMAL(15, 2) NULL,
     status VARCHAR(20) DEFAULT 'ACTIVE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -739,3 +770,5 @@ CREATE INDEX idx_product_batches_product ON product_batches(product_id);
 CREATE INDEX idx_product_batches_expiry ON product_batches(expiry_date);
 CREATE INDEX idx_coupons_code ON coupons(coupon_code);
 CREATE INDEX idx_loyalty_customer ON loyalty_transactions(customer_id);
+CREATE INDEX idx_unit_conv_primary ON unit_conversions(primary_unit_id);
+CREATE INDEX idx_unit_conv_secondary ON unit_conversions(secondary_unit_id);

@@ -243,7 +243,14 @@ $(document).ready(function() {
                         hsn_code: item.hsn_code || '',
                         unit_name: item.unit_name || 'PCS',
                         current_stock: parseFloat(item.current_stock || 0),
-                        quantity: parseFloat(item.quantity)
+                        quantity: parseFloat(item.quantity),
+                        unit_id: item.unit_id || null,
+                        secondary_unit_name: item.secondary_unit_name || null,
+                        secondary_unit_id: item.secondary_unit_id || null,
+                        conversion_factor: item.conversion_factor ? parseFloat(item.conversion_factor) : null,
+                        billing_unit_id: item.billing_unit_id || item.unit_id || null,
+                        billing_unit_name: item.billing_unit_name || item.unit_name || 'PCS',
+                        is_secondary_unit: parseInt(item.is_secondary_unit || 0)
                     });
                 });
                 renderCart();
@@ -265,10 +272,15 @@ $(document).ready(function() {
                 box.empty();
                 if (res.status && res.data.length > 0) {
                     res.data.forEach(item => {
+                        let stockText = 'Stock: ' + item.current_stock + ' ' + (item.unit_name || 'Pcs');
+                        if (item.secondary_unit_name && item.conversion_factor) {
+                            const secondaryStock = parseFloat((item.current_stock * parseFloat(item.conversion_factor)).toFixed(2));
+                            stockText += ' (' + secondaryStock + ' ' + item.secondary_unit_name + ')';
+                        }
                         box.append(`
                             <div class="search-result-item p-2 border-bottom" style="cursor:pointer;" data-id="${item.id}">
                                 <strong>${item.product_name}</strong> - <span class="text-indigo small">${item.sku}</span>
-                                <div class="text-secondary small">Stock: ${item.current_stock} ${item.unit_name || 'Pcs'}</div>
+                                <div class="text-secondary small">${stockText}</div>
                             </div>
                         `);
                     });
@@ -313,7 +325,14 @@ $(document).ready(function() {
                 hsn_code: p.hsn_code || '',
                 unit_name: p.unit_name || 'PCS',
                 current_stock: parseFloat(p.current_stock || 0),
-                quantity: 1
+                quantity: 1,
+                unit_id: p.unit_id || null,
+                secondary_unit_name: p.secondary_unit_name || null,
+                secondary_unit_id: p.secondary_unit_id || null,
+                conversion_factor: p.conversion_factor ? parseFloat(p.conversion_factor) : null,
+                billing_unit_id: p.unit_id || null,
+                billing_unit_name: p.unit_name || 'PCS',
+                is_secondary_unit: 0
             });
         }
         renderCart();
@@ -331,8 +350,28 @@ $(document).ready(function() {
         $(".cart-empty-row").hide();
 
         cart.forEach((item, index) => {
+            let unitCell = '';
+            if (item.secondary_unit_name && item.conversion_factor) {
+                const currentUnit = item.is_secondary_unit ? 'secondary' : 'primary';
+                let equivalentText = '';
+                if (item.is_secondary_unit) {
+                    equivalentText = parseFloat((item.quantity / item.conversion_factor).toFixed(4)) + ' ' + item.unit_name;
+                } else {
+                    equivalentText = parseFloat((item.quantity * item.conversion_factor).toFixed(2)) + ' ' + item.secondary_unit_name;
+                }
+                unitCell = `
+                    <select class="form-select form-select-sm cart-unit-select" style="width:90px;display:inline-block;">
+                        <option value="primary" ${currentUnit === 'primary' ? 'selected' : ''}>${item.unit_name}</option>
+                        <option value="secondary" ${currentUnit === 'secondary' ? 'selected' : ''}>${item.secondary_unit_name}</option>
+                    </select>
+                    <div class="text-muted small mt-1">${equivalentText}</div>
+                `;
+            } else {
+                unitCell = `<span class="text-muted small">${item.billing_unit_name || item.unit_name || 'PCS'}</span>`;
+            }
+
             body.append(`
-                <tr>
+                <tr data-index="${index}">
                     <td>${index + 1}</td>
                     <td>
                         <strong>${item.product_name}</strong>
@@ -342,7 +381,7 @@ $(document).ready(function() {
                     <td>
                         <input type="number" step="1" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.quantity}" style="width:70px;" min="1">
                     </td>
-                    <td class="text-muted small">${item.unit_name || 'PCS'}</td>
+                    <td>${unitCell}</td>
                     <td class="text-center">
                         <button class="btn btn-sm btn-outline-danger btn-remove-item" data-index="${index}"><i class="fa-solid fa-trash"></i></button>
                     </td>
@@ -363,10 +402,29 @@ $(document).ready(function() {
     // Cart event handlers
     $("#dc-cart-table").on('input', '.item-qty-input', function() {
         const idx = $(this).data('index'), val = parseInt($(this).val());
-        if (val > 0) { cart[idx].quantity = val; updateSummary(); }
+        if (val > 0) { cart[idx].quantity = val; renderCart(); }
     });
     $("#dc-cart-table").on('click', '.btn-remove-item', function() {
         cart.splice($(this).data('index'), 1); renderCart();
+    });
+
+    // Unit conversion handler
+    $("#dc-cart-table").on('change', '.cart-unit-select', function() {
+        const idx = $(this).closest('tr').data('index');
+        const selectedValue = $(this).val();
+        const item = cart[idx];
+        if (selectedValue === 'secondary' && item.is_secondary_unit === 0) {
+            item.quantity = parseFloat((item.quantity * item.conversion_factor).toFixed(2));
+            item.is_secondary_unit = 1;
+            item.billing_unit_id = item.secondary_unit_id;
+            item.billing_unit_name = item.secondary_unit_name;
+        } else if (selectedValue === 'primary' && item.is_secondary_unit === 1) {
+            item.quantity = parseFloat((item.quantity / item.conversion_factor).toFixed(4));
+            item.is_secondary_unit = 0;
+            item.billing_unit_id = item.unit_id;
+            item.billing_unit_name = item.unit_name;
+        }
+        renderCart();
     });
 
     // Save Challan
@@ -392,7 +450,10 @@ $(document).ready(function() {
 
         const cartData = cart.map(item => ({
             product_id: item.product_id,
-            quantity: item.quantity
+            quantity: item.quantity,
+            billing_unit_id: item.billing_unit_id || item.unit_id,
+            billing_unit_name: item.billing_unit_name || item.unit_name || 'PCS',
+            is_secondary_unit: item.is_secondary_unit || 0
         }));
 
         $.ajax({

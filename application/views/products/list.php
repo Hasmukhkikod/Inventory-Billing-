@@ -27,6 +27,11 @@
                     <i class="fa-solid fa-scale-balanced me-2"></i>Units
                 </button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="conversions-tab" data-bs-toggle="tab" data-bs-target="#conversions-pane" type="button" role="tab" aria-controls="conversions-pane" aria-selected="false">
+                    <i class="fa-solid fa-right-left me-2"></i>Unit Conversions
+                </button>
+            </li>
         </ul>
         <div>
             <a href="<?php echo BASE_URL; ?>/products/form.php" class="btn btn-primary btn-sm">
@@ -185,7 +190,59 @@
                     </div>
                 </div>
             </div>
-            
+
+            <!-- UNIT CONVERSIONS TAB PANE -->
+            <div class="tab-pane fade" id="conversions-pane" role="tabpanel" aria-labelledby="conversions-tab" tabindex="0">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <div class="card bg-secondary border border-secondary p-3">
+                            <h6 class="text-indigo mb-3" id="conv-form-title">Add Unit Conversion</h6>
+                            <form id="conversionForm">
+                                <input type="hidden" name="id" id="conv-id" value="0">
+                                <div class="mb-3">
+                                    <label class="form-label">Primary Unit</label>
+                                    <select class="form-select" name="primary_unit_id" id="conv-primary" required>
+                                        <option value="">-- Select --</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Secondary Unit</label>
+                                    <select class="form-select" name="secondary_unit_id" id="conv-secondary" required>
+                                        <option value="">-- Select --</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Conversion Factor</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="conv-factor-label">1 Unit =</span>
+                                        <input type="number" step="0.0001" min="0.0001" class="form-control" name="conversion_factor" id="conv-factor" required placeholder="e.g. 12">
+                                        <span class="input-group-text" id="conv-factor-unit"></span>
+                                    </div>
+                                    <small class="text-muted" id="conv-preview"></small>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm w-100">Save Conversion</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm w-100 mt-2 d-none" id="btn-cancel-conv">Cancel Edit</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="table-responsive">
+                            <table class="table table-hover w-100" id="conversionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Primary Unit</th>
+                                        <th>Secondary Unit</th>
+                                        <th>Factor</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -277,16 +334,21 @@ $(document).ready(function() {
                     return '₹ ' + parseFloat(data).toLocaleString('en-IN', {minimumFractionDigits: 2});
                 }
             },
-            { 
+            {
                 data: 'current_stock',
                 render: function(data, type, row) {
                     const stock = parseFloat(data);
                     const min = parseFloat(row.minimum_stock);
                     const unit = row.unit_name || 'Pcs';
-                    if (stock <= min) {
-                        return `<span class="badge bg-light-danger fw-bold"><i class="fa-solid fa-circle-exclamation me-1"></i>${stock} ${unit}</span>`;
+                    let display = stock + ' ' + unit;
+                    if (row.secondary_unit_name && row.conversion_factor) {
+                        const secQty = parseFloat((stock * parseFloat(row.conversion_factor)).toFixed(2));
+                        display += ' <span class="text-muted small">(' + secQty + ' ' + row.secondary_unit_name + ')</span>';
                     }
-                    return `<span class="badge bg-light-success fw-bold">${stock} ${unit}</span>`;
+                    if (stock <= min) {
+                        return `<span class="badge bg-light-danger fw-bold"><i class="fa-solid fa-circle-exclamation me-1"></i>${display}</span>`;
+                    }
+                    return `<span class="badge bg-light-success fw-bold">${display}</span>`;
                 }
             },
             { 
@@ -560,12 +622,118 @@ $(document).ready(function() {
         $(this).addClass('d-none');
     });
 
+    // Unit Conversions Table
+    let convUnits = [];
+    function loadConvUnits() {
+        $.getJSON(BASE_URL + '/api/products.php?action=units_list', function(res) {
+            if (res.status) {
+                convUnits = res.data;
+                const pSel = $('#conv-primary'), sSel = $('#conv-secondary');
+                pSel.find('option:not(:first)').remove();
+                sSel.find('option:not(:first)').remove();
+                res.data.forEach(function(u) {
+                    pSel.append('<option value="' + u.id + '">' + u.unit_name + ' (' + u.short_name + ')</option>');
+                    sSel.append('<option value="' + u.id + '">' + u.unit_name + ' (' + u.short_name + ')</option>');
+                });
+            }
+        });
+    }
+    loadConvUnits();
+
+    const conversionsTable = $('#conversionsTable').DataTable({
+        ajax: { url: BASE_URL + '/api/products.php?action=unit_conversions_list', dataSrc: 'data' },
+        columns: [
+            { data: null, className: 'fw-semibold text-dark', render: function(d,t,r) { return r.primary_unit_name + ' (' + r.primary_short_name + ')'; } },
+            { data: null, render: function(d,t,r) { return r.secondary_unit_name + ' (' + r.secondary_short_name + ')'; } },
+            { data: null, render: function(d,t,r) { return '1 ' + r.primary_short_name + ' = ' + parseFloat(r.conversion_factor) + ' ' + r.secondary_short_name; } },
+            {
+                data: null, className: 'text-end', orderable: false,
+                render: function(d,t,r) {
+                    return '<button class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald btn-edit-conv" data-id="' + r.id + '" data-primary="' + r.primary_unit_id + '" data-secondary="' + r.secondary_unit_id + '" data-factor="' + r.conversion_factor + '"><i class="fa-solid fa-pencil"></i></button>' +
+                           ' <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-danger btn-delete-conv" data-id="' + r.id + '"><i class="fa-solid fa-trash-can"></i></button>';
+                }
+            }
+        ],
+        drawCallback: function() { applyMobileLabels(); }
+    });
+
+    $('#conv-primary, #conv-secondary').on('change', function() {
+        const pId = $('#conv-primary').val(), sId = $('#conv-secondary').val();
+        const pUnit = convUnits.find(u => u.id == pId), sUnit = convUnits.find(u => u.id == sId);
+        $('#conv-factor-label').text('1 ' + (pUnit ? pUnit.short_name : 'Unit') + ' =');
+        $('#conv-factor-unit').text(sUnit ? sUnit.short_name : '');
+        const f = parseFloat($('#conv-factor').val()) || 0;
+        if (pUnit && sUnit && f > 0) {
+            $('#conv-preview').text('1 ' + pUnit.short_name + ' = ' + f + ' ' + sUnit.short_name);
+        } else {
+            $('#conv-preview').text('');
+        }
+    });
+    $('#conv-factor').on('input', function() { $('#conv-primary').trigger('change'); });
+
+    $('#conversionForm').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: BASE_URL + '/api/products.php?action=unit_conversion_save',
+            type: 'POST',
+            data: $(this).serialize() + '&csrf_token=' + $('meta[name="csrf-token"]').attr('content'),
+            dataType: 'json',
+            success: function(res) {
+                if (res.status) {
+                    conversionsTable.ajax.reload();
+                    $('#conversionForm')[0].reset();
+                    $('#conv-id').val('0');
+                    $('#conv-form-title').text('Add Unit Conversion');
+                    $('#btn-cancel-conv').addClass('d-none');
+                    $('#conv-preview').text('');
+                    Swal.fire({ icon: 'success', title: 'Saved', text: res.message, background: '#ffffff', color: '#0f172a' });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#0f172a' });
+                }
+            }
+        });
+    });
+
+    $('#conversionsTable').on('click', '.btn-edit-conv', function() {
+        $('#conv-id').val($(this).data('id'));
+        $('#conv-primary').val($(this).data('primary'));
+        $('#conv-secondary').val($(this).data('secondary'));
+        $('#conv-factor').val($(this).data('factor'));
+        $('#conv-form-title').text('Edit Conversion');
+        $('#btn-cancel-conv').removeClass('d-none');
+        $('#conv-primary').trigger('change');
+    });
+
+    $('#conversionsTable').on('click', '.btn-delete-conv', function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Delete conversion?', icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#2563eb', cancelButtonColor: '#dc2626', confirmButtonText: 'Yes, delete!',
+            background: '#ffffff', color: '#0f172a'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post(BASE_URL + '/api/products.php?action=unit_conversion_delete', { id: id }, function(res) {
+                    if (res.status) { conversionsTable.ajax.reload(); Swal.fire({ icon: 'success', title: 'Deleted', background: '#ffffff', color: '#0f172a' }); }
+                }, 'json');
+            }
+        });
+    });
+
+    $('#btn-cancel-conv').click(function() {
+        $('#conversionForm')[0].reset();
+        $('#conv-id').val('0');
+        $('#conv-form-title').text('Add Unit Conversion');
+        $('#conv-preview').text('');
+        $(this).addClass('d-none');
+    });
+
     // Tab loads
     $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
         const target = $(e.target).attr("id");
         if (target === "categories-tab") categoriesTable.ajax.reload();
         if (target === "brands-tab") brandsTable.ajax.reload();
         if (target === "units-tab") unitsTable.ajax.reload();
+        if (target === "conversions-tab") { conversionsTable.ajax.reload(); loadConvUnits(); }
         if (target === "products-tab") productsTable.ajax.reload();
     });
 

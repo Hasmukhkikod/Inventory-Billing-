@@ -25,7 +25,10 @@ $invoice = $db->query("
 if (!$invoice) die("Invoice not found");
 
 $items = $db->query("
-    SELECT ii.*, p.product_name FROM invoice_items ii JOIN products p ON ii.product_id = p.id WHERE ii.invoice_id = ?
+    SELECT ii.*, p.product_name, un.short_name as unit_name,
+           COALESCE(ii.billing_unit_name, un.short_name, 'Pcs') as display_unit, ii.primary_qty
+    FROM invoice_items ii JOIN products p ON ii.product_id = p.id LEFT JOIN units un ON p.unit_id = un.id
+    WHERE ii.invoice_id = ?
 ", [$id])->fetchAll();
 
 $company = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
@@ -104,7 +107,7 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
             <?php foreach ($items as $item): ?>
                 <tr>
                     <td><?php echo Helpers::sanitize($item['product_name']); ?></td>
-                    <td class="amt"><?php echo (float)$item['quantity']; ?></td>
+                    <td class="amt"><?php echo (float)$item['quantity'] . ' ' . $item['display_unit']; ?><?php if (!empty($item['primary_qty']) && (float)$item['primary_qty'] != (float)$item['quantity']): ?><br><span class="small">(<?php echo (float)$item['primary_qty'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?>)</span><?php endif; ?></td>
                     <td class="amt"><?php echo number_format($item['rate'], 2); ?></td>
                     <td class="amt"><?php echo number_format($item['amount'], 2); ?></td>
                 </tr>

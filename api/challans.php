@@ -42,8 +42,15 @@ switch ($action) {
             if (!$challan) Helpers::jsonResponse(false, 'Challan not found');
 
             $items = $db->query("
-                SELECT ci.*, p.product_name, p.sku, un.short_name as unit_name
-                FROM challan_items ci JOIN products p ON ci.product_id = p.id LEFT JOIN units un ON p.unit_id = un.id
+                SELECT ci.*, p.product_name, p.sku,
+                       p.secondary_unit_id, p.conversion_factor,
+                       un.id as unit_id, un.short_name as unit_name,
+                       su.short_name as secondary_unit_name,
+                       ci.billing_unit_id, ci.billing_unit_name, ci.primary_qty
+                FROM challan_items ci
+                JOIN products p ON ci.product_id = p.id
+                LEFT JOIN units un ON p.unit_id = un.id
+                LEFT JOIN units su ON p.secondary_unit_id = su.id
                 WHERE ci.challan_id = ?
             ", [$id])->fetchAll();
 
@@ -88,8 +95,13 @@ switch ($action) {
                     foreach ($cart as $item) {
                         $pid = (int)($item['product_id'] ?? $item['id'] ?? 0);
                         $qty = (float)($item['quantity'] ?? $item['qty'] ?? 0);
-                        $t->insert("INSERT INTO challan_items (challan_id, product_id, quantity, created_by) VALUES (?,?,?,?)",
-                            [$challan_id, $pid, $qty, $_SESSION['user_id']]);
+                        $b_unit_id = (int)($item['billing_unit_id'] ?? 0);
+                        $b_unit_name = trim($item['billing_unit_name'] ?? '');
+                        $is_sec = (int)($item['is_secondary_unit'] ?? 0);
+                        $cf = (float)($item['conversion_factor'] ?? 0);
+                        $p_qty = ($is_sec && $cf > 0) ? $qty / $cf : $qty;
+                        $t->insert("INSERT INTO challan_items (challan_id, product_id, billing_unit_id, billing_unit_name, quantity, primary_qty, created_by) VALUES (?,?,?,?,?,?,?)",
+                            [$challan_id, $pid, $b_unit_id ?: null, $b_unit_name ?: null, $qty, $p_qty, $_SESSION['user_id']]);
                     }
 
                     Helpers::logActivity($db, 'challans', "Updated challan: " . $existing['challan_no'], $challan_id);

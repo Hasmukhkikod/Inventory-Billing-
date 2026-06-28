@@ -45,10 +45,15 @@ switch ($action) {
             
             if ($purchase) {
                 $items = $db->query("
-                    SELECT pi.*, prod.product_name, prod.sku, prod.hsn_code, un.short_name as unit_name
+                    SELECT pi.*, prod.product_name, prod.sku, prod.hsn_code,
+                           prod.secondary_unit_id, prod.conversion_factor,
+                           un.id as unit_id, un.short_name as unit_name,
+                           su.short_name as secondary_unit_name,
+                           pi.billing_unit_id, pi.billing_unit_name, pi.primary_qty
                     FROM purchase_items pi
                     JOIN products prod ON pi.product_id = prod.id
                     LEFT JOIN units un ON prod.unit_id = un.id
+                    LEFT JOIN units su ON prod.secondary_unit_id = su.id
                     WHERE pi.purchase_id = ? AND pi.deleted_at IS NULL
                 ", [$id])->fetchAll();
                 $purchase['items'] = $items;
@@ -120,9 +125,21 @@ switch ($action) {
                     $subtotal += $row_base;
                     $gst_amount += $row_tax;
 
+                    $billing_unit_id = (int)($item['billing_unit_id'] ?? 0);
+                    $billing_unit_name = trim($item['billing_unit_name'] ?? '');
+                    $is_secondary = (int)($item['is_secondary_unit'] ?? 0);
+                    $conv_factor = (float)($item['conversion_factor'] ?? 0);
+                    $primary_qty = $qty;
+                    if ($is_secondary && $conv_factor > 0) {
+                        $primary_qty = $qty / $conv_factor;
+                    }
+
                     $validatedItems[] = [
                         'product_id' => $pid,
                         'quantity' => $qty,
+                        'primary_qty' => $primary_qty,
+                        'billing_unit_id' => $billing_unit_id,
+                        'billing_unit_name' => $billing_unit_name,
                         'cost_price' => $cost,
                         'gst' => $gst_rate,
                         'amount' => $row_total,
@@ -170,11 +187,11 @@ switch ($action) {
 
                     // Insert new items
                     foreach ($validatedItems as $item) {
-                        $t->insert("INSERT INTO purchase_items (purchase_id, product_id, quantity, cost_price, gst, amount, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                            [$purchase_id, $item['product_id'], $item['quantity'], $item['cost_price'], $item['gst'], $item['amount'], $_SESSION['user_id']]);
+                        $t->insert("INSERT INTO purchase_items (purchase_id, product_id, billing_unit_id, billing_unit_name, quantity, primary_qty, cost_price, gst, amount, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            [$purchase_id, $item['product_id'], $item['billing_unit_id'] ?: null, $item['billing_unit_name'] ?: null, $item['quantity'], $item['primary_qty'], $item['cost_price'], $item['gst'], $item['amount'], $_SESSION['user_id']]);
 
                         if ($order_status === 'COMPLETED') {
-                            $newStock = $item['stock_before'] + $item['quantity'];
+                            $newStock = $item['stock_before'] + $item['primary_qty'];
                             $t->query("UPDATE products SET current_stock = ?, cost_price = ? WHERE id = ?", [$newStock, $item['cost_price'], $item['product_id']]);
                             $t->insert("INSERT INTO stock_transactions (product_id, transaction_type, reference_no, quantity, stock_before, stock_after, remarks, created_by) VALUES (?, 'Purchase', ?, ?, ?, ?, ?, ?)",
                                 [$item['product_id'], $purchase_no, $item['quantity'], $item['stock_before'], $newStock, "PO updated: $purchase_no", $_SESSION['user_id']]);
@@ -205,11 +222,11 @@ switch ($action) {
                     ", [$purchase_no, $supplier_id, $purchase_date, $subtotal, $discount, $gst_amount, $total_amount, $payment_status, $order_status, $_SESSION['user_id']]);
 
                     foreach ($validatedItems as $item) {
-                        $t->insert("INSERT INTO purchase_items (purchase_id, product_id, quantity, cost_price, gst, amount, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                            [$newId, $item['product_id'], $item['quantity'], $item['cost_price'], $item['gst'], $item['amount'], $_SESSION['user_id']]);
+                        $t->insert("INSERT INTO purchase_items (purchase_id, product_id, billing_unit_id, billing_unit_name, quantity, primary_qty, cost_price, gst, amount, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            [$newId, $item['product_id'], $item['billing_unit_id'] ?: null, $item['billing_unit_name'] ?: null, $item['quantity'], $item['primary_qty'], $item['cost_price'], $item['gst'], $item['amount'], $_SESSION['user_id']]);
 
                         if ($order_status === 'COMPLETED') {
-                            $newStock = $item['stock_before'] + $item['quantity'];
+                            $newStock = $item['stock_before'] + $item['primary_qty'];
                             $t->query("UPDATE products SET current_stock = ?, cost_price = ? WHERE id = ?", [$newStock, $item['cost_price'], $item['product_id']]);
                             $t->insert("INSERT INTO stock_transactions (product_id, transaction_type, reference_no, quantity, stock_before, stock_after, remarks, created_by) VALUES (?, 'Purchase', ?, ?, ?, ?, ?, ?)",
                                 [$item['product_id'], $purchase_no, $item['quantity'], $item['stock_before'], $newStock, "Purchased under PO: $purchase_no", $_SESSION['user_id']]);

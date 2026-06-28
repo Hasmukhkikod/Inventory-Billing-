@@ -45,9 +45,15 @@ switch ($action) {
 
             if ($quotation) {
                 $items = $db->query("
-                    SELECT qi.*, p.product_name, p.sku, p.selling_price, p.gst_percentage
+                    SELECT qi.*, p.product_name, p.sku, p.selling_price, p.gst_percentage,
+                           p.secondary_unit_id, p.conversion_factor,
+                           u.id as unit_id, u.short_name as unit_name,
+                           su.short_name as secondary_unit_name,
+                           qi.billing_unit_id, qi.billing_unit_name, qi.primary_qty
                     FROM quotation_items qi
                     JOIN products p ON qi.product_id = p.id
+                    LEFT JOIN units u ON p.unit_id = u.id
+                    LEFT JOIN units su ON p.secondary_unit_id = su.id
                     WHERE qi.quotation_id = ? AND qi.deleted_at IS NULL
                 ", [$id])->fetchAll();
                 $quotation['items'] = $items;
@@ -104,9 +110,21 @@ switch ($action) {
                     $subtotal += $row_after_disc;
                     $gst_amount += $row_tax;
 
+                    $billing_unit_id = (int)($item['billing_unit_id'] ?? 0);
+                    $billing_unit_name = trim($item['billing_unit_name'] ?? '');
+                    $is_secondary = (int)($item['is_secondary_unit'] ?? 0);
+                    $conv_factor = (float)($item['conversion_factor'] ?? 0);
+                    $primary_qty = $qty;
+                    if ($is_secondary && $conv_factor > 0) {
+                        $primary_qty = $qty / $conv_factor;
+                    }
+
                     $validatedItems[] = [
                         'product_id' => $pid,
                         'quantity' => $qty,
+                        'primary_qty' => $primary_qty,
+                        'billing_unit_id' => $billing_unit_id,
+                        'billing_unit_name' => $billing_unit_name,
                         'rate' => $rate,
                         'gst' => $gst_rate,
                         'discount' => $item_discount,
@@ -148,9 +166,9 @@ switch ($action) {
                     // Insert updated items
                     foreach ($validatedItems as $vi) {
                         $t->insert("
-                            INSERT INTO quotation_items (quotation_id, product_id, quantity, rate, gst, discount, amount, created_by)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                        ", [$quotation_id, $vi['product_id'], $vi['quantity'], $vi['rate'], $vi['gst'], $vi['discount'], $vi['amount'], $_SESSION['user_id']]);
+                            INSERT INTO quotation_items (quotation_id, product_id, billing_unit_id, billing_unit_name, quantity, primary_qty, rate, gst, discount, amount, created_by)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ", [$quotation_id, $vi['product_id'], $vi['billing_unit_id'] ?: null, $vi['billing_unit_name'] ?: null, $vi['quantity'], $vi['primary_qty'], $vi['rate'], $vi['gst'], $vi['discount'], $vi['amount'], $_SESSION['user_id']]);
                     }
 
                     Helpers::logActivity($db, "quotations", "Updated quotation: " . $existing['quotation_no'], $quotation_id);

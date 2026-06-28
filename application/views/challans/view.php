@@ -90,7 +90,7 @@
                                 <strong><?php echo \App\Models\Helpers::sanitize($item['product_name']); ?></strong>
                                 <span class="text-muted small d-block">SKU: <?php echo \App\Models\Helpers::sanitize($item['sku']); ?></span>
                             </td>
-                            <td class="text-center fw-bold"><?php echo (float)$item['quantity'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?></td>
+                            <td class="text-center fw-bold"><?php echo (float)$item['quantity'] . ' ' . $item['display_unit']; ?><?php if (!empty($item['primary_qty']) && (float)$item['primary_qty'] != (float)$item['quantity']): ?><br><span class="text-muted small fw-normal">(<?php echo (float)$item['primary_qty'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?>)</span><?php endif; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

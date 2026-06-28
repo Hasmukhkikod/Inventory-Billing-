@@ -21,12 +21,32 @@ switch ($action) {
         $q = trim($_GET['q'] ?? '');
         if (empty($q)) Helpers::jsonResponse(true, 'Empty query', []);
         try {
-            $stmt = $db->query("
-                SELECT p.id, p.product_name, p.sku, p.barcode, p.hsn_code, p.selling_price, p.gst_percentage, p.current_stock, u.short_name as unit_name
-                FROM products p LEFT JOIN units u ON p.unit_id = u.id
-                WHERE p.status = 'ACTIVE' AND p.deleted_at IS NULL AND (p.barcode = ? OR p.product_name LIKE ? OR p.sku LIKE ?)
-                LIMIT 10
-            ", [$q, "%$q%", "%$q%"]);
+            if ($q === '*') {
+                $stmt = $db->query("
+                    SELECT p.id, p.product_name, p.sku, p.barcode, p.hsn_code, p.selling_price, p.gst_percentage, p.current_stock,
+                           p.secondary_unit_id, p.conversion_factor,
+                           u.id as unit_id, u.short_name as unit_name,
+                           su.short_name as secondary_unit_name
+                    FROM products p
+                    LEFT JOIN units u ON p.unit_id = u.id
+                    LEFT JOIN units su ON p.secondary_unit_id = su.id
+                    WHERE p.status = 'ACTIVE' AND p.deleted_at IS NULL
+                    ORDER BY p.product_name ASC
+                    LIMIT 50
+                ");
+            } else {
+                $stmt = $db->query("
+                    SELECT p.id, p.product_name, p.sku, p.barcode, p.hsn_code, p.selling_price, p.gst_percentage, p.current_stock,
+                           p.secondary_unit_id, p.conversion_factor,
+                           u.id as unit_id, u.short_name as unit_name,
+                           su.short_name as secondary_unit_name
+                    FROM products p
+                    LEFT JOIN units u ON p.unit_id = u.id
+                    LEFT JOIN units su ON p.secondary_unit_id = su.id
+                    WHERE p.status = 'ACTIVE' AND p.deleted_at IS NULL AND (p.barcode = ? OR p.product_name LIKE ? OR p.sku LIKE ?)
+                    LIMIT 20
+                ", [$q, "%$q%", "%$q%"]);
+            }
             Helpers::jsonResponse(true, 'Products found', $stmt->fetchAll());
         } catch (Exception $e) {
             Helpers::jsonResponse(false, 'Search failed: ' . $e->getMessage());
@@ -84,6 +104,10 @@ switch ($action) {
                     $pid = (int)$item['id'];
                     $qty = (float)$item['qty'];
                     $disc = (float)($item['discount'] ?? 0);
+                    $is_secondary = (int)($item['is_secondary_unit'] ?? 0);
+                    $billing_unit_id = (int)($item['billing_unit_id'] ?? 0);
+                    $billing_unit_name = trim($item['billing_unit_name'] ?? '');
+                    $conv_factor = (float)($item['conversion_factor'] ?? 0);
 
                     if ($qty <= 0) throw new Exception("Quantity must be greater than zero.");
                     if ($disc < 0 || $disc > 100) throw new Exception("Discount percentage must be between 0 and 100.");
@@ -92,9 +116,13 @@ switch ($action) {
                     if (!$product) throw new Exception("Product ID $pid not found");
 
                     $stock = (float)$product['current_stock'];
-                    if ($stock < $qty) throw new Exception("Insufficient stock for: " . $product['product_name'] . ". Available: $stock");
+                    $primary_qty = $qty;
+                    if ($is_secondary && $conv_factor > 0) {
+                        $primary_qty = $qty / $conv_factor;
+                    }
+                    if ($stock < $primary_qty) throw new Exception("Insufficient stock for: " . $product['product_name'] . ". Available: $stock");
 
-                    $rate = (float)$product['selling_price'];
+                    $rate = (float)($item['rate'] ?? $product['selling_price']);
                     $gst_rate = (float)$product['gst_percentage'];
                     $hsn = $product['hsn_code'] ?? '';
 
@@ -120,7 +148,9 @@ switch ($action) {
 
                     $validatedItems[] = [
                         'product_id' => $pid, 'product_name' => $product['product_name'],
-                        'hsn_code' => $hsn, 'quantity' => $qty, 'rate' => $rate,
+                        'hsn_code' => $hsn, 'quantity' => $qty, 'primary_qty' => $primary_qty,
+                        'billing_unit_id' => $billing_unit_id, 'billing_unit_name' => $billing_unit_name,
+                        'rate' => $rate,
                         'tax_rate' => $gst_rate, 'cgst' => $row_cgst > 0 ? $gst_rate / 2 : 0,
                         'sgst' => $row_sgst > 0 ? $gst_rate / 2 : 0, 'igst' => $is_igst ? $gst_rate : 0,
                         'discount_pct' => $disc, 'discount_amount' => $row_disc,
@@ -201,14 +231,14 @@ switch ($action) {
                 // Save items & update stock
                 foreach ($validatedItems as $item) {
                     $t->insert("
-                        INSERT INTO invoice_items (invoice_id, product_id, hsn_code, quantity, rate, gst, cgst, sgst, igst, discount, amount)
-                        VALUES (?,?,?,?,?,?,?,?,?,?,?)
-                    ", [$invoiceId, $item['product_id'], $item['hsn_code'], $item['quantity'], $item['rate'], $item['tax_rate'], $item['cgst'], $item['sgst'], $item['igst'], $item['discount_amount'], $item['total_amount']]);
+                        INSERT INTO invoice_items (invoice_id, product_id, billing_unit_id, billing_unit_name, hsn_code, quantity, primary_qty, rate, gst, cgst, sgst, igst, discount, amount)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    ", [$invoiceId, $item['product_id'], $item['billing_unit_id'] ?: null, $item['billing_unit_name'] ?: null, $item['hsn_code'], $item['quantity'], $item['primary_qty'], $item['rate'], $item['tax_rate'], $item['cgst'], $item['sgst'], $item['igst'], $item['discount_amount'], $item['total_amount']]);
 
-                    $newStock = $item['stock_before'] - $item['quantity'];
+                    $newStock = $item['stock_before'] - $item['primary_qty'];
                     $t->query("UPDATE products SET current_stock = ? WHERE id = ?", [$newStock, $item['product_id']]);
                     $t->insert("INSERT INTO stock_transactions (product_id, transaction_type, reference_no, quantity, stock_before, stock_after, remarks, created_by) VALUES (?, 'Sale', ?, ?, ?, ?, ?, ?)",
-                        [$item['product_id'], $invoice_number, -$item['quantity'], $item['stock_before'], $newStock, "Invoice: $invoice_number", $_SESSION['user_id']]);
+                        [$item['product_id'], $invoice_number, -$item['primary_qty'], $item['stock_before'], $newStock, "Invoice: $invoice_number", $_SESSION['user_id']]);
                 }
 
                 // Save split payments

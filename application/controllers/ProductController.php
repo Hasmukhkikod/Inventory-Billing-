@@ -50,11 +50,13 @@ class ProductController {
         
         $db = $this->db;
         $product = $db->query("
-            SELECT p.*, c.category_name, b.brand_name, u.unit_name 
+            SELECT p.*, c.category_name, b.brand_name, u.unit_name, u.short_name as unit_short_name,
+                   su.unit_name as secondary_unit_name, su.short_name as secondary_unit_short_name
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
             LEFT JOIN brands b ON p.brand_id = b.id
             LEFT JOIN units u ON p.unit_id = u.id
+            LEFT JOIN units su ON p.secondary_unit_id = su.id
             WHERE p.id = ? LIMIT 1
         ", [(int)$id])->fetch();
         

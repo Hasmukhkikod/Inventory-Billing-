@@ -94,7 +94,7 @@
                         <tr>
                             <td class="text-center"><?php echo $idx + 1; ?></td>
                             <td><strong><?php echo \App\Models\Helpers::sanitize($item['product_name']); ?></strong><br><span class="text-muted small">SKU: <?php echo \App\Models\Helpers::sanitize($item['sku']); ?></span></td>
-                            <td class="text-center"><?php echo (float)$item['quantity']; ?></td>
+                            <td class="text-center"><?php echo (float)$item['quantity'] . ' ' . $item['display_unit']; ?><?php if (!empty($item['primary_qty']) && (float)$item['primary_qty'] != (float)$item['quantity']): ?><br><span class="text-muted small">(<?php echo (float)$item['primary_qty'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?>)</span><?php endif; ?></td>
                             <td class="text-end">₹<?php echo number_format($item['rate'], 2); ?></td>
                             <td class="text-center"><?php echo (float)$item['gst']; ?>%</td>
                             <td class="text-end"><?php echo (float)$item['discount'] > 0 ? $item['discount'] . '%' : '-'; ?></td>

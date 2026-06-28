@@ -352,8 +352,8 @@ switch ($action) {
                     'notifications',
                     'report_logs',
                     'payments',
-                    'expense_categories',
                     'expenses',
+                    'expense_categories',
                     'invoice_items',
                     'invoices',
                     'customer_payments',
@@ -366,13 +366,18 @@ switch ($action) {
                     'product_images',
                     'product_batches',
                     'products',
+                    'unit_conversions',
                     'units',
                     'brands',
                     'categories',
                 ];
 
                 foreach ($tables as $table) {
-                    $db->query("DELETE FROM $table");
+                    try {
+                        $db->query("DELETE FROM $table");
+                    } catch (Exception $e) {
+                        // Skip if table doesn't exist yet
+                    }
                 }
 
                 $db->query("DELETE FROM users WHERE role_id != 1");
