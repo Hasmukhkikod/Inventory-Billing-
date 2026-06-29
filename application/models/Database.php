@@ -33,22 +33,28 @@ class Database {
                 }
             } else {
                 // MySQL PDO Connection
-                // Attempt direct connection first
                 try {
                     $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";port=" . DB_PORT . ";charset=utf8mb4";
                     $this->pdo = new PDO($dsn, DB_USER, DB_PASS);
                 } catch (PDOException $e) {
-                    // Check if DB doesn't exist error (code 1049) and create it
                     if ($e->getCode() == 1049 || strpos($e->getMessage(), 'Unknown database') !== false) {
-                        $dsnNoDb = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";charset=utf8mb4";
-                        $tempPdo = new PDO($dsnNoDb, DB_USER, DB_PASS);
-                        $tempPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                        $tempPdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;");
-                        $tempPdo = null; // Close connection
-                        
-                        // Retry original connection with DB Name
-                        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";port=" . DB_PORT . ";charset=utf8mb4";
-                        $this->pdo = new PDO($dsn, DB_USER, DB_PASS);
+                        // Try to create DB (works on local dev, not on shared hosting)
+                        try {
+                            $dsnNoDb = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";charset=utf8mb4";
+                            $tempPdo = new PDO($dsnNoDb, DB_USER, DB_PASS);
+                            $tempPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                            $tempPdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;");
+                            $tempPdo = null;
+
+                            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";port=" . DB_PORT . ";charset=utf8mb4";
+                            $this->pdo = new PDO($dsn, DB_USER, DB_PASS);
+                        } catch (PDOException $createErr) {
+                            throw new PDOException(
+                                "Database '" . DB_NAME . "' does not exist and could not be auto-created. " .
+                                "Please create the database manually via your hosting panel and import full_install.sql. " .
+                                "Original error: " . $e->getMessage()
+                            );
+                        }
                     } else {
                         throw $e;
                     }

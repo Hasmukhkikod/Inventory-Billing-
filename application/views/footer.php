@@ -22,6 +22,7 @@
 <!-- DataTables Core & Bootstrap 5 Integration -->
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script>$.fn.dataTable.ext.errMode = 'none';</script>
 <!-- SweetAlert 2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <!-- Chart.js -->

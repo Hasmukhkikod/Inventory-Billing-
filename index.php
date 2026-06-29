@@ -16,6 +16,7 @@ set_exception_handler(function (\Throwable $e) {
         echo "<div style='font-family:sans-serif; text-align:center; padding: 50px; color: #333;'>";
         echo "<h2>System Error Encountered</h2>";
         echo "<p>We are experiencing technical difficulties. Please try again later.</p>";
+        echo "<p style='color:#999; font-size:12px; margin-top:20px;'>" . htmlspecialchars($e->getMessage()) . "</p>";
         echo "</div>";
     } else {
         echo json_encode(['status' => false, 'message' => 'Internal Server Error']);
