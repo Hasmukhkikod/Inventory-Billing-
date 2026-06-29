@@ -460,7 +460,7 @@ $(document).ready(function() {
 
     // Categories Table
     const categoriesTable = $('#categoriesTable').DataTable({
-        ajax: { url: BASE_URL + '/api/products.php?action=categories_list', dataSrc: 'data' },
+        ajax: { url: BASE_URL + '/api/products.php?action=categories_list', dataSrc: 'data', cache: false },
         columns: [
             { data: 'category_name', className: 'fw-semibold text-dark' },
             { data: 'description', defaultContent: '-' },
@@ -470,6 +470,9 @@ $(document).ready(function() {
                     return `
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald btn-edit-cat" data-id="${row.id}" data-name="${row.category_name}" data-desc="${row.description}">
                             <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-danger btn-delete-cat" data-id="${row.id}">
+                            <i class="fa-solid fa-trash-can"></i>
                         </button>
                     `;
                 }
@@ -483,7 +486,7 @@ $(document).ready(function() {
         $.ajax({
             url: BASE_URL + '/api/products.php?action=category_save',
             type: 'POST',
-            data: $(this).serialize(),
+            data: $(this).serialize() + '&csrf_token=' + $('meta[name="csrf-token"]').attr('content'),
             dataType: 'json',
             success: function(res) {
                 if (res.status) {
@@ -493,6 +496,8 @@ $(document).ready(function() {
                     $("#cat-form-title").text("Add New Category");
                     $("#btn-cancel-cat").addClass('d-none');
                     Swal.fire({ icon: 'success', title: 'Saved', text: res.message, background: '#ffffff', color: '#0f172a' });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#0f172a' });
                 }
             }
         });
@@ -506,6 +511,21 @@ $(document).ready(function() {
         $("#btn-cancel-cat").removeClass('d-none');
     });
 
+    $('#categoriesTable').on('click', '.btn-delete-cat', function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Delete category?', icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#2563eb', cancelButtonColor: '#dc2626', confirmButtonText: 'Yes, delete!',
+            background: '#ffffff', color: '#0f172a'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post(BASE_URL + '/api/products.php?action=category_delete', { id: id }, function(res) {
+                    if (res.status) { categoriesTable.ajax.reload(); Swal.fire({ icon: 'success', title: 'Deleted', background: '#ffffff', color: '#0f172a' }); }
+                }, 'json');
+            }
+        });
+    });
+
     $("#btn-cancel-cat").click(function() {
         $("#categoryForm")[0].reset();
         $("#cat-id").val('0');
@@ -515,7 +535,7 @@ $(document).ready(function() {
 
     // Brands Table
     const brandsTable = $('#brandsTable').DataTable({
-        ajax: { url: BASE_URL + '/api/products.php?action=brands_list', dataSrc: 'data' },
+        ajax: { url: BASE_URL + '/api/products.php?action=brands_list', dataSrc: 'data', cache: false },
         columns: [
             { data: 'id' },
             { data: 'brand_name', className: 'fw-semibold text-dark' },
@@ -525,6 +545,9 @@ $(document).ready(function() {
                     return `
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald btn-edit-brand" data-id="${row.id}" data-name="${row.brand_name}">
                             <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-danger btn-delete-brand" data-id="${row.id}">
+                            <i class="fa-solid fa-trash-can"></i>
                         </button>
                     `;
                 }
@@ -538,7 +561,7 @@ $(document).ready(function() {
         $.ajax({
             url: BASE_URL + '/api/products.php?action=brand_save',
             type: 'POST',
-            data: $(this).serialize(),
+            data: $(this).serialize() + '&csrf_token=' + $('meta[name="csrf-token"]').attr('content'),
             dataType: 'json',
             success: function(res) {
                 if (res.status) {
@@ -548,6 +571,8 @@ $(document).ready(function() {
                     $("#brand-form-title").text("Add New Brand");
                     $("#btn-cancel-brand").addClass('d-none');
                     Swal.fire({ icon: 'success', title: 'Saved', text: res.message, background: '#ffffff', color: '#0f172a' });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#0f172a' });
                 }
             }
         });
@@ -560,6 +585,21 @@ $(document).ready(function() {
         $("#btn-cancel-brand").removeClass('d-none');
     });
 
+    $('#brandsTable').on('click', '.btn-delete-brand', function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Delete brand?', icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#2563eb', cancelButtonColor: '#dc2626', confirmButtonText: 'Yes, delete!',
+            background: '#ffffff', color: '#0f172a'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post(BASE_URL + '/api/products.php?action=brand_delete', { id: id }, function(res) {
+                    if (res.status) { brandsTable.ajax.reload(); Swal.fire({ icon: 'success', title: 'Deleted', background: '#ffffff', color: '#0f172a' }); }
+                }, 'json');
+            }
+        });
+    });
+
     $("#btn-cancel-brand").click(function() {
         $("#brandForm")[0].reset();
         $("#brand-id").val('0');
@@ -569,7 +609,7 @@ $(document).ready(function() {
 
     // Units Table
     const unitsTable = $('#unitsTable').DataTable({
-        ajax: { url: BASE_URL + '/api/products.php?action=units_list', dataSrc: 'data' },
+        ajax: { url: BASE_URL + '/api/products.php?action=units_list', dataSrc: 'data', cache: false },
         columns: [
             { data: 'unit_name', className: 'fw-semibold text-dark' },
             { data: 'short_name' },
@@ -579,6 +619,9 @@ $(document).ready(function() {
                     return `
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald btn-edit-unit" data-id="${row.id}" data-name="${row.unit_name}" data-short="${row.short_name}">
                             <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-danger btn-delete-unit" data-id="${row.id}">
+                            <i class="fa-solid fa-trash-can"></i>
                         </button>
                     `;
                 }
@@ -592,7 +635,7 @@ $(document).ready(function() {
         $.ajax({
             url: BASE_URL + '/api/products.php?action=unit_save',
             type: 'POST',
-            data: $(this).serialize(),
+            data: $(this).serialize() + '&csrf_token=' + $('meta[name="csrf-token"]').attr('content'),
             dataType: 'json',
             success: function(res) {
                 if (res.status) {
@@ -602,6 +645,8 @@ $(document).ready(function() {
                     $("#unit-form-title").text("Add Measurement Unit");
                     $("#btn-cancel-unit").addClass('d-none');
                     Swal.fire({ icon: 'success', title: 'Saved', text: res.message, background: '#ffffff', color: '#0f172a' });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#0f172a' });
                 }
             }
         });
@@ -613,6 +658,21 @@ $(document).ready(function() {
         $("#unit-short").val($(this).data('short'));
         $("#unit-form-title").text("Edit Unit");
         $("#btn-cancel-unit").removeClass('d-none');
+    });
+
+    $('#unitsTable').on('click', '.btn-delete-unit', function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Delete unit?', icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#2563eb', cancelButtonColor: '#dc2626', confirmButtonText: 'Yes, delete!',
+            background: '#ffffff', color: '#0f172a'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post(BASE_URL + '/api/products.php?action=unit_delete', { id: id }, function(res) {
+                    if (res.status) { unitsTable.ajax.reload(); Swal.fire({ icon: 'success', title: 'Deleted', background: '#ffffff', color: '#0f172a' }); }
+                }, 'json');
+            }
+        });
     });
 
     $("#btn-cancel-unit").click(function() {
@@ -641,7 +701,7 @@ $(document).ready(function() {
     loadConvUnits();
 
     const conversionsTable = $('#conversionsTable').DataTable({
-        ajax: { url: BASE_URL + '/api/products.php?action=unit_conversions_list', dataSrc: 'data' },
+        ajax: { url: BASE_URL + '/api/products.php?action=unit_conversions_list', dataSrc: 'data', cache: false },
         columns: [
             { data: null, className: 'fw-semibold text-dark', render: function(d,t,r) { return r.primary_unit_name + ' (' + r.primary_short_name + ')'; } },
             { data: null, render: function(d,t,r) { return r.secondary_unit_name + ' (' + r.secondary_short_name + ')'; } },

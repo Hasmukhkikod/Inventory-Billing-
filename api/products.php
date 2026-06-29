@@ -14,6 +14,7 @@ require_once __DIR__ . '/../config/database.php';
 $db = new Database();
 $auth = new Auth($db);
 $auth->requirePermission('Manage Inventory');
+session_write_close(); // Release session lock to allow concurrent AJAX requests
 
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
@@ -254,6 +255,18 @@ switch ($action) {
         }
         break;
 
+    case 'category_delete':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) Helpers::jsonResponse(false, "Invalid ID.");
+        try {
+            $db->query("UPDATE categories SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?", [$id]);
+            Helpers::jsonResponse(true, "Category deleted.");
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
+        }
+        break;
+
     // BRANDS CRUD
     case 'brands_list':
         try {
@@ -279,6 +292,18 @@ switch ($action) {
                 $newId = $db->insert("INSERT INTO brands (brand_name) VALUES (?)", [$name]);
                 Helpers::jsonResponse(true, "Brand added.", ['id' => (int)$newId]);
             }
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
+        }
+        break;
+
+    case 'brand_delete':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) Helpers::jsonResponse(false, "Invalid ID.");
+        try {
+            $db->query("UPDATE brands SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?", [$id]);
+            Helpers::jsonResponse(true, "Brand deleted.");
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
         }
@@ -310,6 +335,18 @@ switch ($action) {
                 $newId = $db->insert("INSERT INTO units (unit_name, short_name) VALUES (?, ?)", [$name, $short]);
                 Helpers::jsonResponse(true, "Unit added.", ['id' => (int)$newId]);
             }
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
+        }
+        break;
+
+    case 'unit_delete':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) Helpers::jsonResponse(false, "Invalid ID.");
+        try {
+            $db->query("UPDATE units SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?", [$id]);
+            Helpers::jsonResponse(true, "Unit deleted.");
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
         }

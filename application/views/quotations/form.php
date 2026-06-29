@@ -50,18 +50,7 @@ $isEdit = !empty($quotation);
 <!-- Section 2: Product Search & Cart -->
 <div class="panel-card mb-4">
     <div class="panel-body">
-        <!-- Search Bar -->
-        <div class="d-flex gap-3 mb-4 align-items-end">
-            <div class="flex-grow-1 position-relative">
-                <label class="form-label fw-semibold">Search Product / Scan Barcode</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-magnifying-glass text-indigo"></i></span>
-                    <input type="text" class="form-control" id="qt-product-search" placeholder="Type product name, SKU, or scan barcode..." autocomplete="off">
-                    <span class="input-group-text"><i class="fa-solid fa-barcode"></i></span>
-                </div>
-                <div class="pos-product-search-results d-none" id="qt-search-results-box"></div>
-            </div>
-        </div>
+        <!-- Product search moved into the table -->
 
         <!-- Cart Table -->
         <div class="table-responsive">
@@ -81,10 +70,17 @@ $isEdit = !empty($quotation);
                     </tr>
                 </thead>
                 <tbody>
+                    <tr class="cart-add-row">
+                        <td colspan="10" class="py-2">
+                            <select class="form-select" id="cart-product-select" style="width:100%;">
+                                <option value="">Add Product</option>
+                            </select>
+                        </td>
+                    </tr>
                     <tr class="cart-empty-row">
                         <td colspan="10" class="text-center py-4 text-secondary">
                             <i class="fa-solid fa-basket-shopping fs-3 mb-2 d-block text-muted"></i>
-                            Search and select products above to add them to the quotation
+                            Select products above to add them to the quotation
                         </td>
                     </tr>
                 </tbody>
@@ -194,7 +190,7 @@ $(document).ready(function() {
     const editCustomerId = <?php echo $isEdit ? (int)($quotation['customer_id'] ?? 0) : 0; ?>;
 
     // Focus search on Add Product click
-    $('#btn-focus-search').click(function() { $('#qt-product-search').focus(); });
+    $('#btn-focus-search').click(function() { $('#cart-product-select').select2('open'); });
 
     // Clear All
     $('#btn-clear-cart').click(function() {
@@ -268,72 +264,80 @@ $(document).ready(function() {
     renderCart();
     <?php endif; ?>
 
-    // Product search
-    $("#qt-product-search").on('input', function() {
-        const query = $(this).val().trim();
-        if (query.length < 2) { $("#qt-search-results-box").addClass('d-none'); return; }
-
-        $.ajax({
-            url: BASE_URL + '/api/billing.php?action=search_product&q=' + encodeURIComponent(query),
-            type: 'GET', dataType: 'json',
-            success: function(res) {
-                const box = $("#qt-search-results-box");
-                box.empty();
-                if (res.status && res.data.length > 0) {
-                    res.data.forEach(item => {
-                        let stockDisplay = parseFloat(item.current_stock || 0) + ' ' + (item.unit_name || 'PCS');
-                        if (item.secondary_unit_name && item.conversion_factor) {
-                            const secStock = parseFloat((parseFloat(item.current_stock || 0) * parseFloat(item.conversion_factor)).toFixed(2));
-                            stockDisplay += ' (' + secStock + ' ' + item.secondary_unit_name + ')';
+    // Product search using Select2 (like Invoices)
+    $('#cart-product-select').select2({
+        placeholder: 'Add Product — search by name, SKU or barcode...',
+        allowClear: true,
+        width: '100%',
+        ajax: {
+            url: BASE_URL + '/api/billing.php',
+            dataType: 'json',
+            delay: 300,
+            data: function (params) {
+                return { action: 'search_product', q: params.term || '*' };
+            },
+            processResults: function (data) {
+                if (!data.status) return { results: [] };
+                return {
+                    results: data.data.map(function (p) {
+                        const stock = parseFloat(p.current_stock);
+                        let stockTxt = stock + ' ' + (p.unit_name || 'PCS');
+                        if (p.secondary_unit_name && p.conversion_factor) {
+                            const secStock = parseFloat((stock * parseFloat(p.conversion_factor)).toFixed(2));
+                            stockTxt += ' (' + secStock + ' ' + p.secondary_unit_name + ')';
                         }
-                        box.append(`
-                            <div class="search-result-item p-2 border-bottom" style="cursor:pointer;" data-id="${item.id}">
-                                <strong>${item.product_name}</strong> - <span class="text-indigo small">${item.sku}</span>
-                                <span class="float-end small text-success">${stockDisplay}</span>
-                                <div class="text-secondary small">Sell: &#8377;${parseFloat(item.selling_price||0).toFixed(2)} | GST: ${item.gst_percentage}% | HSN: ${item.hsn_code||'-'}</div>
-                            </div>
-                        `);
-                    });
-                    box.removeClass('d-none');
-                } else {
-                    box.html('<div class="p-2 text-secondary">No products found</div>').removeClass('d-none');
-                }
-            }
-        });
-    });
-
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('#qt-product-search, #qt-search-results-box').length) {
-            $("#qt-search-results-box").addClass('d-none');
+                        return {
+                            id: p.id,
+                            text: p.product_name + ' (' + p.sku + ')',
+                            product: p,
+                            stock: stockTxt,
+                            price: parseFloat(p.selling_price || 0).toFixed(2),
+                            inStock: stock > 0
+                        };
+                    })
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 0,
+        templateResult: function (item) {
+            if (item.loading) return 'Searching...';
+            if (!item.product) return item.text;
+            const badge = item.inStock
+                ? '<span class="badge bg-light-success float-end">' + item.stock + '</span>'
+                : '<span class="badge bg-light-danger float-end">Out of stock</span>';
+            return $('<div>' +
+                '<strong>' + item.product.product_name + '</strong> <span class="text-muted small">(' + item.product.sku + ')</span>' + badge +
+                '<div class="small text-indigo">₹' + item.price + ' | GST: ' + parseFloat(item.product.gst_percentage || 0) + '%</div>' +
+                '</div>');
+        },
+        templateSelection: function () {
+            return 'Add Product';
         }
     });
 
-    $("#qt-search-results-box").on('click', '.search-result-item', function() {
-        const id = $(this).data('id');
-        $.ajax({
-            url: BASE_URL + '/api/products.php?action=get&id=' + id,
-            type: 'GET', dataType: 'json',
-            success: function(res) {
-                if (res.status) {
-                    addToCart(res.data);
-                    $("#qt-product-search").val('');
-                    $("#qt-search-results-box").addClass('d-none');
-                }
-            }
-        });
+    $('#cart-product-select').on('select2:select', function (e) {
+        const data = e.params.data;
+        if (data && data.product) {
+            addToCart(data.product);
+            $(this).val(null).trigger('change');
+        }
     });
 
     function addToCart(p) {
-        const existing = cart.find(item => item.id === p.id);
+        const existing = cart.find(item => item.id === parseInt(p.id));
         if (existing) {
             existing.qty += 1;
         } else {
             cart.push({
-                id: p.id,
+                id: parseInt(p.id),
                 product_name: p.product_name,
                 sku: p.sku,
                 hsn_code: p.hsn_code || '',
                 unit_name: p.unit_name || 'PCS',
+                qty: 1,
+                rate: parseFloat(p.selling_price || 0),
+                original_rate: parseFloat(p.selling_price || 0),
                 unit_id: p.unit_id || null,
                 secondary_unit_name: p.secondary_unit_name || null,
                 secondary_unit_id: p.secondary_unit_id || null,
@@ -341,9 +345,6 @@ $(document).ready(function() {
                 billing_unit_id: p.unit_id || null,
                 billing_unit_name: p.unit_name || 'PCS',
                 is_secondary_unit: 0,
-                original_rate: parseFloat(p.selling_price || 0),
-                qty: 1,
-                rate: parseFloat(p.selling_price || 0),
                 gst_percentage: parseFloat(p.gst_percentage || 0),
                 discount_value: 0,
                 discount_type: 'percent'
@@ -354,7 +355,7 @@ $(document).ready(function() {
 
     function renderCart() {
         const body = $("#qt-cart-table tbody");
-        body.find('tr:not(.cart-empty-row)').remove();
+        body.find('tr:not(.cart-add-row):not(.cart-empty-row)').remove();
 
         if (cart.length === 0) {
             $(".cart-empty-row").show();
@@ -369,7 +370,7 @@ $(document).ready(function() {
             if (item.discount_type === 'percent') {
                 disc_amt = base * (item.discount_value / 100);
             } else {
-                disc_amt = item.discount_value;
+                disc_amt = parseFloat(item.discount_value) || 0;
             }
             const after_disc = base - disc_amt;
             const tax_amt = after_disc * (item.gst_percentage / 100);
@@ -393,7 +394,7 @@ $(document).ready(function() {
                 unitCell = '<td class="text-muted small">' + (item.billing_unit_name || item.unit_name || 'PCS') + '</td>';
             }
 
-            body.append(`
+            $('.cart-add-row').before(`
                 <tr data-index="${index}">
                     <td>${index + 1}</td>
                     <td>

@@ -59,19 +59,6 @@ $isEdit = !empty($purchase);
 <!-- Section 2: Product Search & Cart -->
 <div class="panel-card mb-4">
     <div class="panel-body">
-        <!-- Search Bar -->
-        <div class="d-flex gap-3 mb-4 align-items-end">
-            <div class="flex-grow-1 position-relative">
-                <label class="form-label fw-semibold">Search Product / Scan Barcode</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="fa-solid fa-magnifying-glass text-indigo"></i></span>
-                    <input type="text" class="form-control" id="pur-product-search" placeholder="Type product name, SKU, or scan barcode..." autocomplete="off">
-                    <span class="input-group-text"><i class="fa-solid fa-barcode"></i></span>
-                </div>
-                <div class="pos-product-search-results d-none" id="pur-search-results-box"></div>
-            </div>
-        </div>
-
         <!-- Cart Table -->
         <div class="table-responsive">
             <table class="table table-bordered align-middle mb-0" id="pur-cart-table">
@@ -89,19 +76,25 @@ $isEdit = !empty($purchase);
                     </tr>
                 </thead>
                 <tbody>
+                    <tr class="cart-add-row">
+                        <td colspan="9" class="py-2">
+                            <select class="form-select" id="cart-product-select" style="width:100%;">
+                                <option value="">Add Product</option>
+                            </select>
+                        </td>
+                    </tr>
                     <tr class="cart-empty-row">
                         <td colspan="9" class="text-center py-4 text-secondary">
                             <i class="fa-solid fa-basket-shopping fs-3 mb-2 d-block text-muted"></i>
-                            Search and select products above to add them to the purchase order
+                            Select products above to add them to the purchase order
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Add Row / Clear -->
+        <!-- Clear -->
         <div class="d-flex gap-2 mt-3">
-            <button class="btn btn-sm btn-outline-primary" id="btn-focus-search"><i class="fa-solid fa-plus me-1"></i>Add Product</button>
             <button class="btn btn-sm btn-outline-danger" id="btn-clear-cart">Clear All</button>
         </div>
     </div>
@@ -202,9 +195,6 @@ $(document).ready(function() {
     const csrfToken = $('input[name="csrf_token"]').val();
     const editId = $('#pur-edit-id').val() || 0;
 
-    // Focus search on Add Product click
-    $('#btn-focus-search').click(function() { $('#pur-product-search').focus(); });
-
     // Clear All
     $('#btn-clear-cart').click(function() {
         if (cart.length === 0) return;
@@ -279,98 +269,100 @@ $(document).ready(function() {
         });
     });
 
-    // Product search
-    $("#pur-product-search").on('input', function() {
-        const query = $(this).val().trim();
-        if (query.length < 2) { $("#pur-search-results-box").addClass('d-none'); return; }
-
-        $.ajax({
-            url: BASE_URL + '/api/billing.php?action=search_product&q=' + encodeURIComponent(query),
-            type: 'GET', dataType: 'json',
-            success: function(res) {
-                const box = $("#pur-search-results-box");
-                box.empty();
-                if (res.status && res.data.length > 0) {
-                    res.data.forEach(item => {
-                        const stock = parseFloat(item.current_stock);
-                        let stockDisplay = stock + ' ' + (item.unit_name || 'PCS');
-                        if (item.secondary_unit_name && item.conversion_factor) {
-                            const secStock = parseFloat((stock * parseFloat(item.conversion_factor)).toFixed(2));
-                            stockDisplay += ' (' + secStock + ' ' + item.secondary_unit_name + ')';
+    // Product search using Select2 (like Invoices)
+    $('#cart-product-select').select2({
+        placeholder: 'Add Product — search by name, SKU or barcode...',
+        allowClear: true,
+        width: '100%',
+        ajax: {
+            url: BASE_URL + '/api/billing.php',
+            dataType: 'json',
+            delay: 300,
+            data: function (params) {
+                return { action: 'search_product', q: params.term || '*' };
+            },
+            processResults: function (data) {
+                if (!data.status) return { results: [] };
+                return {
+                    results: data.data.map(function (p) {
+                        const stock = parseFloat(p.current_stock);
+                        let stockTxt = stock + ' ' + (p.unit_name || 'PCS');
+                        if (p.secondary_unit_name && p.conversion_factor) {
+                            const secStock = parseFloat((stock * parseFloat(p.conversion_factor)).toFixed(2));
+                            stockTxt += ' (' + secStock + ' ' + p.secondary_unit_name + ')';
                         }
-                        box.append(`
-                            <div class="search-result-item p-2 border-bottom" style="cursor:pointer;" data-id="${item.id}">
-                                <strong>${item.product_name}</strong> - <span class="text-indigo small">${item.sku}</span>
-                                <div class="text-secondary small">Cost: &#8377;${parseFloat(item.cost_price||0).toFixed(2)} | Stock: ${stockDisplay} | HSN: ${item.hsn_code||'-'}</div>
-                            </div>
-                        `);
-                    });
-                    box.removeClass('d-none');
-                } else {
-                    box.html('<div class="p-2 text-secondary">No products found</div>').removeClass('d-none');
-                }
-            }
-        });
-    });
-
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('#pur-product-search, #pur-search-results-box').length) {
-            $("#pur-search-results-box").addClass('d-none');
+                        return {
+                            id: p.id,
+                            text: p.product_name + ' (' + p.sku + ')',
+                            product: p,
+                            stock: stockTxt,
+                            price: parseFloat(p.cost_price || p.selling_price || 0).toFixed(2),
+                            inStock: true // always allow ordering more even if out of stock
+                        };
+                    })
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 0,
+        templateResult: function (item) {
+            if (item.loading) return 'Searching...';
+            if (!item.product) return item.text;
+            return $('<div>' +
+                '<strong>' + item.product.product_name + '</strong> <span class="text-muted small">(' + item.product.sku + ')</span>' +
+                '<span class="badge bg-light-secondary float-end">' + item.stock + '</span>' +
+                '<div class="small text-indigo">Cost: ₹' + item.price + ' | GST: ' + parseFloat(item.product.gst_percentage || 0) + '%</div>' +
+                '</div>');
+        },
+        templateSelection: function () {
+            return 'Add Product';
         }
     });
 
-    $("#pur-search-results-box").on('click', '.search-result-item', function() {
-        const id = $(this).data('id');
-        $.ajax({
-            url: BASE_URL + '/api/products.php?action=get&id=' + id,
-            type: 'GET', dataType: 'json',
-            success: function(res) {
-                if (res.status) {
-                    addToCart(res.data);
-                    $("#pur-product-search").val('');
-                    $("#pur-search-results-box").addClass('d-none');
-                }
-            }
-        });
+    $('#cart-product-select').on('select2:select', function (e) {
+        const data = e.params.data;
+        if (data && data.product) {
+            addToCart(data.product);
+            $(this).val(null).trigger('change');
+        }
     });
 
-    function addToCart(p) {
-        const existing = cart.find(item => item.id === p.id);
+    function addToCart(item) {
+        const existing = cart.find(i => i.id === parseInt(item.id));
         if (existing) {
             existing.qty += 1;
         } else {
             cart.push({
-                id: p.id,
-                product_name: p.product_name,
-                sku: p.sku,
-                hsn_code: p.hsn_code || '',
-                unit_name: p.unit_name || 'PCS',
+                id: parseInt(item.id),
+                product_name: item.product_name,
+                sku: item.sku,
+                hsn_code: item.hsn_code || '',
+                unit_name: item.unit_name || 'PCS',
                 qty: 1,
-                cost_price: parseFloat(p.cost_price || 0),
-                gst_percentage: parseFloat(p.gst_percentage || 18),
-                unit_id: p.unit_id || null,
-                secondary_unit_name: p.secondary_unit_name || null,
-                secondary_unit_id: p.secondary_unit_id || null,
-                conversion_factor: p.conversion_factor ? parseFloat(p.conversion_factor) : null,
-                billing_unit_id: p.unit_id || null,
-                billing_unit_name: p.unit_name || 'PCS',
+                cost_price: parseFloat(item.cost_price || item.selling_price || 0),
+                gst_percentage: parseFloat(item.gst_percentage || 0),
+                unit_id: item.unit_id || null,
+                secondary_unit_name: item.secondary_unit_name || null,
+                secondary_unit_id: item.secondary_unit_id || null,
+                conversion_factor: item.conversion_factor ? parseFloat(item.conversion_factor) : null,
+                billing_unit_id: item.unit_id || null,
+                billing_unit_name: item.unit_name || 'PCS',
                 is_secondary_unit: 0,
-                original_rate: parseFloat(p.cost_price)
+                original_rate: parseFloat(item.cost_price || item.selling_price || 0)
             });
         }
         renderCart();
     }
 
     function renderCart() {
-        const body = $("#pur-cart-table tbody");
-        body.find('tr:not(.cart-empty-row)').remove();
-
+        const body = $('#pur-cart-table tbody');
+        body.find('tr:not(.cart-add-row):not(.cart-empty-row)').remove();
         if (cart.length === 0) {
-            $(".cart-empty-row").show();
+            $('.cart-empty-row').show();
             calculateTotals();
             return;
         }
-        $(".cart-empty-row").hide();
+        $('.cart-empty-row').hide();
 
         cart.forEach((item, index) => {
             const row_total = item.qty * item.cost_price * (1 + item.gst_percentage / 100);
@@ -393,7 +385,7 @@ $(document).ready(function() {
                 unitCell = '<td class="text-muted small">' + (item.billing_unit_name || item.unit_name || 'PCS') + '</td>';
             }
 
-            body.append(`
+            $('.cart-add-row').before(`
                 <tr data-index="${index}">
                     <td>${index + 1}</td>
                     <td>
