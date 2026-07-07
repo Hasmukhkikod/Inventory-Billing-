@@ -33,6 +33,8 @@ $items = $db->query("
 
 $company = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
 if (!$company) $company = ['company_name' => 'Grovixo', 'phone' => '', 'address' => '', 'gst_number' => '', 'invoice_footer' => 'Thank you!'];
+$pos_template = $company['pos_template'] ?? 'pos_standard';
+$thermal_width = $company['thermal_width'] ?? '80mm';
 
 $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND status = 'ACTIVE'", [$id])->fetchAll();
 ?>
@@ -72,17 +74,39 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
         @media screen {
             .receipt { border: 1px solid #ccc; margin: 20px auto; padding: 10px; }
         }
+        
+        /* POS Themes */
+        .receipt.pos_minimal { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        .receipt.pos_minimal .company-name { font-size: 18px; letter-spacing: 1px; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
+        .receipt.pos_minimal .divider { border-top: 1px solid #ddd; }
+        .receipt.pos_minimal .double-divider { display: none; }
+        
+        .receipt.pos_bold .company-name { display: none; }
+        .receipt.pos_bold .header-box { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: 900; font-size: 18px; text-transform: uppercase; margin-bottom: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .receipt.pos_bold table th { background: #000; color: #fff; padding: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .receipt.pos_bold .total-box { background: #000; color: #fff; padding: 8px; text-align: center; font-size: 16px; margin-top: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     </style>
 </head>
 <body>
 <div class="no-print">
     <button onclick="window.print();" style="padding:8px 20px;font-size:14px;cursor:pointer;">Print Receipt</button>
+    <button onclick="downloadPDF();" style="padding:8px 20px;font-size:14px;cursor:pointer;background-color:#dc3545;color:white;border:none;border-radius:3px;">Download PDF</button>
     <button onclick="window.close();" style="padding:8px 20px;font-size:14px;cursor:pointer;">Close</button>
 </div>
-<div class="receipt">
+<div class="receipt <?php echo htmlspecialchars($pos_template); ?>" style="width: <?php echo htmlspecialchars($thermal_width); ?>;">
+    
+    <?php if ($pos_template === 'pos_bold'): ?>
+        <div class="header-box">
+            <div><?php echo Helpers::sanitize($company['company_name']); ?></div>
+            <div style="font-size:10px; font-weight:normal; margin-top:2px;"><?php echo Helpers::sanitize($company['address'] ?? ''); ?></div>
+        </div>
+    <?php endif; ?>
+
     <div class="text-center">
         <div class="company-name"><?php echo Helpers::sanitize($company['company_name']); ?></div>
+        <?php if ($pos_template !== 'pos_bold'): ?>
         <div class="small"><?php echo Helpers::sanitize($company['address'] ?? ''); ?></div>
+        <?php endif; ?>
         <div class="small">Ph: <?php echo Helpers::sanitize($company['phone'] ?? ''); ?></div>
         <?php if (!empty($company['gst_number'])): ?>
             <div class="small">GSTIN: <?php echo Helpers::sanitize($company['gst_number']); ?></div>
@@ -131,8 +155,8 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
     <?php if ((float)$invoice['igst_amount'] > 0): ?>
         <div class="row small"><span>IGST:</span><span><?php echo Helpers::formatCurrency($invoice['igst_amount']); ?></span></div>
     <?php endif; ?>
-    <?php if ((float)$invoice['discount'] > 0): ?>
-        <div class="row"><span>Discount:</span><span>-<?php echo Helpers::formatCurrency($invoice['discount']); ?></span></div>
+    <?php if ((float)$invoice['discount_amount'] > 0): ?>
+        <div class="row"><span>Discount:</span><span>-<?php echo Helpers::formatCurrency($invoice['discount_amount']); ?></span></div>
     <?php endif; ?>
     <?php if ((float)$invoice['coupon_discount'] > 0): ?>
         <div class="row"><span>Coupon:</span><span>-<?php echo Helpers::formatCurrency($invoice['coupon_discount']); ?></span></div>
@@ -143,6 +167,11 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
 
     <div class="double-divider"></div>
     <div class="row total-line"><span>TOTAL:</span><span><?php echo Helpers::formatCurrency($invoice['grand_total']); ?></span></div>
+    
+    <?php if ($pos_template === 'pos_bold'): ?>
+    <div class="total-box">TOTAL: <?php echo Helpers::formatCurrency($invoice['grand_total']); ?></div>
+    <?php endif; ?>
+    
     <div class="double-divider"></div>
 
     <?php if (count($payments) > 1): ?>
@@ -174,5 +203,19 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
     <div class="text-center small" style="margin-top:4px;">Powered by Grovixo IIMS</div>
 </div>
 <script>window.onload = function() { window.print(); };</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    function downloadPDF() {
+        const element = document.querySelector('.receipt');
+        const opt = {
+            margin: 0,
+            filename: 'Receipt_<?php echo $invoice['invoice_no']; ?>.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: [80, 200], orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
 </body>
 </html>

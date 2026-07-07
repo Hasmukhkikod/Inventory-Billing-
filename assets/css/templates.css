@@ -1,0 +1,90 @@
+/* 
+   IIMS v2.0 - Document Print Templates 
+   Apply these classes to the main wrapper (.invoice-box, .box) 
+*/
+
+/* 1. Standard (Default) */
+.theme-standard .brand-bar {
+    background: linear-gradient(135deg, #2563eb, #6366f1);
+    color: #fff;
+}
+
+/* 2. Professional (Corporate, Dark Header) */
+.theme-professional {
+    font-family: 'Georgia', serif;
+}
+.theme-professional .brand-bar {
+    background: #1f2937; /* Dark slate */
+    color: #f3f4f6;
+    border-radius: 0;
+}
+.theme-professional .table th {
+    background-color: #374151 !important;
+    color: #fff !important;
+}
+.theme-professional .invoice-box, 
+.theme-professional.box {
+    border: 2px solid #374151;
+    border-radius: 0;
+}
+
+/* 3. Modern (Rounded, Clean, Vibrant) */
+.theme-modern {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+.theme-modern .invoice-box,
+.theme-modern.box {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    padding: 40px;
+}
+.theme-modern .brand-bar {
+    background: transparent;
+    color: #111827;
+    border-bottom: 2px solid #ecfdf5;
+    padding: 0 0 20px 0;
+    margin-bottom: 20px;
+}
+.theme-modern .brand-bar h4, .theme-modern .brand-bar h5 {
+    color: #10b981; /* Emerald */
+    font-weight: 800;
+}
+.theme-modern .table th {
+    background-color: #ecfdf5 !important;
+    color: #065f46 !important;
+    border-bottom: none !important;
+    border-radius: 8px;
+}
+
+/* 4. Classic (Tabular, Black & White, Thick Borders) */
+.theme-classic {
+    font-family: 'Times New Roman', Times, serif;
+    color: #000;
+}
+.theme-classic .invoice-box,
+.theme-classic.box {
+    border: 3px solid #000;
+    border-radius: 0;
+    padding: 20px;
+}
+.theme-classic .brand-bar {
+    background: #fff;
+    color: #000;
+    border-bottom: 3px solid #000;
+    border-radius: 0;
+    padding: 10px 0;
+}
+.theme-classic .table th, 
+.theme-classic .table td {
+    border: 1px solid #000 !important;
+}
+.theme-classic .table th {
+    background-color: #eee !important;
+    color: #000 !important;
+    font-weight: bold;
+}
+.theme-classic .bg-light {
+    background-color: #fff !important;
+    border-bottom: 1px solid #000;
+}

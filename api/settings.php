@@ -39,7 +39,10 @@ switch ($action) {
                     'loyalty_points_per_100' => 0,
                     'loyalty_redeem_value' => 0,
                     'invoice_template' => 'standard',
+                    'pos_template' => 'pos_standard',
                     'thermal_width' => '80mm',
+                    'pos_mode' => 0,
+                    'system_language' => 'en',
                     'bank_name' => '',
                     'bank_account_no' => '',
                     'bank_ifsc' => '',
@@ -98,7 +101,10 @@ switch ($action) {
         $loyalty_points_per_100 = (int)($_POST['loyalty_points_per_100'] ?? 0);
         $loyalty_redeem_value = (float)($_POST['loyalty_redeem_value'] ?? 0);
         $invoice_template = trim($_POST['invoice_template'] ?? 'standard');
+        $pos_template = trim($_POST['pos_template'] ?? 'pos_standard');
         $thermal_width = trim($_POST['thermal_width'] ?? '80mm');
+        $pos_mode = (int)($_POST['pos_mode'] ?? 0);
+        $system_language = trim($_POST['system_language'] ?? 'en');
         $bank_name = trim($_POST['bank_name'] ?? '');
         $bank_account_no = trim($_POST['bank_account_no'] ?? '');
         $bank_ifsc = trim($_POST['bank_ifsc'] ?? '');
@@ -160,7 +166,7 @@ switch ($action) {
                     purchase_start = ?, purchase_end = ?, challan_start = ?, challan_end = ?,
                     gst_slabs = ?, state_code = ?, invoice_footer = ?, invoice_terms = ?,
                     loyalty_enabled = ?, loyalty_points_per_100 = ?, loyalty_redeem_value = ?,
-                    invoice_template = ?, thermal_width = ?,
+                    invoice_template = ?, pos_template = ?, thermal_width = ?, pos_mode = ?, system_language = ?,
                     bank_name = ?, bank_account_no = ?, bank_ifsc = ?, bank_branch = ?, upi_id = ?";
             $params = [
                 $company_name, $gst_number, $email, $phone, $address,
@@ -169,7 +175,7 @@ switch ($action) {
                 $purchase_start, $purchase_end, $challan_start, $challan_end,
                 $gst_slabs, $state_code, $invoice_footer, $invoice_terms,
                 $loyalty_enabled, $loyalty_points_per_100, $loyalty_redeem_value,
-                $invoice_template, $thermal_width,
+                $invoice_template, $pos_template, $thermal_width, $pos_mode, $system_language,
                 $bank_name, $bank_account_no, $bank_ifsc, $bank_branch, $upi_id
             ];
 

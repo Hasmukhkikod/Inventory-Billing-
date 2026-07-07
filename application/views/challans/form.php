@@ -259,7 +259,7 @@ $(document).ready(function() {
     $('#cart-product-select').select2({
         placeholder: 'Add Product — search by name, SKU or barcode...',
         allowClear: true,
-        width: '100%',
+        theme: 'bootstrap-5', width: '100%',
         ajax: {
             url: BASE_URL + '/api/billing.php',
             dataType: 'json',
@@ -414,12 +414,10 @@ $(document).ready(function() {
         const selectedValue = $(this).val();
         const item = cart[idx];
         if (selectedValue === 'secondary' && item.is_secondary_unit === 0) {
-            item.quantity = parseFloat((item.quantity * item.conversion_factor).toFixed(2));
             item.is_secondary_unit = 1;
             item.billing_unit_id = item.secondary_unit_id;
             item.billing_unit_name = item.secondary_unit_name;
         } else if (selectedValue === 'primary' && item.is_secondary_unit === 1) {
-            item.quantity = parseFloat((item.quantity / item.conversion_factor).toFixed(4));
             item.is_secondary_unit = 0;
             item.billing_unit_id = item.unit_id;
             item.billing_unit_name = item.unit_name;

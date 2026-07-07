@@ -37,10 +37,11 @@ $isEdit = !empty($user);
                 <div class="col-md-3">
                     <label class="form-label">System Access Role *</label>
                     <select class="form-select" name="role_id" id="usr-role" required>
-                        <option value="1" <?php echo ($isEdit && $user['role_id'] == 1) ? 'selected' : ''; ?>>Super Admin</option>
-                        <option value="2" <?php echo ($isEdit && $user['role_id'] == 2) ? 'selected' : ''; ?>>Admin</option>
-                        <option value="3" <?php echo (!$isEdit || $user['role_id'] == 3) ? 'selected' : ''; ?>>Staff / Cashier</option>
-                        <option value="4" <?php echo ($isEdit && $user['role_id'] == 4) ? 'selected' : ''; ?>>Accountant</option>
+                        <?php foreach($roles as $r): ?>
+                            <option value="<?php echo $r['id']; ?>" <?php echo ($isEdit && $user['role_id'] == $r['id']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($r['role_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="col-md-3">

@@ -41,6 +41,8 @@ if (!$company) $company = ['company_name' => 'Grovixo', 'phone' => '', 'email' =
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery Challan - <?php echo $challan['challan_no']; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/templates.css">
     <style>
         body { background: #fff; color: #212529; font-size: 13px; font-family: 'Segoe UI', Arial, sans-serif; }
         .box { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #eee; }
@@ -52,10 +54,12 @@ if (!$company) $company = ['company_name' => 'Grovixo', 'phone' => '', 'email' =
 <body>
 <div class="container my-4 no-print text-end" style="max-width:800px;">
     <button class="btn btn-primary btn-sm" onclick="window.print();">Print</button>
+    <button class="btn btn-danger btn-sm" onclick="downloadPDF();"><i class="fa-solid fa-file-pdf me-1"></i>PDF</button>
     <button class="btn btn-outline-secondary btn-sm" onclick="window.close();">Close</button>
 </div>
-<div class="box">
-    <div class="brand-bar d-flex justify-content-between align-items-center">
+<?php $theme = $company['invoice_template'] ?? 'standard'; ?>
+<div class="box theme-<?php echo htmlspecialchars($theme); ?>">
+    <div class="brand-bar d-flex justify-content-between align-items-center mb-0">
         <div><h4 class="fw-bold mb-0"><?php echo Helpers::sanitize($company['company_name']); ?></h4><small class="opacity-75"><?php echo Helpers::sanitize($company['address'] ?? ''); ?></small></div>
         <div class="text-end"><h5 class="mb-0">DELIVERY CHALLAN</h5><small class="opacity-75"><?php echo $challan['challan_no']; ?></small></div>
     </div>
@@ -109,5 +113,19 @@ if (!$company) $company = ['company_name' => 'Grovixo', 'phone' => '', 'email' =
     </div>
     <div class="text-center mt-4 text-muted small border-top pt-3">This is a delivery challan for goods dispatch. Not a tax invoice.</div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    function downloadPDF() {
+        const element = document.querySelector('.box');
+        const opt = {
+            margin: 0.2,
+            filename: 'Challan_<?php echo $challan['challan_no']; ?>.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
 </body>
 </html>

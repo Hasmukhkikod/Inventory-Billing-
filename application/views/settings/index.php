@@ -6,9 +6,9 @@
 ?>
 
 <div class="row g-4">
-    <!-- Left forms panel -->
-    <div class="col-md-8">
-        <div class="panel-card">
+    <!-- Top forms panel (Full Width) -->
+    <div class="col-md-12">
+        <div class="panel-card" style="overflow: visible;">
             <div class="panel-header">
                 <ul class="nav nav-tabs border-0" id="settingsTabs" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -36,11 +36,21 @@
                             <i class="fa-solid fa-tags me-2"></i>Coupons
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme-pane" type="button" role="tab" aria-controls="theme-pane" aria-selected="false">
+                            <i class="fa-solid fa-paint-roller me-2"></i>Theme & Display
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false">
+                            <i class="fa-solid fa-database me-2"></i>Data & Backups
+                        </button>
+                    </li>
                 </ul>
             </div>
             
             <div class="panel-body">
-                <form id="settingsForm">
+                <form id="settingsForm" novalidate>
                     <?php echo \App\Models\Helpers::csrfField(); ?>
                     
                     <div class="tab-content text-dark" id="settingsTabsContent">
@@ -266,11 +276,11 @@
                             </div>
                         </div>
 
-                        <!-- LOYALTY & TEMPLATES PANE -->
+                        <!-- LOYALTY PANE -->
                         <div class="tab-pane fade" id="loyalty-pane" role="tabpanel" aria-labelledby="loyalty-tab" tabindex="0">
                             <div class="row g-3">
                                 <div class="col-md-12">
-                                    <h6 class="text-indigo mb-0"><i class="fa-solid fa-gift me-2"></i>Loyalty Settings</h6>
+                                    <h6 class="text-indigo mb-3"><i class="fa-solid fa-gift me-2"></i>Customer Loyalty Program</h6>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Enable Loyalty Points</label>
@@ -287,24 +297,369 @@
                                     <label class="form-label">&#8377; value per point</label>
                                     <input type="number" step="0.01" class="form-control" name="loyalty_redeem_value" id="set-loyalty-redeem" min="0" placeholder="e.g. 0.50">
                                 </div>
+                            </div>
+                        </div>
 
-                                <div class="col-md-12 mt-4">
-                                    <h6 class="text-indigo mb-0"><i class="fa-solid fa-file-invoice me-2"></i>Invoice Template</h6>
+                        <!-- THEME & DISPLAY PANE -->
+                        <div class="tab-pane fade" id="theme-pane" role="tabpanel" aria-labelledby="theme-tab" tabindex="0">
+                            <div class="row g-4">
+                                <div class="col-md-12" id="invoice-template-section">
+                                    <h6 class="text-indigo mb-3"><i class="fa-solid fa-file-pdf me-2"></i>Invoice Document Template</h6>
+                                    <input type="hidden" name="invoice_template" id="set-invoice-template" value="standard">
+                                    <style>
+                                        .tab-pane:focus { outline: none; }
+                                        .template-preview-wrapper { position: relative; z-index: 1; }
+                                        .template-preview-wrapper:hover { z-index: 50; }
+                                        .template-preview { border: 2px solid transparent; cursor: pointer; transition: 0.2s; border-radius: 8px; overflow: hidden; }
+                                        .template-preview.selected { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
+                                        .preview-content { height: 120px; background: #f8f9fa; display: flex; flex-direction: column; }
+                                        .preview-header { height: 25px; width: 100%; }
+                                        .preview-body { flex: 1; padding: 10px; }
+                                        .preview-line { height: 4px; background: #e9ecef; margin-bottom: 4px; border-radius: 2px; }
+                                        
+                                        /* Large Hover Popover */
+                                        .hover-large-preview {
+                                            position: absolute;
+                                            bottom: 100%;
+                                            left: 50%;
+                                            transform: translateX(-50%) translateY(10px) scale(0.9);
+                                            opacity: 0;
+                                            visibility: hidden;
+                                            width: 320px;
+                                            background: #fff;
+                                            border-radius: 12px;
+                                            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+                                            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                                            pointer-events: none;
+                                            margin-bottom: 15px;
+                                            border: 1px solid #e5e7eb;
+                                            overflow: hidden;
+                                        }
+                                        .template-preview-wrapper:hover .hover-large-preview {
+                                            opacity: 1;
+                                            visibility: visible;
+                                            transform: translateX(-50%) translateY(0) scale(1);
+                                        }
+                                        .hover-large-preview::after {
+                                            content: '';
+                                            position: absolute;
+                                            top: 100%;
+                                            left: 50%;
+                                            margin-left: -10px;
+                                            border-width: 10px;
+                                            border-style: solid;
+                                            border-color: #fff transparent transparent transparent;
+                                        }
+                                        /* Detailed Mockup Elements */
+                                        .mockup { padding: 15px; font-family: sans-serif; }
+                                        .mockup-table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+                                        .mockup-table th { font-size: 8px; text-transform: uppercase; padding: 4px; text-align: left; }
+                                        .mockup-table td { font-size: 8px; padding: 4px; border-bottom: 1px solid #eee; }
+                                        
+                                        /* Alignment Helpers */
+                                        .hover-large-preview.preview-align-left { left: 0; transform: translateX(0) translateY(10px) scale(0.9); transform-origin: left bottom; }
+                                        .template-preview-wrapper:hover .hover-large-preview.preview-align-left { transform: translateX(0) translateY(0) scale(1); }
+                                        .hover-large-preview.preview-align-left::after { left: 15%; margin-left: 0; }
+                                        
+                                        .hover-large-preview.preview-align-right { left: auto; right: 0; transform: translateX(0) translateY(10px) scale(0.9); transform-origin: right bottom; }
+                                        .template-preview-wrapper:hover .hover-large-preview.preview-align-right { transform: translateX(0) translateY(0) scale(1); }
+                                        .hover-large-preview.preview-align-right::after { left: auto; right: 15%; margin-left: 0; }
+                                    </style>
+                                    <div class="row g-3 justify-content-center">
+                                        <!-- Standard -->
+                                        <div class="col-md-3 template-preview-wrapper">
+                                            <div class="hover-large-preview preview-align-left">
+                                                <div style="background: linear-gradient(135deg, #2563eb, #6366f1); padding: 10px; border-radius: 12px 12px 0 0; color: #fff;">
+                                                    <div style="font-size:12px; font-weight:bold;">COMPANY NAME</div>
+                                                    <div style="font-size:8px;">INVOICE #INV-123</div>
+                                                </div>
+                                                <div class="mockup">
+                                                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                                        <div><div style="font-size:9px; font-weight:bold;">Billed To:</div><div style="font-size:8px; color:#666;">Customer Name<br>Address Line</div></div>
+                                                        <div style="text-align:right;"><div style="font-size:9px; font-weight:bold;">Details:</div><div style="font-size:8px; color:#666;">Date: 2026-07-07</div></div>
+                                                    </div>
+                                                    <table class="mockup-table">
+                                                        <tr style="background:#f8f9fa;"><th colspan="2">Item</th><th>Qty</th><th>Total</th></tr>
+                                                        <tr><td colspan="2"><strong>Product A</strong></td><td>1</td><td>$50</td></tr>
+                                                        <tr><td colspan="2"><strong>Product B</strong></td><td>2</td><td>$100</td></tr>
+                                                    </table>
+                                                    <div style="text-align:right; margin-top:10px; font-size:10px; font-weight:bold;">Total: $150</div>
+                                                </div>
+                                            </div>
+                                            <div class="template-preview" data-theme="standard" onclick="selectTemplate('standard')">
+                                                <div class="preview-content">
+                                                    <div class="preview-header" style="background: linear-gradient(135deg, #2563eb, #6366f1);"></div>
+                                                    <div class="preview-body"><div class="preview-line w-50"></div><div class="preview-line w-75"></div></div>
+                                                </div>
+                                                <div class="p-2 text-center fw-bold small bg-white border-top">Standard</div>
+                                            </div>
+                                        </div>
+                                        <!-- Professional -->
+                                        <div class="col-md-3 template-preview-wrapper">
+                                            <div class="hover-large-preview">
+                                                <div style="border: 2px solid #374151;">
+                                                    <div style="background: #1f2937; padding: 10px; color: #fff;">
+                                                        <div style="font-size:12px; font-weight:bold; font-family:Georgia;">COMPANY NAME</div>
+                                                        <div style="font-size:8px; font-family:Georgia;">INVOICE #INV-123</div>
+                                                    </div>
+                                                    <div class="mockup" style="font-family:Georgia;">
+                                                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                                            <div><div style="font-size:9px; font-weight:bold;">Billed To:</div><div style="font-size:8px; color:#666;">Customer Name</div></div>
+                                                        </div>
+                                                        <table class="mockup-table">
+                                                            <tr style="background:#374151; color:#fff;"><th colspan="2">Item</th><th>Qty</th><th>Total</th></tr>
+                                                            <tr><td colspan="2"><strong>Product A</strong></td><td>1</td><td>$50</td></tr>
+                                                            <tr><td colspan="2"><strong>Product B</strong></td><td>2</td><td>$100</td></tr>
+                                                        </table>
+                                                        <div style="text-align:right; margin-top:10px; font-size:10px; font-weight:bold;">Total: $150</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="template-preview" data-theme="professional" onclick="selectTemplate('professional')">
+                                                <div class="preview-content" style="border: 2px solid #374151;">
+                                                    <div class="preview-header" style="background: #1f2937;"></div>
+                                                    <div class="preview-body"><div class="preview-line w-50" style="background:#9ca3af"></div><div class="preview-line w-75"></div></div>
+                                                </div>
+                                                <div class="p-2 text-center fw-bold small bg-white border-top">Professional</div>
+                                            </div>
+                                        </div>
+                                        <!-- Modern -->
+                                        <div class="col-md-3 template-preview-wrapper">
+                                            <div class="hover-large-preview">
+                                                <div style="border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 15px;">
+                                                    <div style="border-bottom: 2px solid #ecfdf5; padding-bottom: 10px; margin-bottom: 10px;">
+                                                        <div style="font-size:12px; font-weight:800; color:#10b981;">COMPANY NAME</div>
+                                                        <div style="font-size:8px;">INVOICE #INV-123</div>
+                                                    </div>
+                                                    <div class="mockup" style="padding:0;">
+                                                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                                                            <div><div style="font-size:9px; font-weight:bold; color:#10b981;">Billed To:</div><div style="font-size:8px; color:#666;">Customer Name</div></div>
+                                                        </div>
+                                                        <table class="mockup-table">
+                                                            <tr style="background:#ecfdf5; color:#065f46;"><th colspan="2">Item</th><th>Qty</th><th>Total</th></tr>
+                                                            <tr><td colspan="2"><strong>Product A</strong></td><td>1</td><td>$50</td></tr>
+                                                            <tr><td colspan="2"><strong>Product B</strong></td><td>2</td><td>$100</td></tr>
+                                                        </table>
+                                                        <div style="text-align:right; margin-top:10px; font-size:10px; font-weight:bold; color:#10b981;">Total: $150</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="template-preview" data-theme="modern" onclick="selectTemplate('modern')">
+                                                <div class="preview-content" style="border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 5px; height: 110px;">
+                                                    <div class="preview-header" style="background: transparent; border-bottom: 2px solid #ecfdf5; height: 20px;"></div>
+                                                    <div class="preview-body"><div class="preview-line w-75" style="background:#10b981"></div></div>
+                                                </div>
+                                                <div class="p-2 text-center fw-bold small bg-white border-top">Modern</div>
+                                            </div>
+                                        </div>
+                                        <!-- Classic -->
+                                        <div class="col-md-3 template-preview-wrapper">
+                                            <div class="hover-large-preview preview-align-right">
+                                                <div style="border: 3px solid #000; padding: 10px; font-family: 'Times New Roman', serif;">
+                                                    <div style="border-bottom: 3px solid #000; padding-bottom: 5px; margin-bottom: 10px;">
+                                                        <div style="font-size:14px; font-weight:bold; text-align:center;">COMPANY NAME</div>
+                                                        <div style="font-size:10px; text-align:center;">INVOICE #INV-123</div>
+                                                    </div>
+                                                    <div class="mockup" style="padding:0; font-family: 'Times New Roman', serif;">
+                                                        <table class="mockup-table" style="border: 1px solid #000;">
+                                                            <tr style="background:#eee;"><th colspan="2" style="border:1px solid #000;">Item</th><th style="border:1px solid #000;">Qty</th><th style="border:1px solid #000;">Total</th></tr>
+                                                            <tr><td colspan="2" style="border:1px solid #000;"><strong>Product A</strong></td><td style="border:1px solid #000;">1</td><td style="border:1px solid #000;">$50</td></tr>
+                                                            <tr><td colspan="2" style="border:1px solid #000;"><strong>Product B</strong></td><td style="border:1px solid #000;">2</td><td style="border:1px solid #000;">$100</td></tr>
+                                                        </table>
+                                                        <div style="text-align:right; margin-top:10px; font-size:10px; font-weight:bold;">Total: $150</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="template-preview" data-theme="classic" onclick="selectTemplate('classic')">
+                                                <div class="preview-content" style="border: 3px solid #000; margin: 2px; height: 116px; background: #fff;">
+                                                    <div class="preview-header" style="background: #fff; border-bottom: 3px solid #000; height: 20px;"></div>
+                                                    <div class="preview-body"><div class="preview-line w-100" style="background:#000; height:2px;"></div></div>
+                                                </div>
+                                                <div class="p-2 text-center fw-bold small bg-white border-top">Classic</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <script>
+                                        function selectTemplate(theme) {
+                                            $('#set-invoice-template').val(theme);
+                                            $('.template-preview').removeClass('selected');
+                                            $('.template-preview[data-theme="' + theme + '"]').addClass('selected');
+                                        }
+                                        setTimeout(() => {
+                                            selectTemplate($('#set-invoice-template').val() || 'standard');
+                                        }, 1000);
+                                    </script>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Invoice Template</label>
-                                    <select class="form-select" name="invoice_template" id="set-invoice-template">
-                                        <option value="standard">Standard</option>
-                                        <option value="thermal">Thermal</option>
-                                        <option value="professional">Professional</option>
-                                    </select>
+                                <div class="col-md-12" id="pos-template-section" style="display: none;">
+                                    <h6 class="text-indigo mb-3"><i class="fa-solid fa-receipt me-2"></i>POS Receipt Template</h6>
+                                    <input type="hidden" name="pos_template" id="set-pos-template" value="pos_standard">
+                                    <div class="row g-3 justify-content-center">
+                                        <!-- POS Standard -->
+                                        <div class="col-md-3 template-preview-wrapper">
+                                            <div class="hover-large-preview preview-align-left">
+                                                <div style="background: #fff; padding: 10px; color: #000; border-bottom: 1px dashed #000; text-align: center;">
+                                                    <div style="font-size:12px; font-weight:bold;">COMPANY NAME</div>
+                                                    <div style="font-size:8px;">RECEIPT #INV-123</div>
+                                                </div>
+                                                <div class="mockup text-center" style="color: #000;">
+                                                    <table class="mockup-table">
+                                                        <tr style="border-bottom: 1px solid #000;"><th colspan="2">Item</th><th>Qty</th><th>Total</th></tr>
+                                                        <tr><td colspan="2"><strong>Product A</strong></td><td>1</td><td>$50</td></tr>
+                                                        <tr><td colspan="2"><strong>Product B</strong></td><td>2</td><td>$100</td></tr>
+                                                    </table>
+                                                    <div style="text-align:right; margin-top:10px; font-size:12px; font-weight:bold;">Total: $150</div>
+                                                    <div style="font-size:8px; margin-top:5px; text-align:center;">Thank You!</div>
+                                                </div>
+                                            </div>
+                                            <div class="template-preview pos" data-theme="pos_standard" onclick="selectPosTemplate('pos_standard')">
+                                                <div class="preview-content" style="background:#fff; align-items:center; border: 1px dashed #ccc; padding: 5px;">
+                                                    <div class="preview-line w-50" style="background:#000; height:2px; margin-bottom:8px;"></div>
+                                                    <div class="preview-line w-75" style="background:#000; height:1px;"></div>
+                                                    <div class="preview-line w-75" style="background:#000; height:1px;"></div>
+                                                    <div class="preview-line w-50" style="background:#000; height:1px; margin-top:5px;"></div>
+                                                </div>
+                                                <div class="p-2 text-center fw-bold small bg-white border-top">Thermal Standard</div>
+                                            </div>
+                                        </div>
+                                        <!-- POS Minimal -->
+                                        <div class="col-md-3 template-preview-wrapper">
+                                            <div class="hover-large-preview preview-align-left">
+                                                <div style="background: #fff; padding: 5px; color: #000; text-align: left;">
+                                                    <div style="font-size:14px; font-weight:bold; letter-spacing: 1px;">COMPANY NAME</div>
+                                                    <div style="font-size:8px;">INV-123 | 2026-07-07</div>
+                                                </div>
+                                                <div class="mockup" style="color: #000; padding: 5px;">
+                                                    <table class="mockup-table" style="border:none;">
+                                                        <tr><td colspan="2"><strong>Product A</strong> x1</td><td class="text-end">$50</td></tr>
+                                                        <tr><td colspan="2"><strong>Product B</strong> x2</td><td class="text-end">$100</td></tr>
+                                                    </table>
+                                                    <div style="border-top: 1px solid #000; padding-top:5px; text-align:right; font-size:12px; font-weight:bold;">Total: $150</div>
+                                                </div>
+                                            </div>
+                                            <div class="template-preview pos" data-theme="pos_minimal" onclick="selectPosTemplate('pos_minimal')">
+                                                <div class="preview-content" style="background:#fff; border: 1px solid #eee; padding: 5px; align-items:flex-start;">
+                                                    <div class="preview-line w-25" style="background:#000; height:3px; margin-bottom:10px;"></div>
+                                                    <div class="preview-line w-100" style="background:#eee; height:1px;"></div>
+                                                    <div class="preview-line w-100" style="background:#eee; height:1px;"></div>
+                                                    <div class="preview-line w-50" style="background:#000; height:2px; align-self:flex-end;"></div>
+                                                </div>
+                                                <div class="p-2 text-center fw-bold small bg-white border-top">Thermal Minimal</div>
+                                            </div>
+                                        </div>
+                                        <!-- POS Bold -->
+                                        <div class="col-md-3 template-preview-wrapper">
+                                            <div class="hover-large-preview preview-align-right">
+                                                <div style="background: #000; padding: 15px; color: #fff; text-align: center;">
+                                                    <div style="font-size:14px; font-weight:900;">COMPANY NAME</div>
+                                                    <div style="font-size:10px;">RECEIPT</div>
+                                                </div>
+                                                <div class="mockup text-center" style="color: #000;">
+                                                    <div style="font-size:14px; font-weight:bold; margin-bottom:5px;">INV-123</div>
+                                                    <table class="mockup-table">
+                                                        <tr style="background:#000; color:#fff;"><th colspan="2">Item</th><th>Qty</th><th>Total</th></tr>
+                                                        <tr><td colspan="2"><strong>Product A</strong></td><td>1</td><td>$50</td></tr>
+                                                    </table>
+                                                    <div style="background:#000; color:#fff; text-align:center; padding:10px; margin-top:10px; font-size:16px; font-weight:bold;">TOTAL: $150</div>
+                                                </div>
+                                            </div>
+                                            <div class="template-preview pos" data-theme="pos_bold" onclick="selectPosTemplate('pos_bold')">
+                                                <div class="preview-content" style="background:#fff; border: 1px solid #ccc;">
+                                                    <div style="background:#000; height:30px; width:100%;"></div>
+                                                    <div style="padding:5px;">
+                                                        <div class="preview-line w-100" style="background:#ccc; height:10px; margin-bottom:2px;"></div>
+                                                        <div style="background:#000; height:20px; width:100%; margin-top:10px;"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="p-2 text-center fw-bold small bg-white border-top">Thermal Bold</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <script>
+                                        function selectPosTemplate(theme) {
+                                            $('#set-pos-template').val(theme);
+                                            $('.template-preview.pos').removeClass('selected');
+                                            $('.template-preview.pos[data-theme="' + theme + '"]').addClass('selected');
+                                        }
+                                        setTimeout(() => {
+                                            selectPosTemplate($('#set-pos-template').val() || 'pos_standard');
+                                        }, 1000);
+                                    </script>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12">
+                                    <hr class="my-3">
+                                </div>
+                                <div class="col-md-4" id="thermal-width-section">
                                     <label class="form-label">Thermal Width</label>
                                     <select class="form-select" name="thermal_width" id="set-thermal-width">
                                         <option value="80mm">80mm</option>
                                         <option value="58mm">58mm</option>
                                     </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label"><i class="fa-solid fa-language text-indigo me-1"></i>System Language</label>
+                                    <select class="form-select" name="system_language" id="set-system-language">
+                                        <option value="en">English (Default)</option>
+                                        <option value="hi">Hindi (हिंदी)</option>
+                                        <option value="gu">Gujarati (ગુજરાતી)</option>
+                                        <option value="mr">Marathi (मराठी)</option>
+                                        <option value="bn">Bengali (বাংলা)</option>
+                                        <option value="ta">Tamil (தமிழ்)</option>
+                                        <option value="te">Telugu (తెలుగు)</option>
+                                        <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                                        <option value="ml">Malayalam (മലയാളം)</option>
+                                        <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+                                        <option value="ur">Urdu (اردو)</option>
+                                        <option value="or">Odia (ଓଡ଼ିଆ)</option>
+                                        <option value="as">Assamese (অসমীয়া)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label mb-0"><i class="fa-solid fa-barcode text-indigo me-1"></i>POS & Barcode Mode</label>
+                                        <button type="button" class="btn btn-sm btn-outline-info py-0 px-2" style="font-size: 0.75rem; display: none;" data-bs-toggle="modal" data-bs-target="#posGuideModal" id="btn-pos-guide">
+                                            <i class="fa-solid fa-circle-question me-1"></i>Guide
+                                        </button>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="set-pos-mode" value="1">
+                                        <input type="hidden" name="pos_mode" id="pos-mode-hidden" value="0">
+                                        <label class="form-check-label" for="set-pos-mode">Enable Scanner</label>
+                                    </div>
+                                    <script>
+                                        function togglePosSettings(isPosEnabled) {
+                                            document.getElementById('pos-mode-hidden').value = isPosEnabled ? 1 : 0;
+                                            document.getElementById('btn-pos-guide').style.display = isPosEnabled ? 'inline-block' : 'none';
+                                            
+                                            // Toggle visibility of related settings
+                                            const invoiceTemplateSec = document.getElementById('invoice-template-section');
+                                            const posTemplateSec = document.getElementById('pos-template-section');
+                                            const thermalWidthSec = document.getElementById('thermal-width-section');
+                                            
+                                            if (isPosEnabled) {
+                                                if(invoiceTemplateSec) invoiceTemplateSec.style.display = 'none';
+                                                if(posTemplateSec) posTemplateSec.style.display = 'block';
+                                                if(thermalWidthSec) thermalWidthSec.style.display = 'block';
+                                            } else {
+                                                if(invoiceTemplateSec) invoiceTemplateSec.style.display = 'block';
+                                                if(posTemplateSec) posTemplateSec.style.display = 'none';
+                                                if(thermalWidthSec) thermalWidthSec.style.display = 'none';
+                                            }
+                                        }
+
+                                        document.getElementById('set-pos-mode').addEventListener('change', function() {
+                                            togglePosSettings(this.checked);
+                                            if (this.checked) {
+                                                var posModal = new bootstrap.Modal(document.getElementById('posGuideModal'));
+                                                posModal.show();
+                                            }
+                                        });
+                                        
+                                        // Update on load
+                                        setTimeout(() => {
+                                            const isChecked = document.getElementById('set-pos-mode').checked;
+                                            togglePosSettings(isChecked);
+                                        }, 1000);
+                                    </script>
                                 </div>
                             </div>
                         </div>
@@ -374,6 +729,58 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- DATA & BACKUPS PANE -->
+                    <div class="tab-pane fade" id="data-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
+                        <div class="row g-4">
+                            <!-- Backups -->
+                            <div class="col-md-8">
+                                <div class="panel-card h-100" style="border: 1px solid #e2e8f0; box-shadow: none;">
+                                    <div class="panel-header bg-light">
+                                        <h6 class="mb-0 text-dark"><i class="fa-solid fa-database me-2 text-indigo"></i>Database Backups</h6>
+                                        <?php if ($auth->hasPermission('Run Backups')): ?>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" id="btn-run-backup" title="Create Backup">
+                                            <i class="fa-solid fa-plus"></i> Backup
+                                        </button>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="panel-body p-0 text-dark">
+                                        <div class="table-responsive" style="max-height: 420px;">
+                                            <table class="table table-hover align-middle mb-0" id="backupsTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>File Details</th>
+                                                        <th>Size</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Loaded via AJAX -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Danger Zone -->
+                            <div class="col-md-4">
+                                <?php if (($_SESSION['role_id'] ?? 0) == 1): ?>
+                                <div class="panel-card h-100" style="border: 1px solid #fecdd3; box-shadow: none;">
+                                    <div class="panel-header border-bottom border-danger" style="background: #fff1f2;">
+                                        <h6 class="mb-0 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Danger Zone</h6>
+                                    </div>
+                                    <div class="panel-body d-flex flex-column justify-content-between">
+                                        <p class="text-muted mb-3">Permanently delete all records from the system. Only admin user accounts will be preserved. This action cannot be undone.</p>
+                                        <button type="button" class="btn btn-danger w-100 mt-auto" id="btn-purge-all">
+                                            <i class="fa-solid fa-trash-can me-2"></i>Delete All Records
+                                        </button>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -441,50 +848,8 @@
             </div>
         </div>
     </div>
-
-    <!-- Right backups panel -->
-    <div class="col-md-4">
-        <div class="panel-card">
-            <div class="panel-header">
-                <h6 class="mb-0 text-dark"><i class="fa-solid fa-database me-2 text-indigo"></i>Database Backups</h6>
-                <?php if ($auth->hasPermission('Run Backups')): ?>
-                <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" id="btn-run-backup" title="Create Backup">
-                    <i class="fa-solid fa-plus"></i> Backup
-                </button>
-                <?php endif; ?>
-            </div>
-
-            <div class="panel-body p-0 text-dark">
-                <div class="table-responsive" style="max-height: 420px;">
-                    <table class="table table-hover align-middle mb-0" id="backupsTable">
-                        <thead>
-                            <tr>
-                                <th>File Details</th>
-                                <th>Size</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Loaded via AJAX -->
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
-
-        <?php if (($_SESSION['role_id'] ?? 0) == 1): ?>
-        <div class="panel-card mt-3">
-            <div class="panel-header">
-                <h6 class="mb-0 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Danger Zone</h6>
-            </div>
-            <div class="panel-body">
-                <p class="text-muted small mb-3">Permanently delete all records from the system. Only admin user accounts will be preserved. This action cannot be undone.</p>
-                <button type="button" class="btn btn-danger w-100" id="btn-purge-all">
-                    <i class="fa-solid fa-trash-can me-2"></i>Delete All Records
-                </button>
-            </div>
-        </div>
-        <?php endif; ?>
     </div>
 </div>
 
@@ -529,6 +894,9 @@ $(document).ready(function() {
                 $("#set-loyalty-redeem").val(s.loyalty_redeem_value || '');
                 $("#set-invoice-template").val(s.invoice_template || 'standard');
                 $("#set-thermal-width").val(s.thermal_width || '80mm');
+                $("#set-system-language").val(s.system_language || 'en');
+                $("#set-pos-mode").prop('checked', s.pos_mode == 1);
+                $("#pos-mode-hidden").val(s.pos_mode || 0);
                 // Bank Details
                 $("#set-bank-name").val(s.bank_name || '');
                 $("#set-bank-account").val(s.bank_account_no || '');
@@ -578,6 +946,12 @@ $(document).ready(function() {
     // Save Settings (with FormData for file upload)
     $("#settingsForm").submit(function(e) {
         e.preventDefault();
+        
+        if (!$("#set-name").val().trim()) {
+            Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Business Name is required.', background: '#ffffff', color: '#0f172a' });
+            return;
+        }
+
         var formData = new FormData(this);
         // Ensure loyalty_enabled is sent even when unchecked
         if (!$("#set-loyalty-enabled").is(':checked')) {

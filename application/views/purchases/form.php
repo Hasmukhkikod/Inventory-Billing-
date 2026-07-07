@@ -85,7 +85,7 @@ $isEdit = !empty($purchase);
                     </tr>
                     <tr class="cart-empty-row">
                         <td colspan="9" class="text-center py-4 text-secondary">
-                            <i class="fa-solid fa-basket-shopping fs-3 mb-2 d-block text-muted"></i>
+                            <i class="fa-solid fa-cart-shopping fs-3 mb-2 d-block text-muted"></i>
                             Select products above to add them to the purchase order
                         </td>
                     </tr>
@@ -273,7 +273,7 @@ $(document).ready(function() {
     $('#cart-product-select').select2({
         placeholder: 'Add Product — search by name, SKU or barcode...',
         allowClear: true,
-        width: '100%',
+        theme: 'bootstrap-5', width: '100%',
         ajax: {
             url: BASE_URL + '/api/billing.php',
             dataType: 'json',
@@ -435,14 +435,12 @@ $(document).ready(function() {
         const selectedValue = $(this).val();
         const item = cart[idx];
         if (selectedValue === 'secondary' && item.is_secondary_unit === 0) {
-            item.qty = parseFloat((item.qty * item.conversion_factor).toFixed(2));
-            item.cost_price = parseFloat((item.original_rate / item.conversion_factor).toFixed(2));
+            item.cost_price = parseFloat((item.cost_price / item.conversion_factor).toFixed(2));
             item.is_secondary_unit = 1;
             item.billing_unit_id = item.secondary_unit_id;
             item.billing_unit_name = item.secondary_unit_name;
         } else if (selectedValue === 'primary' && item.is_secondary_unit === 1) {
-            item.qty = parseFloat((item.qty / item.conversion_factor).toFixed(4));
-            item.cost_price = item.original_rate;
+            item.cost_price = parseFloat((item.cost_price * item.conversion_factor).toFixed(2));
             item.is_secondary_unit = 0;
             item.billing_unit_id = item.unit_id;
             item.billing_unit_name = item.unit_name;

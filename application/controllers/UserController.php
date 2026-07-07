@@ -30,14 +30,17 @@ class UserController {
         require_once __DIR__ . '/../views/footer.php';
     }
 
-    public function form($id = null) {
+    public function form() {
         $this->auth->requirePermission('Manage Users');
         
+        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $user = null;
         if ($id > 0) {
-            $db = $this->db;
-            $user = $db->query("SELECT * FROM users WHERE id = ? LIMIT 1", [(int)$id])->fetch();
+            $user = $this->db->query("SELECT * FROM users WHERE id = ? LIMIT 1", [$id])->fetch();
         }
+        
+        // Fetch active roles
+        $roles = $this->db->query("SELECT * FROM roles WHERE deleted_at IS NULL AND status = 'ACTIVE' ORDER BY role_name ASC")->fetchAll();
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';

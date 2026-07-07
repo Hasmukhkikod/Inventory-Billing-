@@ -10,6 +10,7 @@
             <input type="date" class="form-control form-control-sm" id="day-end-date" value="<?php echo date('Y-m-d'); ?>" style="width:160px;">
             <button class="btn btn-primary btn-sm" id="btn-load-day-end"><i class="fa-solid fa-sync me-1"></i>Load</button>
             <button class="btn btn-outline-secondary btn-sm" onclick="window.print();"><i class="fa-solid fa-print me-1"></i>Print</button>
+            <button class="btn btn-danger btn-sm" onclick="downloadDayEndPDF();"><i class="fa-solid fa-file-pdf me-1"></i>PDF</button>
         </div>
     </div>
 </div>
@@ -118,4 +119,18 @@ $(document).ready(function() {
     loadDayEnd();
     $('#btn-load-day-end').click(loadDayEnd);
 });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    function downloadDayEndPDF() {
+        const element = document.querySelector('.main-content') || document.body;
+        const opt = {
+            margin: 0.3,
+            filename: 'DayEndReport_' + $('#day-end-date').val() + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
 </script>

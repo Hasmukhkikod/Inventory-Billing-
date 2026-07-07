@@ -7,7 +7,9 @@ $loyaltyEnabled = (int)($compSettings['loyalty_enabled'] ?? 0);
 $loyaltyPer100 = (int)($compSettings['loyalty_points_per_100'] ?? 1);
 $loyaltyRedeemValue = (float)($compSettings['loyalty_redeem_value'] ?? 1.00);
 $companyState = trim($compSettings['state'] ?? '');
+$posMode = (int)($compSettings['pos_mode'] ?? 0);
 ?>
+<input type="hidden" id="config-pos-mode" value="<?php echo $posMode; ?>">
 
 <!-- Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -67,6 +69,24 @@ $companyState = trim($compSettings['state'] ?? '');
 <!-- Section 2: Product Cart -->
 <div class="panel-card mb-4">
     <div class="panel-body">
+        <?php if ($posMode === 1): ?>
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0 fw-bold"><i class="fa-solid fa-barcode text-indigo me-1"></i>POS Scanner</label>
+                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#posGuideModal">
+                    <i class="fa-solid fa-circle-question me-1"></i>How it works
+                </button>
+            </div>
+            <div class="input-group input-group-lg" style="box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 8px;">
+                <span class="input-group-text bg-indigo text-white border-indigo" style="border-top-left-radius: 8px; border-bottom-left-radius: 8px;">
+                    <i class="fa-solid fa-barcode"></i>
+                </span>
+                <input type="text" class="form-control border-indigo" id="barcode-scanner" placeholder="Scan Barcode Here (Auto-focus)" autofocus autocomplete="off" style="border-top-right-radius: 8px; border-bottom-right-radius: 8px;">
+            </div>
+            <small class="text-muted mt-1 d-block"><i class="fa-solid fa-info-circle me-1"></i>Ensure scanner is configured to send Enter key after scanning.</small>
+        </div>
+        <?php endif; ?>
+
         <!-- Cart Table -->
         <div class="table-responsive">
             <table class="table table-bordered align-middle mb-0" id="pos-cart-table">
@@ -94,7 +114,7 @@ $companyState = trim($compSettings['state'] ?? '');
                     </tr>
                     <tr class="cart-empty-row">
                         <td colspan="10" class="text-center py-4 text-secondary">
-                            <i class="fa-solid fa-basket-shopping fs-3 mb-2 d-block text-muted"></i>
+                            <i class="fa-solid fa-cart-shopping fs-3 mb-2 d-block text-muted"></i>
                             Search and select products above to add them
                         </td>
                     </tr>
@@ -117,6 +137,15 @@ $companyState = trim($compSettings['state'] ?? '');
         <div class="panel-card h-100">
             <div class="panel-body">
                 <h6 class="fw-semibold mb-3"><i class="fa-solid fa-receipt text-indigo me-2"></i>Additional Details</h6>
+
+                <!-- Coupon -->
+                <div class="mb-3">
+                    <label class="form-label mb-1 fw-semibold small">Discount Coupon</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control text-uppercase" id="coupon-code-input" placeholder="Enter coupon code" autocomplete="off">
+                        <button class="btn btn-outline-primary" type="button" id="btn-apply-coupon">Apply</button>
+                    </div>
+                </div>
 
                 <!-- Loyalty -->
                 <?php if ($loyaltyEnabled): ?>
@@ -191,6 +220,13 @@ $companyState = trim($compSettings['state'] ?? '');
                             <tr>
                                 <td class="text-secondary">Flat Discount (₹)</td>
                                 <td class="text-end"><input type="number" step="0.01" min="0" class="form-control form-control-sm text-end d-inline-block" style="width:100px;" id="bill-discount-input" value="0.00"></td>
+                            </tr>
+                            <tr class="d-none" id="coupon-discount-row">
+                                <td class="text-success small">
+                                    <i class="fa-solid fa-tag me-1"></i><span id="coupon-label">Coupon</span>
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-danger ms-1 text-decoration-none" id="btn-remove-coupon" title="Remove Coupon"><i class="fa-solid fa-times"></i></button>
+                                </td>
+                                <td class="text-end text-success fw-bold" id="bill-coupon-discount">-₹0.00</td>
                             </tr>
                             <?php if ($loyaltyEnabled): ?>
                             <tr class="d-none" id="loyalty-discount-row">
@@ -287,6 +323,7 @@ $companyState = trim($compSettings['state'] ?? '');
         </div>
     </div>
 </div>
+
 
 <!-- Hidden config -->
 <input type="hidden" id="config-loyalty-enabled" value="<?php echo $loyaltyEnabled; ?>">

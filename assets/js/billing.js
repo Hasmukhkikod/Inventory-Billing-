@@ -29,7 +29,7 @@ $(document).ready(function () {
     $('#cart-product-select').select2({
         placeholder: 'Add Product — search by name, SKU or barcode...',
         allowClear: true,
-        width: '100%',
+        theme: 'bootstrap-5', width: '100%',
         ajax: {
             url: BASE_URL + '/api/billing.php',
             dataType: 'json',
@@ -84,6 +84,41 @@ $(document).ready(function () {
             playBeep();
         }
     });
+
+    // ==================== POS SCANNER MODE ====================
+    const posMode = parseInt($('#config-pos-mode').val()) || 0;
+    if (posMode === 1 && $('#barcode-scanner').length) {
+        const $scanner = $('#barcode-scanner');
+        
+        // Listen for Enter key
+        $scanner.on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                const barcode = $(this).val().trim();
+                if (!barcode) return;
+                
+                // Fetch product by exact barcode/sku
+                $.getJSON(BASE_URL + '/api/billing.php?action=scan_product&barcode=' + encodeURIComponent(barcode), function(res) {
+                    if (res.status && res.data) {
+                        addToCart(res.data);
+                        $scanner.val('');
+                        playBeep();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Not Found', text: 'No product matches this barcode.', timer: 1500, showConfirmButton: false, background: '#151e30', color: '#f3f4f6' });
+                        $scanner.val('');
+                    }
+                    $scanner.focus();
+                });
+            }
+        });
+
+        // Keep focus on the scanner whenever clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('input, select, button, a, textarea').length) {
+                $scanner.focus();
+            }
+        });
+    }
 
     // ==================== CART ====================
     function addToCart(product) {
@@ -228,14 +263,12 @@ $(document).ready(function () {
         const item = cart[idx];
 
         if (selectedValue === 'secondary' && item.is_secondary_unit === 0) {
-            item.qty = parseFloat((item.qty * item.conversion_factor).toFixed(2));
-            item.rate = parseFloat((item.original_rate / item.conversion_factor).toFixed(2));
+            item.rate = parseFloat((item.rate / item.conversion_factor).toFixed(2));
             item.is_secondary_unit = 1;
             item.billing_unit_id = item.secondary_unit_id;
             item.billing_unit_name = item.secondary_unit_name;
         } else if (selectedValue === 'primary' && item.is_secondary_unit === 1) {
-            item.qty = parseFloat((item.qty / item.conversion_factor).toFixed(4));
-            item.rate = item.original_rate;
+            item.rate = parseFloat((item.rate * item.conversion_factor).toFixed(2));
             item.is_secondary_unit = 0;
             item.billing_unit_id = item.unit_id;
             item.billing_unit_name = item.unit_name;
@@ -549,13 +582,21 @@ $(document).ready(function () {
             success: function (res) {
                 if (res.status) {
                     lastInvoiceId = res.data.invoice_id;
+                    let printButtons = '';
+                    if (posMode === 1) {
+                        printButtons = '<a href="' + BASE_URL + '/invoice_thermal.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Print Thermal</a>' +
+                                       '<a href="' + BASE_URL + '/invoice_print.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-print me-1"></i>A4 Print</a>';
+                    } else {
+                        printButtons = '<a href="' + BASE_URL + '/invoice_print.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-print me-1"></i>Print</a>' +
+                                       '<a href="' + BASE_URL + '/invoice_thermal.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>';
+                    }
+
                     Swal.fire({
                         icon: 'success',
                         title: 'Invoice Created!',
                         html: '<div class="fw-bold fs-5 mb-3">' + res.data.invoice_number + '</div>' +
                             '<div class="d-flex flex-wrap gap-2 justify-content-center">' +
-                            '<a href="' + BASE_URL + '/invoice_print.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-print me-1"></i>Print</a>' +
-                            '<a href="' + BASE_URL + '/invoice_thermal.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>' +
+                            printButtons +
                             '<a href="https://api.whatsapp.com/send?text=' + encodeURIComponent('Invoice ' + res.data.invoice_number + ' - Total: ' + $('#bill-grand-total').text() + '. Thank you!') + '" target="_blank" class="btn btn-success btn-sm"><i class="fa-brands fa-whatsapp me-1"></i>WhatsApp</a>' +
                             '</div>',
                         confirmButtonText: 'OK',
@@ -601,8 +642,10 @@ $(document).ready(function () {
         if (e.key === 'F5') { e.preventDefault(); $('#btn-toggle-held').click(); }
         if (e.key === 'F6') {
             e.preventDefault();
-            if (lastInvoiceId) window.open(BASE_URL + '/invoice_print.php?id=' + lastInvoiceId, '_blank');
-            else Swal.fire({ icon: 'info', title: 'No Invoice', text: 'Generate an invoice first.', timer: 1500, showConfirmButton: false, background: '#151e30', color: '#f3f4f6' });
+            if (lastInvoiceId) {
+                const printUrl = posMode === 1 ? '/invoice_thermal.php?id=' : '/invoice_print.php?id=';
+                window.open(BASE_URL + printUrl + lastInvoiceId, '_blank');
+            } else Swal.fire({ icon: 'info', title: 'No Invoice', text: 'Generate an invoice first.', timer: 1500, showConfirmButton: false, background: '#151e30', color: '#f3f4f6' });
         }
         if (e.key === 'Escape') {
             if ($('.modal.show').length) { $('.modal.show').modal('hide'); return; }

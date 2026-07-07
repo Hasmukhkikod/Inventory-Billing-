@@ -916,9 +916,23 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     border-radius: var(--radius-sm);
-    padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
     transition: all var(--transition-fast);
+}
+
+.form-control {
+    padding: 0.5rem 0.75rem;
+}
+
+.form-select {
+    padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+}
+
+.form-select.form-select-sm {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    padding-left: 0.5rem;
+    font-size: 0.875rem;
 }
 
 .form-control:focus, .form-select:focus {
@@ -1317,14 +1331,40 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     box-shadow: var(--card-shadow) !important;
 }
 
+.select2-container--bootstrap-5 .select2-dropdown.select2-dropdown--below {
+    margin-top: -42px !important; /* Pull up to cover the selection box */
+    border-radius: 8px !important;
+    border-top: none !important;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown.select2-dropdown--above {
+    margin-top: 42px !important; /* Push down to cover the selection box */
+    border-radius: 8px !important;
+    border-bottom: none !important;
+}
+
 .select2-container--bootstrap-5 .select2-results__option--highlighted[aria-selected] {
     background-color: var(--accent-indigo) !important;
 }
 
+.select2-container--bootstrap-5.select2-container--open .select2-selection {
+    opacity: 0 !important; /* Hide visually but keep it for positioning */
+}
+
+.select2-container--bootstrap-5 .select2-search--dropdown {
+    padding: 0 !important;
+}
+
 .select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
-    border-radius: 6px !important;
-    border-color: var(--border-color) !important;
-    padding: 6px 10px !important;
+    min-height: 42px !important;
+    border: 1px solid var(--accent-indigo) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 0.45rem 0.9rem !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
+    background-color: var(--bg-primary) !important;
+    font-size: 0.95rem !important;
+    outline: none !important;
 }
 
 .select2-container--bootstrap-5 .select2-selection__clear {
@@ -1368,66 +1408,17 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
 .text-warning { color: var(--accent-amber) !important; }
 
 /* ================= MOBILE FIRST RESPONSIVE STRATEGY ================= */
-@media (max-width: 767px) {
-    /* Main container settings */
+@media (max-width: 991px) {
+    .sidebar {
+        transform: translateX(-100%);
+        z-index: 1050;
+    }
+    .sidebar.show {
+        transform: translateX(0);
+    }
     .main-content {
+        margin-left: 0 !important;
         padding: 1rem !important;
-    }
-    
-    /* Convert horizontal tables to responsive cards */
-    table.table {
-        border: 0 !important;
-        margin-top: 0.5rem !important;
-    }
-    
-    table.table thead {
-        display: none !important; /* Hide standard headers */
-    }
-    
-    table.table tbody tr {
-        display: block !important;
-        background-color: var(--bg-card) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 12px !important;
-        padding: 1rem !important;
-        margin-bottom: 1.25rem !important;
-        box-shadow: var(--card-shadow) !important;
-    }
-    
-    table.table tbody td {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        padding: 0.5rem 0 !important;
-        border-bottom: 1px dashed rgba(255, 255, 255, 0.05) !important;
-        text-align: right !important;
-        font-size: 0.875rem !important;
-    }
-    
-    table.table tbody td:last-child {
-        border-bottom: none !important;
-        padding-top: 0.75rem !important;
-        justify-content: center !important;
-    }
-    
-    /* Auto inject headers using data-label value */
-    table.table tbody td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: var(--text-secondary);
-        float: left;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.5px;
-    }
-    
-    /* Pagination and Search layouts on mobile */
-    .dataTables_wrapper .row {
-        flex-direction: column !important;
-        gap: 0.5rem !important;
-    }
-    .dataTables_filter, .dataTables_length {
-        text-align: left !important;
     }
     
     /* Convert POS Terminal screen into a stacked list view */
@@ -1438,12 +1429,19 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     }
     .pos-billing-area {
         height: auto !important;
-        max-height: 400px !important;
+        max-height: none !important;
     }
     .pos-checkout-sidebar {
         height: auto !important;
     }
     
+    /* Form grids stacking */
+    .row-cols-md-4, .row-cols-sm-2 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 767px) {
     /* Floating Buttons and layout adjustments */
     .btn-mobile-full {
         width: 100% !important;
@@ -1458,11 +1456,6 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     
     .panel-header .btn {
         width: auto !important;
-    }
-    
-    /* Form grids stacking */
-    .row-cols-md-4, .row-cols-sm-2 {
-        grid-template-columns: 1fr !important;
     }
 }
 

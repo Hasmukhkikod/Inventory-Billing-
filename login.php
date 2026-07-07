@@ -20,6 +20,7 @@ if ($auth->check()) {
 }
 
 $errorMessage = "";
+$loginSuccess = false;
 
 // Load company settings for branding
 $compSettings = $db->query("SELECT company_name, company_logo FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
@@ -48,8 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Reset attempts on success
                     unset($_SESSION['login_attempts']);
                     unset($_SESSION['login_lockout']);
-                    header("Location: index.php");
-                    exit;
+                    $loginSuccess = true;
                 } else {
                     // Increment failed attempts
                     $_SESSION['login_attempts'] = $attempts + 1;
@@ -71,6 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grovixo - System Authentication</title>
+    <?php if ($loginSuccess): ?>
+    <meta http-equiv="refresh" content="1.5;url=index.php">
+    <?php endif; ?>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 for icons -->
@@ -80,7 +83,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="auth-wrapper">
 
-<div class="auth-card">
+<?php if ($loginSuccess): ?>
+<!-- Success Transition Preloader -->
+<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #6366f1; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+    <div class="spinner-border text-white" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <div class="text-white mt-3 fw-bold" style="letter-spacing: 1px;"><i class="fa-solid fa-check-circle me-2 text-success"></i>AUTHENTICATION SUCCESSFUL</div>
+    <div class="text-white-50 mt-1 small">Preparing your dashboard...</div>
+</div>
+<?php else: ?>
+
+<!-- Initial Preloader -->
+<div id="login-preloader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #6366f1; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+    <div class="spinner-border text-white" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <div class="text-white mt-3 fw-bold" style="letter-spacing: 1px;">INITIALIZING SECURE LOGIN...</div>
+</div>
+
+<div class="auth-card" id="login-content" style="opacity: 0; transition: opacity 0.5s ease;">
     <div class="text-center mb-4">
         <?php if (!empty($brandLogo) && file_exists(UPLOAD_DIR . '/' . $brandLogo)): ?>
             <img src="<?php echo BASE_URL . '/uploads/' . $brandLogo; ?>" alt="Logo" style="height: 48px; margin-bottom: 8px;">
@@ -128,5 +150,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!-- Bootstrap JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Remove preloader once fully loaded
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('login-preloader');
+        const content = document.getElementById('login-content');
+        if (preloader) {
+            preloader.style.opacity = '0';
+            preloader.style.transition = 'opacity 0.4s ease';
+            setTimeout(() => {
+                preloader.style.display = 'none';
+                content.style.opacity = '1';
+            }, 400);
+        }
+    });
+</script>
+<?php endif; ?>
 </body>
 </html>

@@ -35,6 +35,7 @@ use App\Controllers\ReturnController;
 use App\Controllers\ReportsController;
 use App\Controllers\UserController;
 use App\Controllers\SettingsController;
+use App\Controllers\RoleController;
 use App\Controllers\QuotationController;
 use App\Controllers\ChallanController;
 use App\Models\Database;
@@ -55,6 +56,7 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/returns/index.php', [ReturnController::class, 'index']);
     $r->addRoute('GET', '/reports/index.php', [ReportsController::class, 'index']);
     $r->addRoute('GET', '/users/index.php', [UserController::class, 'index']);
+    $r->addRoute('GET', '/roles/index.php', [RoleController::class, 'index']);
     $r->addRoute('GET', '/settings/index.php', [SettingsController::class, 'index']);
     $r->addRoute('GET', '/quotations/index.php', [QuotationController::class, 'index']);
     $r->addRoute('GET', '/challans/index.php', [ChallanController::class, 'index']);
@@ -68,6 +70,7 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/expenses/form.php', [ExpenseController::class, 'form']);
     $r->addRoute('GET', '/returns/form.php', [ReturnController::class, 'form']);
     $r->addRoute('GET', '/users/form.php', [UserController::class, 'form']);
+    $r->addRoute('GET', '/roles/form.php', [RoleController::class, 'form']);
     $r->addRoute('GET', '/quotations/form.php', [QuotationController::class, 'form']);
     $r->addRoute('GET', '/challans/form.php', [ChallanController::class, 'form']);
 

@@ -53,6 +53,32 @@ switch ($action) {
         }
         break;
 
+    case 'scan_product':
+        $barcode = trim($_GET['barcode'] ?? '');
+        if (empty($barcode)) Helpers::jsonResponse(false, 'Empty barcode', null);
+        try {
+            $stmt = $db->query("
+                SELECT p.id, p.product_name, p.sku, p.barcode, p.hsn_code, p.selling_price, p.gst_percentage, p.current_stock,
+                       p.secondary_unit_id, p.conversion_factor,
+                       u.id as unit_id, u.short_name as unit_name,
+                       su.short_name as secondary_unit_name
+                FROM products p
+                LEFT JOIN units u ON p.unit_id = u.id
+                LEFT JOIN units su ON p.secondary_unit_id = su.id
+                WHERE p.status = 'ACTIVE' AND p.deleted_at IS NULL AND (p.barcode = ? OR p.sku = ?)
+                LIMIT 1
+            ", [$barcode, $barcode]);
+            $product = $stmt->fetch();
+            if ($product) {
+                Helpers::jsonResponse(true, 'Product found', $product);
+            } else {
+                Helpers::jsonResponse(false, 'Product not found', null);
+            }
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, 'Scan failed: ' . $e->getMessage());
+        }
+        break;
+
     case 'get_customers':
         try {
             $stmt = $db->query("SELECT id, customer_name, mobile, gst_number, state, loyalty_points FROM customers WHERE status = 'ACTIVE' AND deleted_at IS NULL ORDER BY customer_name ASC");

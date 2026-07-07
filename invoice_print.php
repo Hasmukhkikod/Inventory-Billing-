@@ -50,6 +50,7 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
     <title>Invoice - <?php echo $invoice['invoice_no']; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/templates.css">
     <style>
         body { background: #fff; color: #212529; font-size: 13px; font-family: 'Segoe UI', Arial, sans-serif; }
         .invoice-box { max-width: 800px; margin: auto; padding: 30px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.08); }
@@ -72,6 +73,7 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
 <body>
 <div class="container my-4 no-print text-end" style="max-width:800px;">
     <button class="btn btn-primary btn-sm" onclick="window.print();"><i class="fa-solid fa-print me-1"></i>Print</button>
+    <button class="btn btn-danger btn-sm" onclick="downloadPDF();"><i class="fa-solid fa-file-pdf me-1"></i>PDF</button>
     <a href="invoice_thermal.php?id=<?php echo $id; ?>" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>
     <?php
     $waMsg = 'Invoice ' . $invoice['invoice_no'] . ' - Total: ' . Helpers::formatCurrency($invoice['grand_total']) . '. Thank you for your business!';
@@ -80,7 +82,8 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
     <button class="btn btn-outline-secondary btn-sm" onclick="window.close();">Close</button>
 </div>
 
-<div class="invoice-box">
+<?php $theme = $company['invoice_template'] ?? 'standard'; ?>
+<div class="invoice-box theme-<?php echo htmlspecialchars($theme); ?>">
     <!-- Brand Header Bar -->
     <div class="brand-bar d-flex justify-content-between align-items-center mb-0">
         <div>
@@ -246,5 +249,19 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
         <?php echo Helpers::sanitize($company['invoice_footer'] ?? 'Thank you!'); ?>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    function downloadPDF() {
+        const element = document.querySelector('.invoice-box');
+        const opt = {
+            margin: 0.2,
+            filename: 'Invoice_<?php echo $invoice['invoice_no']; ?>.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
 </body>
 </html>

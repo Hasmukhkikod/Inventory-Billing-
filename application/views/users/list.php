@@ -6,7 +6,7 @@
 ?>
 
 <div class="row g-4 mb-4">
-    <div class="col-md-9">
+    <div class="col-md-12">
         <div class="panel-card">
             <div class="panel-header">
                 <ul class="nav nav-tabs border-0" id="usersTabs" role="tablist">
@@ -26,9 +26,14 @@
                         </button>
                     </li>
                 </ul>
-                <a href="<?php echo BASE_URL; ?>/users/form.php" class="btn btn-primary btn-sm btn-action-add" id="btn-add-user">
-                    <i class="fa-solid fa-user-plus me-1"></i> Add User
-                </a>
+                <div class="d-flex gap-2">
+                    <a href="<?php echo BASE_URL; ?>/roles/index.php" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa-solid fa-user-shield me-1"></i> Manage Roles
+                    </a>
+                    <a href="<?php echo BASE_URL; ?>/users/form.php" class="btn btn-primary btn-sm btn-action-add" id="btn-add-user">
+                        <i class="fa-solid fa-user-plus me-1"></i> Add User
+                    </a>
+                </div>
             </div>
             
             <div class="panel-body">
@@ -91,18 +96,6 @@
                     </div>
 
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Right Sidebar - Predefined RBAC Matrix Summary -->
-    <div class="col-md-3">
-        <div class="panel-card">
-            <div class="panel-header">
-                <h6 class="mb-0 text-dark"><i class="fa-solid fa-shield-halved text-indigo me-2"></i>RBAC Matrix</h6>
-            </div>
-            <div class="panel-body p-3" id="rbac-matrix-box">
-                <div class="text-center py-4 text-secondary small">Loading roles & permissions...</div>
             </div>
         </div>
     </div>
@@ -247,39 +240,5 @@ $(document).ready(function() {
             }
         });
     });
-
-    // Load Predefined RBAC Matrix summary details
-    function loadRbacMatrix() {
-        $.ajax({
-            url: BASE_URL + '/api/users.php?action=roles_list',
-            type: 'GET',
-            dataType: 'json',
-            success: function(res) {
-                if (res.status) {
-                    const box = $("#rbac-matrix-box");
-                    box.empty();
-                    
-                    res.data.forEach(role => {
-                        let badges = '';
-                        role.permissions.forEach(p => {
-                            badges += `<span class="badge bg-light-primary m-1">${p}</span>`;
-                        });
-                        
-                        box.append(`
-                            <div class="mb-4 border-bottom pb-3">
-                                <h6 class="text-dark fw-bold d-flex justify-content-between mb-2">
-                                    <span>${role.role_name}</span>
-                                    <small class="text-indigo small">${role.description || ''}</small>
-                                </h6>
-                                <div>${badges || '<span class="text-muted small">No permissions assigned</span>'}</div>
-                            </div>
-                        `);
-                    });
-                }
-            }
-        });
-    }
-
-    loadRbacMatrix();
 });
 </script>
