@@ -54,12 +54,24 @@
                 </div>
                 <div class="col-6 text-end">
                     <h6 class="fw-bold text-dark mb-2">ORDER META:</h6>
-                    <p class="mb-1 text-secondary"><strong>Payment Status:</strong> <span class="badge bg-light-primary"><?php echo \App\Models\Helpers::sanitize($purchase['payment_status']); ?></span></p>
+                    <?php
+                        $paymentStatus = $purchase['payment_status'] ?? 'PENDING';
+                        $paymentBadgeClass = match($paymentStatus) {
+                            'PAID' => 'bg-light-success text-success',
+                            'PARTIAL' => 'bg-light-warning text-warning',
+                            'UNPAID' => 'bg-light-danger text-rose',
+                            'PENDING' => '',
+                            default => 'bg-light-secondary text-secondary'
+                        };
+                        $paymentBadgeStyle = $paymentStatus === 'PENDING' ? 'style="background-color: #d97706; color: white;"' : '';
+                    ?>
+                    <p class="mb-1 text-secondary"><strong>Payment Status:</strong> <span class="badge <?php echo $paymentBadgeClass; ?>" <?php echo $paymentBadgeStyle; ?>><?php echo \App\Models\Helpers::sanitize($paymentStatus); ?></span></p>
                     <?php
                         $orderStatus = $purchase['order_status'] ?? 'PENDING';
-                        $orderBadgeClass = $orderStatus === 'COMPLETED' ? 'bg-light-success text-success' : 'bg-light-warning text-warning';
+                        $orderBadgeClass = $orderStatus === 'COMPLETED' ? 'bg-light-success text-success' : '';
+                        $orderBadgeStyle = $orderStatus === 'COMPLETED' ? '' : 'style="background-color: #d97706; color: white;"';
                     ?>
-                    <p class="mb-1 text-secondary"><strong>Order Status:</strong> <span class="badge <?php echo $orderBadgeClass; ?>"><?php echo \App\Models\Helpers::sanitize($orderStatus); ?></span></p>
+                    <p class="mb-1 text-secondary"><strong>Order Status:</strong> <span class="badge <?php echo $orderBadgeClass; ?>" <?php echo $orderBadgeStyle; ?>><?php echo \App\Models\Helpers::sanitize($orderStatus); ?></span></p>
                     <p class="mb-1 text-secondary"><strong>Logged By:</strong> <?php echo \App\Models\Helpers::sanitize($purchase['creator_name'] ?: 'System'); ?></p>
                 </div>
             </div>

@@ -89,12 +89,12 @@ $(document).ready(function() {
                 data: 'payment_status',
                 render: function(data) {
                     const statusMap = {
-                        'PAID': 'bg-light-success text-success',
-                        'PARTIAL': 'bg-light-warning text-warning',
-                        'UNPAID': 'bg-light-danger text-rose'
+                        'PAID': '<span class="badge bg-light-success text-success">PAID</span>',
+                        'PARTIAL': '<span class="badge bg-light-warning text-warning">PARTIAL</span>',
+                        'UNPAID': '<span class="badge bg-light-danger text-rose">UNPAID</span>',
+                        'PENDING': '<span class="badge" style="background-color: #d97706; color: white;">PENDING</span>'
                     };
-                    const cls = statusMap[data] || 'bg-light-secondary';
-                    return `<span class="badge ${cls}">${data}</span>`;
+                    return statusMap[data] || `<span class="badge bg-light-secondary text-secondary">${data}</span>`;
                 }
             },
             {
@@ -104,7 +104,7 @@ $(document).ready(function() {
                     if (status === 'COMPLETED') {
                         return `<span class="badge bg-light-success text-success"><i class="fa-solid fa-circle-check me-1"></i>COMPLETED</span>`;
                     }
-                    return `<span class="badge bg-light-warning text-warning" style="cursor:pointer;" onclick="updateOrderStatus(${row.id}, 'COMPLETED')" title="Click to mark as Completed"><i class="fa-solid fa-clock me-1"></i>PENDING</span>`;
+                    return `<span class="badge" style="background-color: #d97706; color: white; cursor:pointer;" onclick="updateOrderStatus(${row.id}, 'COMPLETED')" title="Click to mark as Completed"><i class="fa-solid fa-clock me-1"></i>PENDING</span>`;
                 }
             },
             { data: 'subtotal', render: d => '₹' + parseFloat(d).toFixed(2), className: 'text-end font-monospace' },
