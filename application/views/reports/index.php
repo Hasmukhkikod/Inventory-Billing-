@@ -9,12 +9,15 @@
 <div class="panel-card mb-4">
     <div class="panel-body py-3">
         <form id="report-filter-form" class="row g-3 align-items-center justify-content-between">
-            <div class="col-md-5 d-flex align-items-center gap-2">
-                <label class="form-label mb-0 text-nowrap">From Date</label>
-                <input type="date" class="form-control form-control-sm" name="start_date" id="rep-start-date" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
-                
-                <label class="form-label mb-0 text-nowrap">To Date</label>
-                <input type="date" class="form-control form-control-sm" name="end_date" id="rep-end-date" value="<?php echo date('Y-m-d'); ?>">
+            <div class="col-md-5 d-flex flex-wrap align-items-center gap-2 row-gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label mb-0 text-nowrap">From Date</label>
+                    <input type="date" class="form-control form-control-sm" name="start_date" id="rep-start-date" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label mb-0 text-nowrap">To Date</label>
+                    <input type="date" class="form-control form-control-sm" name="end_date" id="rep-end-date" value="<?php echo date('Y-m-d'); ?>">
+                </div>
             </div>
             
             <div class="col-md-4 text-end">

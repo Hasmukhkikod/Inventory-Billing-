@@ -39,7 +39,7 @@
 
                     <hr class="text-muted opacity-25">
                     
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 row-gap-2">
                         <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-key me-2 text-indigo"></i>Role Permissions</h5>
                         <?php if ($id != 1): ?>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleAllPermissions()">Select / Deselect All</button>

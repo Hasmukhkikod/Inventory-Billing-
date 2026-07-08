@@ -26,13 +26,13 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
         <div class="card border p-4 bg-white text-dark shadow-sm">
             <!-- Header -->
             <div class="row align-items-center mb-4">
-                <div class="col-8">
+                <div class="col-12 col-sm-8">
                     <h3 class="fw-bold mb-1 text-uppercase text-dark"><?php echo \App\Models\Helpers::sanitize($company['company_name'] ?? 'Grovixo'); ?></h3>
                     <p class="mb-0 text-muted small" style="white-space:pre-line;"><?php echo \App\Models\Helpers::sanitize($company['address'] ?? ''); ?></p>
                     <p class="mb-0 small mt-1"><strong>Phone:</strong> <?php echo \App\Models\Helpers::sanitize($company['phone'] ?? ''); ?> | <strong>Email:</strong> <?php echo \App\Models\Helpers::sanitize($company['email'] ?? ''); ?></p>
                     <?php if (!empty($company['gst_number'])): ?><p class="mb-0 small text-muted"><strong>GSTIN:</strong> <?php echo \App\Models\Helpers::sanitize($company['gst_number']); ?></p><?php endif; ?>
                 </div>
-                <div class="col-4 text-end">
+                <div class="col-12 col-sm-4 text-sm-end mt-3 mt-sm-0">
                     <h4 class="fw-bold text-secondary mb-1 text-uppercase"><?php echo \App\Models\Helpers::sanitize($invoice['invoice_type']); ?></h4>
                     <h5 class="text-indigo mb-1 fw-bold"><?php echo $invoice['invoice_no']; ?></h5>
                     <p class="text-secondary small mb-0">Date: <?php echo date('d-M-Y', strtotime($invoice['invoice_date'])); ?></p>
@@ -46,7 +46,7 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
 
             <!-- Customer & Meta -->
             <div class="row mb-4">
-                <div class="col-6">
+                <div class="col-12 col-sm-6">
                     <h6 class="fw-bold text-dark mb-2">BILLED TO:</h6>
                     <?php if (!empty($invoice['customer_name'])): ?>
                         <strong class="text-black"><?php echo \App\Models\Helpers::sanitize($invoice['customer_name']); ?></strong><br>
@@ -57,7 +57,7 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
                         <span class="text-muted">Walk-in Customer</span>
                     <?php endif; ?>
                 </div>
-                <div class="col-6 text-end">
+                <div class="col-12 col-sm-6 text-sm-end mt-3 mt-sm-0">
                     <p class="mb-1 text-secondary small"><strong>Payment:</strong> <?php echo \App\Models\Helpers::sanitize($invoice['payment_method']); ?></p>
                     <p class="mb-1 text-secondary small"><strong>Status:</strong>
                         <span class="badge <?php echo $invoice['status'] === 'PAID' ? 'bg-success' : ($invoice['status'] === 'PARTIAL' ? 'bg-warning text-dark' : 'bg-danger'); ?>"><?php echo $invoice['status']; ?></span>
@@ -67,6 +67,7 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
             </div>
 
             <!-- Items Table -->
+            <div class="table-responsive">
             <table class="table table-bordered mb-4 text-dark border-secondary-subtle">
                 <thead>
                     <tr class="align-middle bg-light text-dark">
@@ -95,10 +96,11 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
 
             <!-- Totals -->
             <div class="row">
-                <div class="col-7">
+                <div class="col-12 col-sm-7">
                     <?php if (!empty($company['invoice_terms'])): ?>
                         <div class="border rounded p-3 bg-light small"><strong>Terms:</strong><br><span class="text-muted" style="white-space:pre-line;"><?php echo \App\Models\Helpers::sanitize($company['invoice_terms']); ?></span></div>
                     <?php endif; ?>
@@ -106,7 +108,7 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
                         <div class="border rounded p-3 bg-light small mt-2"><strong>Notes:</strong><br><span class="text-muted"><?php echo nl2br(\App\Models\Helpers::sanitize($invoice['notes'])); ?></span></div>
                     <?php endif; ?>
                 </div>
-                <div class="col-5">
+                <div class="col-12 col-sm-5 mt-3 mt-sm-0">
                     <div class="d-flex justify-content-between mb-1"><span class="text-secondary">Subtotal:</span><span>₹<?php echo number_format($invoice['subtotal'], 2); ?></span></div>
                     <?php if (!$isIGST): ?>
                         <div class="d-flex justify-content-between mb-1"><span class="text-secondary">CGST:</span><span>₹<?php echo number_format($invoice['cgst_amount'], 2); ?></span></div>

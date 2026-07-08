@@ -288,6 +288,7 @@
 
 .notification-dropdown {
     width: 300px;
+    max-width: calc(100vw - 2rem);
     max-height: 350px;
     overflow-y: auto;
 }
@@ -1186,7 +1187,7 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     position: fixed;
     top: 0;
     right: -380px;
-    width: 360px;
+    width: min(360px, 100vw);
     height: 100vh;
     background-color: var(--bg-secondary);
     border-left: 1px solid var(--border-color);
@@ -1456,6 +1457,48 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     
     .panel-header .btn {
         width: auto !important;
+    }
+
+    /* Let any inner header/toolbar row wrap instead of overflowing */
+    .panel-header > div {
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+    }
+
+    /* Bulk-actions toolbar (list pages): wrap controls instead of clipping */
+    .bulk-actions-toolbar {
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+    }
+    .bulk-actions-toolbar .bulk-action-select {
+        width: auto !important;
+        min-width: 140px;
+        flex: 1 1 140px;
+    }
+
+    /* Horizontal-scroll tab strip instead of multi-row wrapping tabs */
+    .panel-card .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .panel-card .nav-tabs .nav-link {
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 420px) {
+    /* Squeeze the top navbar into two rows rather than clipping controls */
+    .top-navbar {
+        flex-wrap: wrap;
+        height: auto;
+        row-gap: 0.5rem;
+    }
+    .top-navbar .global-search-container {
+        order: 3;
+        max-width: 100% !important;
+        flex-basis: 100%;
+        margin-left: 0 !important;
     }
 }
 

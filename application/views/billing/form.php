@@ -12,12 +12,12 @@ $posMode = (int)($compSettings['pos_mode'] ?? 0);
 <input type="hidden" id="config-pos-mode" value="<?php echo $posMode; ?>">
 
 <!-- Header -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 row-gap-2">
     <div>
         <h4 class="mb-1"><i class="fa-solid fa-file-invoice text-indigo me-2"></i>Create Invoice</h4>
         <nav class="text-muted small">Home / Invoices / Create Invoice</nav>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
         <button class="btn btn-warning btn-sm position-relative" id="btn-toggle-held" title="Held Bills (F5)">
             <i class="fa-solid fa-pause-circle me-1"></i>Held Bills
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="held-bills-count">0</span>

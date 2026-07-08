@@ -31,7 +31,7 @@
                     </div>
                     <div class="row g-2 small mb-2">
                         <div class="col-5 text-secondary">GSTIN:</div>
-                        <div class="col-7 text-dark fw-semibold"><?php echo \App\Models\Helpers::sanitize($customer['gst_number'] ?: '-'); ?></div>
+                        <div class="col-7 text-dark fw-semibold text-break"><?php echo \App\Models\Helpers::sanitize($customer['gst_number'] ?: '-'); ?></div>
                     </div>
                     <div class="row g-2 small mb-2">
                         <div class="col-5 text-secondary">Credit Limit:</div>
@@ -51,18 +51,18 @@
     <!-- Ledger Statement & Financials -->
     <div class="col-md-8">
         <div class="panel-card h-100">
-            <div class="panel-header d-flex justify-content-between align-items-center">
+            <div class="panel-header d-flex flex-wrap justify-content-between align-items-center row-gap-2">
                 <h6 class="mb-0 text-indigo"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Account Ledger & Statement</h6>
                 <div>
                     <span class="text-secondary small me-2">Outstanding credit:</span>
                     <strong class="text-rose fs-6" id="view-outstanding-bal">Loading...</strong>
                 </div>
             </div>
-            
+
             <div class="panel-body">
                 <!-- Stat Overview Row -->
                 <div class="row g-3 mb-4">
-                    <div class="col-md-6 text-center border-end border-secondary">
+                    <div class="col-md-6 text-center border-md-end border-secondary">
                         <span class="text-secondary small d-block mb-1">Opening Balance</span>
                         <strong class="fs-5 text-dark">₹ <?php echo number_format($customer['opening_balance'], 2); ?></strong>
                     </div>

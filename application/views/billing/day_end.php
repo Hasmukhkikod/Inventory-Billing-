@@ -6,8 +6,8 @@
 <div class="panel-card mb-4">
     <div class="panel-header">
         <h5 class="mb-0 text-dark"><i class="fa-solid fa-cash-register me-2 text-indigo"></i>Day-End Cash Register Report</h5>
-        <div class="d-flex gap-2 align-items-center">
-            <input type="date" class="form-control form-control-sm" id="day-end-date" value="<?php echo date('Y-m-d'); ?>" style="width:160px;">
+        <div class="d-flex flex-wrap gap-2 align-items-center row-gap-2">
+            <input type="date" class="form-control form-control-sm" id="day-end-date" value="<?php echo date('Y-m-d'); ?>" style="max-width:160px;">
             <button class="btn btn-primary btn-sm" id="btn-load-day-end"><i class="fa-solid fa-sync me-1"></i>Load</button>
             <button class="btn btn-outline-secondary btn-sm" onclick="window.print();"><i class="fa-solid fa-print me-1"></i>Print</button>
             <button class="btn btn-danger btn-sm" onclick="downloadDayEndPDF();"><i class="fa-solid fa-file-pdf me-1"></i>PDF</button>
@@ -29,8 +29,10 @@
         <div class="panel-card h-100">
             <div class="panel-header"><h6 class="mb-0 text-dark"><i class="fa-solid fa-credit-card me-2 text-indigo"></i>Payment Mode Breakdown</h6></div>
             <div class="panel-body p-0">
+                <div class="table-responsive">
                 <table class="table table-hover mb-0"><thead><tr><th>Method</th><th>Bills</th><th class="text-end">Total (₹)</th><th class="text-end">Received (₹)</th></tr></thead>
                 <tbody id="de-methods-table"><tr><td colspan="4" class="text-center py-3 text-secondary">Loading...</td></tr></tbody></table>
+                </div>
             </div>
         </div>
     </div>
@@ -39,8 +41,10 @@
         <div class="panel-card h-100">
             <div class="panel-header"><h6 class="mb-0 text-dark"><i class="fa-solid fa-arrows-split-up-and-left me-2 text-emerald"></i>Split Payment Summary</h6></div>
             <div class="panel-body p-0">
+                <div class="table-responsive">
                 <table class="table table-hover mb-0"><thead><tr><th>Method</th><th class="text-end">Amount (₹)</th></tr></thead>
                 <tbody id="de-split-table"><tr><td colspan="2" class="text-center py-3 text-secondary">Loading...</td></tr></tbody></table>
+                </div>
             </div>
         </div>
     </div>
@@ -52,8 +56,10 @@
         <div class="panel-card h-100">
             <div class="panel-header"><h6 class="mb-0 text-dark"><i class="fa-solid fa-fire me-2 text-warning"></i>Top 5 Products Sold</h6></div>
             <div class="panel-body p-0">
+                <div class="table-responsive">
                 <table class="table table-hover mb-0"><thead><tr><th>Product</th><th class="text-center">Qty</th><th class="text-end">Revenue (₹)</th></tr></thead>
                 <tbody id="de-top-products"><tr><td colspan="3" class="text-center py-3 text-secondary">Loading...</td></tr></tbody></table>
+                </div>
             </div>
         </div>
     </div>
@@ -62,8 +68,10 @@
         <div class="panel-card h-100">
             <div class="panel-header"><h6 class="mb-0 text-dark"><i class="fa-solid fa-users me-2 text-indigo"></i>Cashier-wise Sales</h6></div>
             <div class="panel-body p-0">
+                <div class="table-responsive">
                 <table class="table table-hover mb-0"><thead><tr><th>Cashier</th><th class="text-center">Bills</th><th class="text-end">Total (₹)</th></tr></thead>
                 <tbody id="de-cashier-table"><tr><td colspan="3" class="text-center py-3 text-secondary">Loading...</td></tr></tbody></table>
+                </div>
             </div>
         </div>
     </div>

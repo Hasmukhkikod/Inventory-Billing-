@@ -32,7 +32,7 @@
 
         <div class="card border p-4 bg-white text-dark shadow-sm">
             <div class="row align-items-center mb-4">
-                <div class="col-8">
+                <div class="col-12 col-sm-8">
                     <h3 class="fw-bold mb-1 text-uppercase text-dark"><?php echo \App\Models\Helpers::sanitize($company['company_name'] ?? 'Grovixo'); ?></h3>
                     <p class="mb-0 text-muted small" style="white-space:pre-line;"><?php echo \App\Models\Helpers::sanitize($company['address'] ?? ''); ?></p>
                     <p class="mb-0 small mt-1"><strong>Phone:</strong> <?php echo \App\Models\Helpers::sanitize($company['phone'] ?? ''); ?> | <strong>Email:</strong> <?php echo \App\Models\Helpers::sanitize($company['email'] ?? ''); ?></p>
@@ -40,7 +40,7 @@
                         <p class="mb-0 small text-muted"><strong>GSTIN:</strong> <?php echo \App\Models\Helpers::sanitize($company['gst_number']); ?></p>
                     <?php endif; ?>
                 </div>
-                <div class="col-4 text-end">
+                <div class="col-12 col-sm-4 text-sm-end mt-3 mt-sm-0">
                     <h4 class="fw-bold text-secondary mb-1">QUOTATION</h4>
                     <h5 class="text-indigo mb-1 fw-bold"><?php echo $quotation['quotation_no']; ?></h5>
                     <p class="text-secondary small mb-0">Date: <?php echo date('d-M-Y', strtotime($quotation['quotation_date'])); ?></p>
@@ -60,7 +60,7 @@
             <hr class="my-3">
 
             <div class="row mb-4">
-                <div class="col-6">
+                <div class="col-12 col-sm-6">
                     <h6 class="fw-bold text-dark mb-2">QUOTATION FOR:</h6>
                     <?php if (!empty($quotation['customer_name'])): ?>
                         <strong class="text-black"><?php echo \App\Models\Helpers::sanitize($quotation['customer_name']); ?></strong><br>
@@ -72,11 +72,12 @@
                         <span class="text-muted">No customer selected</span>
                     <?php endif; ?>
                 </div>
-                <div class="col-6 text-end">
+                <div class="col-12 col-sm-6 text-sm-end mt-3 mt-sm-0">
                     <p class="mb-1 small text-secondary"><strong>Created By:</strong> <?php echo \App\Models\Helpers::sanitize($quotation['created_by_name'] ?? 'System'); ?></p>
                 </div>
             </div>
 
+            <div class="table-responsive">
             <table class="table table-bordered mb-4 text-dark border-secondary-subtle">
                 <thead>
                     <tr class="align-middle bg-light text-dark">
@@ -103,9 +104,10 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
 
             <div class="row">
-                <div class="col-7">
+                <div class="col-12 col-sm-7">
                     <?php if (!empty($quotation['notes'])): ?>
                         <div class="border rounded p-3 bg-light small">
                             <strong>Notes:</strong><br>
@@ -113,7 +115,7 @@
                         </div>
                     <?php endif; ?>
                 </div>
-                <div class="col-5">
+                <div class="col-12 col-sm-5 mt-3 mt-sm-0">
                     <div class="d-flex justify-content-between mb-1"><span class="text-secondary">Subtotal:</span><span>₹<?php echo number_format($quotation['subtotal'], 2); ?></span></div>
                     <?php if ((float)$quotation['discount'] > 0): ?>
                         <div class="d-flex justify-content-between mb-1"><span class="text-secondary">Discount:</span><span class="text-success">-₹<?php echo number_format($quotation['discount'], 2); ?></span></div>

@@ -24,7 +24,7 @@
         <div class="card border p-4 bg-white shadow-sm text-dark">
             <!-- Header Block -->
             <div class="row align-items-center mb-4">
-                <div class="col-8">
+                <div class="col-12 col-sm-8">
                     <h4 class="fw-bold mb-1 text-uppercase text-dark"><?php echo \App\Models\Helpers::sanitize($purchase['supplier_name']); ?></h4>
                     <p class="mb-0 text-muted small" style="white-space: pre-line;">
                         <?php echo \App\Models\Helpers::sanitize($purchase['supplier_address'] ?? ''); ?>
@@ -36,7 +36,7 @@
                         <p class="mb-0 small"><strong>GSTIN:</strong> <?php echo \App\Models\Helpers::sanitize($purchase['supplier_gst']); ?></p>
                     <?php endif; ?>
                 </div>
-                <div class="col-4 text-end">
+                <div class="col-12 col-sm-4 text-sm-end mt-3 mt-sm-0">
                     <h4 class="fw-bold text-secondary mb-1">PURCHASE ORDER</h4>
                     <h5 class="text-indigo mb-1 fw-bold"><?php echo $purchase['purchase_no']; ?></h5>
                     <p class="text-secondary small mb-0">Date: <?php echo date('d-M-Y', strtotime($purchase['purchase_date'])); ?></p>
@@ -47,12 +47,12 @@
 
             <!-- Supplier & Staff Section -->
             <div class="row mb-4">
-                <div class="col-6">
+                <div class="col-12 col-sm-6">
                     <h6 class="fw-bold text-dark mb-2">BILLED FROM:</h6>
                     <strong class="text-black d-block"><?php echo \App\Models\Helpers::sanitize($purchase['supplier_name']); ?></strong>
                     <span class="d-block text-secondary">Mobile: <?php echo \App\Models\Helpers::sanitize($purchase['supplier_mobile']); ?></span>
                 </div>
-                <div class="col-6 text-end">
+                <div class="col-12 col-sm-6 text-sm-end mt-3 mt-sm-0">
                     <h6 class="fw-bold text-dark mb-2">ORDER META:</h6>
                     <?php
                         $paymentStatus = $purchase['payment_status'] ?? 'PENDING';
@@ -77,6 +77,7 @@
             </div>
 
             <!-- Items Table -->
+            <div class="table-responsive">
             <table class="table table-bordered mb-4 text-dark border-secondary-subtle">
                 <thead>
                     <tr class="align-middle bg-light text-dark">
@@ -104,10 +105,11 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
 
             <!-- Calculation summaries -->
             <div class="row justify-content-end">
-                <div class="col-5">
+                <div class="col-12 col-sm-5">
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-secondary">Subtotal (Taxable):</span>
                         <span>₹<?php echo number_format($purchase['subtotal'], 2); ?></span>

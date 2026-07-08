@@ -410,9 +410,9 @@ $(document).ready(function() {
                         <input type="number" step="0.01" class="form-control form-control-sm item-rate-input" data-index="${index}" value="${item.rate.toFixed(2)}" style="width:100px;" min="0">
                     </td>
                     <td>
-                        <div class="input-group input-group-sm" style="width:130px;">
+                        <div class="input-group input-group-sm" style="width:150px;">
                             <input type="number" step="0.01" class="form-control item-disc-input" data-index="${index}" value="${item.discount_value}" min="0">
-                            <select class="form-select item-disc-type" data-index="${index}" style="max-width:50px;">
+                            <select class="form-select item-disc-type" data-index="${index}" style="max-width:62px;">
                                 <option value="percent" ${item.discount_type==='percent'?'selected':''}>%</option>
                                 <option value="amount" ${item.discount_type==='amount'?'selected':''}>&#8377;</option>
                             </select>

@@ -61,7 +61,7 @@
                                 <!-- Logo Upload -->
                                 <div class="col-md-12">
                                     <label class="form-label">Company Logo</label>
-                                    <div class="d-flex align-items-center gap-3">
+                                    <div class="d-flex flex-wrap align-items-center gap-3 row-gap-2">
                                         <div id="logo-preview" style="width:64px; height:64px; border-radius:10px; border:2px dashed #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#f8fafc;">
                                             <i class="fa-solid fa-image text-muted fs-4" id="logo-placeholder"></i>
                                             <img id="logo-img" src="" alt="Logo" style="width:100%; height:100%; object-fit:contain; display:none;">
@@ -203,7 +203,7 @@
                                     <input type="hidden" name="gst_slabs" id="set-slabs" value="">
                                     <div class="gst-slabs-container border rounded p-2 bg-white" style="min-height: 44px;">
                                         <div class="d-flex flex-wrap gap-2 mb-2" id="gst-tags-box"></div>
-                                        <div class="d-flex gap-2">
+                                        <div class="d-flex flex-wrap gap-2 row-gap-2">
                                             <div class="input-group input-group-sm" style="max-width: 200px;">
                                                 <input type="number" step="0.01" min="0" max="100" class="form-control" id="gst-new-value" placeholder="e.g. 5">
                                                 <span class="input-group-text">%</span>
@@ -799,42 +799,42 @@
                     <input type="hidden" name="id" id="coupon-id" value="0">
                     <div class="modal-body">
                         <div class="row g-3">
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="form-label">Coupon Code *</label>
                                 <input type="text" class="form-control text-uppercase" name="coupon_code" id="coupon-code" required placeholder="e.g. SAVE20">
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="form-label">Coupon Name *</label>
                                 <input type="text" class="form-control" name="coupon_name" id="coupon-name" required placeholder="e.g. Diwali Sale 20%">
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="form-label">Discount Type *</label>
                                 <select class="form-select" name="discount_type" id="coupon-type">
                                     <option value="PERCENTAGE">Percentage (%)</option>
                                     <option value="FLAT">Flat Amount (₹)</option>
                                 </select>
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="form-label">Discount Value *</label>
                                 <input type="number" step="0.01" min="0" class="form-control" name="discount_value" id="coupon-value" required placeholder="e.g. 10">
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="form-label">Min Order Amount (₹)</label>
                                 <input type="number" step="0.01" min="0" class="form-control" name="min_order_amount" id="coupon-min" value="0" placeholder="0 = no minimum">
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="form-label">Max Discount (₹)</label>
                                 <input type="number" step="0.01" min="0" class="form-control" name="max_discount" id="coupon-max" placeholder="For % type only">
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="form-label">Valid From</label>
                                 <input type="date" class="form-control" name="valid_from" id="coupon-from">
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="form-label">Valid Until</label>
                                 <input type="date" class="form-control" name="valid_until" id="coupon-until">
                             </div>
-                            <div class="col-6">
+                            <div class="col-12 col-sm-6">
                                 <label class="form-label">Usage Limit</label>
                                 <input type="number" min="0" class="form-control" name="usage_limit" id="coupon-limit" value="0" placeholder="0 = unlimited">
                             </div>

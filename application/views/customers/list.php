@@ -155,10 +155,10 @@ $(document).ready(function() {
                     return `
                         <div class="btn-group">
                             <a href="${BASE_URL}/customers/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="Statement Ledger">
-                                <i class="fa-solid fa-list-ul"></i> Statement
+                                <i class="fa-solid fa-list-ul"></i> <span class="d-none d-md-inline">Statement</span>
                             </a>
                             <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-success btn-pay" data-id="${row.id}" data-name="${row.customer_name}" data-bal="${row.credit_balance}" title="Receive Payment" ${parseFloat(row.credit_balance) <= 0 ? 'disabled' : ''}>
-                                <i class="fa-solid fa-indian-rupee-sign"></i> Receive
+                                <i class="fa-solid fa-indian-rupee-sign"></i> <span class="d-none d-md-inline">Receive</span>
                             </button>
                             <a href="${BASE_URL}/customers/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald" title="Edit customer">
                                 <i class="fa-solid fa-pencil"></i>

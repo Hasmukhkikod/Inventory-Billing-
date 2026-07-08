@@ -57,7 +57,7 @@
 </div>
 
 <!-- Floating Language Selector Button -->
-<button class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center" style="position: fixed; bottom: 80px; right: 20px; width: 50px; height: 50px; z-index: 1050;" data-bs-toggle="modal" data-bs-target="#languageModal" title="Select Language">
+<button class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center" style="position: fixed; bottom: calc(80px + env(safe-area-inset-bottom)); right: 20px; width: 50px; height: 50px; z-index: 1050;" data-bs-toggle="modal" data-bs-target="#languageModal" title="Select Language">
     <i class="fa-solid fa-language fs-4"></i>
 </button>
 

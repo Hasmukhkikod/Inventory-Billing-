@@ -24,7 +24,7 @@
         <div class="card border p-4 bg-white shadow-sm text-dark">
             <!-- Company Header Block -->
             <div class="row align-items-center mb-4">
-                <div class="col-8">
+                <div class="col-12 col-sm-8">
                     <h4 class="fw-bold mb-1 text-uppercase text-dark"><?php echo \App\Models\Helpers::sanitize($compSettings['company_name'] ?? COMPANY_NAME); ?></h4>
                     <p class="mb-0 text-muted small" style="white-space: pre-line;"><?php echo \App\Models\Helpers::sanitize($compSettings['address'] ?? ''); ?></p>
                     <?php if (!empty($compSettings['phone'])): ?>
@@ -34,7 +34,7 @@
                         <p class="mb-0 small"><strong>GSTIN:</strong> <?php echo \App\Models\Helpers::sanitize($compSettings['gst_number']); ?></p>
                     <?php endif; ?>
                 </div>
-                <div class="col-4 text-end">
+                <div class="col-12 col-sm-4 text-sm-end mt-3 mt-sm-0">
                     <h4 class="fw-bold text-secondary mb-1">DELIVERY CHALLAN</h4>
                     <h5 class="text-indigo mb-1 fw-bold"><?php echo \App\Models\Helpers::sanitize($challan['challan_no']); ?></h5>
                     <p class="text-secondary small mb-0">Date: <?php echo date('d-M-Y', strtotime($challan['challan_date'])); ?></p>
@@ -52,7 +52,7 @@
 
             <!-- Customer & Transport Details -->
             <div class="row mb-4">
-                <div class="col-6">
+                <div class="col-12 col-sm-6">
                     <h6 class="fw-bold text-dark mb-2">DISPATCH TO:</h6>
                     <strong class="text-black d-block"><?php echo \App\Models\Helpers::sanitize($challan['customer_name']); ?></strong>
                     <?php if (!empty($challan['customer_address'])): ?>
@@ -63,7 +63,7 @@
                         <span class="d-block text-secondary small">GSTIN: <?php echo \App\Models\Helpers::sanitize($challan['customer_gst']); ?></span>
                     <?php endif; ?>
                 </div>
-                <div class="col-6 text-end">
+                <div class="col-12 col-sm-6 text-sm-end mt-3 mt-sm-0">
                     <h6 class="fw-bold text-dark mb-2">TRANSPORT INFO:</h6>
                     <p class="mb-1 text-secondary"><strong>Transport:</strong> <?php echo \App\Models\Helpers::sanitize($challan['transport_name'] ?: 'N/A'); ?></p>
                     <p class="mb-1 text-secondary"><strong>Vehicle No:</strong> <?php echo \App\Models\Helpers::sanitize($challan['vehicle_no'] ?: 'N/A'); ?></p>
@@ -72,6 +72,7 @@
             </div>
 
             <!-- Items Table -->
+            <div class="table-responsive">
             <table class="table table-bordered mb-4 text-dark border-secondary-subtle">
                 <thead>
                     <tr class="align-middle bg-light text-dark">
@@ -101,6 +102,7 @@
                     </tr>
                 </tfoot>
             </table>
+            </div>
 
             <!-- Notes Section -->
             <?php if (!empty($challan['notes'])): ?>
@@ -112,17 +114,17 @@
 
             <!-- Signatures -->
             <div class="row mt-5 pt-4 border-top border-secondary-subtle">
-                <div class="col-4 text-center">
+                <div class="col-4 col-sm-4 text-center">
                     <div class="border-top border-dark pt-2 mt-5 mx-3">
                         <small class="text-secondary">Prepared By</small>
                     </div>
                 </div>
-                <div class="col-4 text-center">
+                <div class="col-4 col-sm-4 text-center">
                     <div class="border-top border-dark pt-2 mt-5 mx-3">
                         <small class="text-secondary">Checked By</small>
                     </div>
                 </div>
-                <div class="col-4 text-center">
+                <div class="col-4 col-sm-4 text-center">
                     <div class="border-top border-dark pt-2 mt-5 mx-3">
                         <small class="text-secondary">Received By</small>
                     </div>
