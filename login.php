@@ -85,12 +85,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php if ($loginSuccess): ?>
 <!-- Success Transition Preloader -->
-<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #6366f1; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column;">
-    <div class="spinner-border text-white" role="status" style="width: 3rem; height: 3rem;">
-        <span class="visually-hidden">Loading...</span>
+<div class="auth-success-screen">
+    <div class="auth-success-scene">
+        <i class="fa-solid fa-box auth-float-box auth-float-box-1"></i>
+        <i class="fa-solid fa-cube auth-float-box auth-float-box-2"></i>
+        <i class="fa-solid fa-box-open auth-float-box auth-float-box-3"></i>
+
+        <div class="auth-invoice-paper">
+            <div class="auth-invoice-line auth-invoice-line-title"></div>
+            <div class="auth-invoice-line" style="animation-delay: .38s;"></div>
+            <div class="auth-invoice-line" style="animation-delay: .48s;"></div>
+            <div class="auth-invoice-line auth-invoice-line-short" style="animation-delay: .58s;"></div>
+            <div class="auth-invoice-stamp"><i class="fa-solid fa-check"></i></div>
+        </div>
     </div>
-    <div class="text-white mt-3 fw-bold" style="letter-spacing: 1px;"><i class="fa-solid fa-check-circle me-2 text-success"></i>AUTHENTICATION SUCCESSFUL</div>
-    <div class="text-white-50 mt-1 small">Preparing your dashboard...</div>
+    <div class="text-white mt-4 fw-bold auth-success-text" style="letter-spacing: 1px;">LOGIN SUCCESSFUL</div>
+    <div class="text-white-50 mt-1 small auth-success-text" style="animation-delay: .15s;">Preparing your dashboard...</div>
 </div>
 <?php else: ?>
 
@@ -115,6 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <span><?php echo Helpers::sanitize($brandName); ?></span>
     </div>
 
+    <span class="auth-eyebrow"><i class="fa-solid fa-shield-halved"></i> Invoice &amp; Inventory Platform</span>
     <h1>Invoice &amp; Inventory,<br>Simplified.</h1>
     <p class="auth-lead">Everything you need to manage sales, stock, and finances &mdash; all in one workspace.</p>
 
@@ -124,10 +135,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <li><span class="icon-badge"><i class="fa-solid fa-cart-shopping"></i></span> Purchases, sales &amp; returns</li>
         <li><span class="icon-badge"><i class="fa-solid fa-chart-line"></i></span> Insightful reports &amp; analytics</li>
     </ul>
+
+    <div class="auth-mock-card" style="align-self: flex-end;">
+        <div class="auth-mock-card-header">
+            <span class="auth-mock-dot"></span>
+            <span>INV-2026-0007</span>
+            <span class="auth-mock-badge">Paid</span>
+        </div>
+        <div class="auth-mock-row"><span>Subtotal</span><span>&#8377;58,200</span></div>
+        <div class="auth-mock-row"><span>GST (18%)</span><span>&#8377;10,476</span></div>
+        <div class="auth-mock-row auth-mock-total"><span>Total</span><span>&#8377;68,676</span></div>
+    </div>
 </div>
 
 <!-- Form Panel -->
-<div class="auth-form-panel" id="login-content" style="opacity: 0; transition: opacity 0.5s ease;">
+<div class="auth-form-panel" id="login-content" style="opacity: 0; transform: translateY(14px); transition: opacity 0.5s ease, transform 0.5s ease;">
     <div class="auth-form-inner">
         <div class="mb-4">
             <div class="d-lg-none text-center mb-3">
@@ -168,13 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <button type="submit" class="btn btn-primary w-100 py-2.5">
-                <i class="fa-solid fa-right-to-bracket me-2"></i>Authenticate Securely
+                <i class="fa-solid fa-right-to-bracket me-2"></i>Login
             </button>
         </form>
-
-        <div class="text-center mt-4">
-            <span class="text-muted small">Powered by <?php echo Helpers::sanitize($brandName); ?> IIMS v2.0</span>
-        </div>
     </div>
 </div>
 
@@ -192,6 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setTimeout(() => {
                 preloader.style.display = 'none';
                 content.style.opacity = '1';
+                content.style.transform = 'translateY(0)';
             }, 400);
         }
     });
