@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Custom stylesheet -->
     <link href="assets/css/style.css" rel="stylesheet">
 </head>
-<body class="auth-wrapper">
+<body class="auth-split-wrapper">
 
 <?php if ($loginSuccess): ?>
 <!-- Success Transition Preloader -->
@@ -102,49 +102,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="text-white mt-3 fw-bold" style="letter-spacing: 1px;">INITIALIZING SECURE LOGIN...</div>
 </div>
 
-<div class="auth-card" id="login-content" style="opacity: 0; transition: opacity 0.5s ease;">
-    <div class="text-center mb-4">
-        <?php if (!empty($brandLogo) && file_exists(UPLOAD_DIR . '/' . $brandLogo)): ?>
-            <img src="<?php echo BASE_URL . '/uploads/' . $brandLogo; ?>" alt="Logo" style="height: 48px; margin-bottom: 8px;">
-        <?php else: ?>
-            <i class="fa-solid fa-boxes-stacked text-indigo" style="font-size: 2.5rem;"></i>
-        <?php endif; ?>
-        <h3 class="mb-1 text-dark"><?php echo Helpers::sanitize($brandName); ?></h3>
-        <p class="text-secondary small">Invoice & Inventory Management System</p>
+<!-- Brand / Feature Panel -->
+<div class="auth-brand-panel d-none d-lg-flex">
+    <div class="auth-brand-logo-row">
+        <span class="auth-logo-badge">
+            <?php if (!empty($brandLogo) && file_exists(UPLOAD_DIR . '/' . $brandLogo)): ?>
+                <img src="<?php echo BASE_URL . '/uploads/' . $brandLogo; ?>" alt="Logo">
+            <?php else: ?>
+                <i class="fa-solid fa-boxes-stacked"></i>
+            <?php endif; ?>
+        </span>
+        <span><?php echo Helpers::sanitize($brandName); ?></span>
     </div>
-    
-    <?php if (!empty($errorMessage)): ?>
-        <div class="alert alert-danger border-0 bg-light-danger small" role="alert">
-            <i class="fa-solid fa-circle-exclamation me-2"></i> <?php echo Helpers::sanitize($errorMessage); ?>
-        </div>
-    <?php endif; ?>
 
-    <form action="login.php" method="POST" autocomplete="off">
-        <?php echo Helpers::csrfField(); ?>
-        
-        <div class="mb-3">
-            <label for="email" class="form-label">Email Address</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
-                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email address" required autofocus>
-            </div>
-        </div>
-        
+    <h1>Invoice &amp; Inventory,<br>Simplified.</h1>
+    <p class="auth-lead">Everything you need to manage sales, stock, and finances &mdash; all in one workspace.</p>
+
+    <ul class="auth-feature-list">
+        <li><span class="icon-badge"><i class="fa-solid fa-file-invoice"></i></span> GST-ready invoicing &amp; billing</li>
+        <li><span class="icon-badge"><i class="fa-solid fa-boxes-stacked"></i></span> Real-time stock &amp; inventory tracking</li>
+        <li><span class="icon-badge"><i class="fa-solid fa-cart-shopping"></i></span> Purchases, sales &amp; returns</li>
+        <li><span class="icon-badge"><i class="fa-solid fa-chart-line"></i></span> Insightful reports &amp; analytics</li>
+    </ul>
+</div>
+
+<!-- Form Panel -->
+<div class="auth-form-panel" id="login-content" style="opacity: 0; transition: opacity 0.5s ease;">
+    <div class="auth-form-inner">
         <div class="mb-4">
-            <label for="password" class="form-label">Password</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+            <div class="d-lg-none text-center mb-3">
+                <?php if (!empty($brandLogo) && file_exists(UPLOAD_DIR . '/' . $brandLogo)): ?>
+                    <img src="<?php echo BASE_URL . '/uploads/' . $brandLogo; ?>" alt="Logo" style="height: 44px; margin-bottom: 8px;">
+                <?php else: ?>
+                    <i class="fa-solid fa-boxes-stacked text-indigo" style="font-size: 2.25rem;"></i>
+                <?php endif; ?>
+                <h4 class="mb-1"><?php echo Helpers::sanitize($brandName); ?></h4>
             </div>
+            <h3 class="mb-1 text-dark">Welcome back</h3>
+            <p class="text-secondary small mb-0">Sign in to your <?php echo Helpers::sanitize($brandName); ?> account to continue.</p>
         </div>
-        
-        <button type="submit" class="btn btn-primary w-100 py-2.5">
-            <i class="fa-solid fa-right-to-bracket me-2"></i>Authenticate Securely
-        </button>
-    </form>
-    
-    <div class="text-center mt-4">
-        <span class="text-muted small">Powered by Grovixo IIMS v2.0</span>
+
+        <?php if (!empty($errorMessage)): ?>
+            <div class="alert alert-danger border-0 bg-light-danger small" role="alert">
+                <i class="fa-solid fa-circle-exclamation me-2"></i> <?php echo Helpers::sanitize($errorMessage); ?>
+            </div>
+        <?php endif; ?>
+
+        <form action="login.php" method="POST" autocomplete="off">
+            <?php echo Helpers::csrfField(); ?>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email address" required autofocus>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2.5">
+                <i class="fa-solid fa-right-to-bracket me-2"></i>Authenticate Securely
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <span class="text-muted small">Powered by <?php echo Helpers::sanitize($brandName); ?> IIMS v2.0</span>
+        </div>
     </div>
 </div>
 
