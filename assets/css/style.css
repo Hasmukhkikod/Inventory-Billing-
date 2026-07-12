@@ -219,6 +219,100 @@
     animation: skeleton-loading 1.5s infinite;
 }
 
+/* DataTables loading indicator - shown automatically while any table's AJAX
+   data source is loading (see footer.php's processing.dt handler). A shimmering
+   skeleton mirrors that specific table's own column widths, rather than a
+   generic disconnected spinner. DataTables' own built-in indicator is
+   suppressed in favor of this fully custom overlay. */
+.dataTables_wrapper .dataTables_processing {
+    display: none !important;
+}
+
+.dt-loader-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    overflow: hidden;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    animation: dt-skel-fade-in 0.2s ease both;
+}
+
+.dt-skel-topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    overflow: hidden;
+    background: var(--bg-tertiary);
+}
+.dt-skel-topbar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, var(--accent-indigo), #06b6d4, transparent);
+    animation: dt-skel-sweep 1.3s ease-in-out infinite;
+}
+
+.dt-skel-table {
+    padding: 1.15rem 1rem 0.5rem;
+}
+
+.dt-skel-row {
+    display: grid;
+    align-items: center;
+    column-gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.dt-skel-row:first-child {
+    opacity: 0.95;
+}
+
+.dt-skel-cell {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+.dt-skel-cell-narrow {
+    justify-content: center;
+}
+
+.dt-skel-bar {
+    display: block;
+    height: 11px;
+    max-width: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-color) 50%, var(--bg-tertiary) 75%);
+    background-size: 200% 100%;
+    animation: dt-skel-shimmer 1.6s ease-in-out infinite;
+}
+.dt-skel-cell-narrow .dt-skel-bar {
+    height: 14px;
+    width: 14px !important;
+    border-radius: 4px;
+}
+
+@keyframes dt-skel-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes dt-skel-sweep {
+    0% { left: -40%; }
+    100% { left: 100%; }
+}
+
+@keyframes dt-skel-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 /* Global Search Dropdown Styling */
 .global-search-container {
     position: relative;

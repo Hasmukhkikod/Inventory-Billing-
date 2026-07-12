@@ -490,8 +490,9 @@
                                         }, 1000);
                                     </script>
                                 </div>
-                                <div class="col-md-12" id="pos-template-section" style="display: none;">
-                                    <h6 class="text-indigo mb-3"><i class="fa-solid fa-receipt me-2"></i>POS Receipt Template</h6>
+                                <div class="col-md-12"><hr class="my-1"></div>
+                                <div class="col-md-12" id="pos-template-section">
+                                    <h6 class="text-indigo mb-3"><i class="fa-solid fa-receipt me-2"></i>POS Receipt Template <span class="text-muted small fw-normal">(used for thermal/POS bill printing)</span></h6>
                                     <input type="hidden" name="pos_template" id="set-pos-template" value="pos_standard">
                                     <div class="row g-3 justify-content-center">
                                         <!-- POS Standard -->
@@ -629,21 +630,9 @@
                                         function togglePosSettings(isPosEnabled) {
                                             document.getElementById('pos-mode-hidden').value = isPosEnabled ? 1 : 0;
                                             document.getElementById('btn-pos-guide').style.display = isPosEnabled ? 'inline-block' : 'none';
-                                            
-                                            // Toggle visibility of related settings
-                                            const invoiceTemplateSec = document.getElementById('invoice-template-section');
-                                            const posTemplateSec = document.getElementById('pos-template-section');
-                                            const thermalWidthSec = document.getElementById('thermal-width-section');
-                                            
-                                            if (isPosEnabled) {
-                                                if(invoiceTemplateSec) invoiceTemplateSec.style.display = 'none';
-                                                if(posTemplateSec) posTemplateSec.style.display = 'block';
-                                                if(thermalWidthSec) thermalWidthSec.style.display = 'block';
-                                            } else {
-                                                if(invoiceTemplateSec) invoiceTemplateSec.style.display = 'block';
-                                                if(posTemplateSec) posTemplateSec.style.display = 'none';
-                                                if(thermalWidthSec) thermalWidthSec.style.display = 'none';
-                                            }
+                                            // Note: Invoice (A4) and POS/thermal receipt template settings are both
+                                            // always visible below - businesses often print both formats regardless
+                                            // of whether the hardware barcode scanner is enabled.
                                         }
 
                                         document.getElementById('set-pos-mode').addEventListener('change', function() {
@@ -660,6 +649,51 @@
                                             togglePosSettings(isChecked);
                                         }, 1000);
                                     </script>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mt-1" id="pos-content-section">
+                                <div class="col-md-12">
+                                    <hr class="my-1">
+                                    <h6 class="text-indigo mb-3"><i class="fa-solid fa-sliders me-2"></i>Receipt Content Options</h6>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="pos_show_logo" id="set-pos-show-logo" value="1" checked>
+                                        <label class="form-check-label" for="set-pos-show-logo">Show Logo</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="pos_show_cashier" id="set-pos-show-cashier" value="1" checked>
+                                        <label class="form-check-label" for="set-pos-show-cashier">Show Cashier Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="pos_show_customer_mobile" id="set-pos-show-mobile" value="1" checked>
+                                        <label class="form-check-label" for="set-pos-show-mobile">Show Customer Mobile</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="pos_show_hsn" id="set-pos-show-hsn" value="1">
+                                        <label class="form-check-label" for="set-pos-show-hsn">Show HSN Code</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="pos_show_gst_breakdown" id="set-pos-show-gst" value="1" checked>
+                                        <label class="form-check-label" for="set-pos-show-gst">Show GST Breakdown (CGST/SGST/IGST)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Receipt Header Text <span class="text-muted small">(shown under company name)</span></label>
+                                    <input type="text" class="form-control" name="pos_header_text" id="set-pos-header-text" maxlength="255" placeholder="e.g. Retail Outlet - Main Branch">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Receipt Footer Text <span class="text-muted small">(replaces the default thank-you line)</span></label>
+                                    <input type="text" class="form-control" name="pos_footer_text" id="set-pos-footer-text" maxlength="255" placeholder="e.g. Goods once sold will not be taken back.">
                                 </div>
                             </div>
                         </div>
@@ -897,6 +931,13 @@ $(document).ready(function() {
                 $("#set-system-language").val(s.system_language || 'en');
                 $("#set-pos-mode").prop('checked', s.pos_mode == 1);
                 $("#pos-mode-hidden").val(s.pos_mode || 0);
+                $("#set-pos-show-logo").prop('checked', s.pos_show_logo == 1);
+                $("#set-pos-show-cashier").prop('checked', s.pos_show_cashier == 1);
+                $("#set-pos-show-mobile").prop('checked', s.pos_show_customer_mobile == 1);
+                $("#set-pos-show-hsn").prop('checked', s.pos_show_hsn == 1);
+                $("#set-pos-show-gst").prop('checked', s.pos_show_gst_breakdown == 1);
+                $("#set-pos-header-text").val(s.pos_header_text || '');
+                $("#set-pos-footer-text").val(s.pos_footer_text || '');
                 // Bank Details
                 $("#set-bank-name").val(s.bank_name || '');
                 $("#set-bank-account").val(s.bank_account_no || '');

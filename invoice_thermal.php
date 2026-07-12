@@ -35,6 +35,14 @@ $company = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1")->fe
 if (!$company) $company = ['company_name' => 'Grovixo', 'phone' => '', 'address' => '', 'gst_number' => '', 'invoice_footer' => 'Thank you!'];
 $pos_template = $company['pos_template'] ?? 'pos_standard';
 $thermal_width = $company['thermal_width'] ?? '80mm';
+$pos_show_logo = (int)($company['pos_show_logo'] ?? 1);
+$pos_show_cashier = (int)($company['pos_show_cashier'] ?? 1);
+$pos_show_customer_mobile = (int)($company['pos_show_customer_mobile'] ?? 1);
+$pos_show_hsn = (int)($company['pos_show_hsn'] ?? 0);
+$pos_show_gst_breakdown = (int)($company['pos_show_gst_breakdown'] ?? 1);
+$pos_header_text = trim($company['pos_header_text'] ?? '');
+$pos_footer_text = trim($company['pos_footer_text'] ?? '') ?: ($company['invoice_footer'] ?? 'Thank you!');
+$logoPath = !empty($company['company_logo']) && file_exists(UPLOAD_DIR . '/' . $company['company_logo']) ? BASE_URL . '/uploads/' . $company['company_logo'] : null;
 
 $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND status = 'ACTIVE'", [$id])->fetchAll();
 ?>
@@ -97,12 +105,16 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
     
     <?php if ($pos_template === 'pos_bold'): ?>
         <div class="header-box">
+            <?php if ($pos_show_logo && $logoPath): ?><img src="<?php echo $logoPath; ?>" alt="Logo" style="height:28px; margin-bottom:4px;"><?php endif; ?>
             <div><?php echo Helpers::sanitize($company['company_name']); ?></div>
             <div style="font-size:10px; font-weight:normal; margin-top:2px;"><?php echo Helpers::sanitize($company['address'] ?? ''); ?></div>
         </div>
     <?php endif; ?>
 
     <div class="text-center">
+        <?php if ($pos_show_logo && $logoPath && $pos_template !== 'pos_bold'): ?>
+            <img src="<?php echo $logoPath; ?>" alt="Logo" style="height:32px; margin-bottom:4px;">
+        <?php endif; ?>
         <div class="company-name"><?php echo Helpers::sanitize($company['company_name']); ?></div>
         <?php if ($pos_template !== 'pos_bold'): ?>
         <div class="small"><?php echo Helpers::sanitize($company['address'] ?? ''); ?></div>
@@ -110,6 +122,9 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
         <div class="small">Ph: <?php echo Helpers::sanitize($company['phone'] ?? ''); ?></div>
         <?php if (!empty($company['gst_number'])): ?>
             <div class="small">GSTIN: <?php echo Helpers::sanitize($company['gst_number']); ?></div>
+        <?php endif; ?>
+        <?php if ($pos_header_text !== ''): ?>
+            <div class="small bold" style="margin-top:2px;"><?php echo Helpers::sanitize($pos_header_text); ?></div>
         <?php endif; ?>
     </div>
 
@@ -119,9 +134,13 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
     <div class="row small"><span>Date: <?php echo date('d/m/Y H:i', strtotime($invoice['created_at'])); ?></span></div>
     <?php if (!empty($invoice['customer_name'])): ?>
         <div class="row small"><span>Customer: <?php echo Helpers::sanitize($invoice['customer_name']); ?></span></div>
+        <?php if ($pos_show_customer_mobile): ?>
         <div class="row small"><span>Mobile: <?php echo Helpers::sanitize($invoice['customer_mobile']); ?></span></div>
+        <?php endif; ?>
     <?php endif; ?>
+    <?php if ($pos_show_cashier): ?>
     <div class="row small"><span>Cashier: <?php echo Helpers::sanitize($invoice['cashier_name']); ?></span></div>
+    <?php endif; ?>
 
     <div class="divider"></div>
 
@@ -130,7 +149,7 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
         <tbody>
             <?php foreach ($items as $item): ?>
                 <tr>
-                    <td><?php echo Helpers::sanitize($item['product_name']); ?></td>
+                    <td><?php echo Helpers::sanitize($item['product_name']); ?><?php if ($pos_show_hsn && !empty($item['hsn_code'])): ?><br><span class="small">HSN: <?php echo Helpers::sanitize($item['hsn_code']); ?></span><?php endif; ?></td>
                     <td class="amt"><?php echo (float)$item['quantity'] . ' ' . $item['display_unit']; ?><?php if (!empty($item['primary_qty']) && (float)$item['primary_qty'] != (float)$item['quantity']): ?><br><span class="small">(<?php echo (float)$item['primary_qty'] . ' ' . ($item['unit_name'] ?: 'Pcs'); ?>)</span><?php endif; ?></td>
                     <td class="amt"><?php echo number_format($item['rate'], 2); ?></td>
                     <td class="amt"><?php echo number_format($item['amount'], 2); ?></td>
@@ -148,15 +167,20 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
     <div class="divider"></div>
 
     <div class="row"><span>Subtotal:</span><span><?php echo Helpers::formatCurrency($invoice['subtotal']); ?></span></div>
-    <?php if ((float)$invoice['cgst_amount'] > 0): ?>
-        <div class="row small"><span>CGST:</span><span><?php echo Helpers::formatCurrency($invoice['cgst_amount']); ?></span></div>
-        <div class="row small"><span>SGST:</span><span><?php echo Helpers::formatCurrency($invoice['sgst_amount']); ?></span></div>
+    <?php $totalTax = (float)$invoice['cgst_amount'] + (float)$invoice['sgst_amount'] + (float)$invoice['igst_amount']; ?>
+    <?php if ($pos_show_gst_breakdown): ?>
+        <?php if ((float)$invoice['cgst_amount'] > 0): ?>
+            <div class="row small"><span>CGST:</span><span><?php echo Helpers::formatCurrency($invoice['cgst_amount']); ?></span></div>
+            <div class="row small"><span>SGST:</span><span><?php echo Helpers::formatCurrency($invoice['sgst_amount']); ?></span></div>
+        <?php endif; ?>
+        <?php if ((float)$invoice['igst_amount'] > 0): ?>
+            <div class="row small"><span>IGST:</span><span><?php echo Helpers::formatCurrency($invoice['igst_amount']); ?></span></div>
+        <?php endif; ?>
+    <?php elseif ($totalTax > 0): ?>
+        <div class="row small"><span>Tax:</span><span><?php echo Helpers::formatCurrency($totalTax); ?></span></div>
     <?php endif; ?>
-    <?php if ((float)$invoice['igst_amount'] > 0): ?>
-        <div class="row small"><span>IGST:</span><span><?php echo Helpers::formatCurrency($invoice['igst_amount']); ?></span></div>
-    <?php endif; ?>
-    <?php if ((float)$invoice['discount_amount'] > 0): ?>
-        <div class="row"><span>Discount:</span><span>-<?php echo Helpers::formatCurrency($invoice['discount_amount']); ?></span></div>
+    <?php if ((float)$invoice['discount'] > 0): ?>
+        <div class="row"><span>Discount:</span><span>-<?php echo Helpers::formatCurrency($invoice['discount']); ?></span></div>
     <?php endif; ?>
     <?php if ((float)$invoice['coupon_discount'] > 0): ?>
         <div class="row"><span>Coupon:</span><span>-<?php echo Helpers::formatCurrency($invoice['coupon_discount']); ?></span></div>
@@ -198,7 +222,7 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
 
     <div class="divider"></div>
     <div class="text-center small" style="margin-top:6px;">
-        <?php echo Helpers::sanitize($company['invoice_footer'] ?? 'Thank you!'); ?>
+        <?php echo Helpers::sanitize($pos_footer_text); ?>
     </div>
     <div class="text-center small" style="margin-top:4px;">Powered by Grovixo IIMS</div>
 </div>

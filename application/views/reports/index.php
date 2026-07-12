@@ -275,11 +275,10 @@
 $(document).ready(function() {
     let salesTable, stockTable, expensesTable, customerTable, supplierTable, gstTable, overdueTable;
 
-    function applyFilters() {
+    function fetchSummary() {
         const start = $("#rep-start-date").val();
         const end = $("#rep-end-date").val();
-        
-        // 1. Fetch P&L metrics summary
+
         $.ajax({
             url: BASE_URL + `/api/reports.php?action=summary&start_date=${start}&end_date=${end}`,
             type: 'GET',
@@ -290,11 +289,11 @@ $(document).ready(function() {
                     $("#pl-sales").text('₹' + parseFloat(d.total_sales).toFixed(2));
                     $("#pl-cogs").text('₹' + parseFloat(d.cogs).toFixed(2));
                     $("#pl-expenses").text('₹' + parseFloat(d.total_expenses).toFixed(2));
-                    
+
                     const margin = d.net_profit;
                     const marginEl = $("#pl-netprofit");
                     marginEl.text('₹' + parseFloat(margin).toFixed(2));
-                    
+
                     if (margin >= 0) {
                         marginEl.removeClass('text-rose').addClass('text-success');
                     } else {
@@ -303,8 +302,19 @@ $(document).ready(function() {
                 }
             }
         });
+    }
 
-        // 2. Reload DataTables
+    // Used by the "Apply Filters" button - re-fetches the summary and reloads the
+    // date-filtered tables. Not called on initial page load: each table already
+    // fetches its own first page of data via its own `ajax` config at construction,
+    // so reloading them again here too would race that initial request and made
+    // the loading indicator flicker/vanish before the real data arrived.
+    function applyFilters() {
+        const start = $("#rep-start-date").val();
+        const end = $("#rep-end-date").val();
+
+        fetchSummary();
+
         if (salesTable) salesTable.ajax.url(BASE_URL + `/api/reports.php?action=sales&start_date=${start}&end_date=${end}`).load();
         if (expensesTable) expensesTable.ajax.url(BASE_URL + `/api/reports.php?action=expenses&start_date=${start}&end_date=${end}`).load();
         if (stockTable) stockTable.ajax.reload();
@@ -475,8 +485,9 @@ $(document).ready(function() {
         ]
     });
 
-    // Run initial filters load
-    applyFilters();
+    // Initial load: tables already fetched their first page via their own `ajax`
+    // config above - only the summary cards need an explicit initial fetch.
+    fetchSummary();
 
     // Trigger on form submit
     $("#report-filter-form").submit(function(e) {

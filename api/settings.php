@@ -42,6 +42,13 @@ switch ($action) {
                     'pos_template' => 'pos_standard',
                     'thermal_width' => '80mm',
                     'pos_mode' => 0,
+                    'pos_show_logo' => 1,
+                    'pos_show_cashier' => 1,
+                    'pos_show_customer_mobile' => 1,
+                    'pos_show_hsn' => 0,
+                    'pos_show_gst_breakdown' => 1,
+                    'pos_header_text' => '',
+                    'pos_footer_text' => '',
                     'system_language' => 'en',
                     'bank_name' => '',
                     'bank_account_no' => '',
@@ -104,6 +111,13 @@ switch ($action) {
         $pos_template = trim($_POST['pos_template'] ?? 'pos_standard');
         $thermal_width = trim($_POST['thermal_width'] ?? '80mm');
         $pos_mode = (int)($_POST['pos_mode'] ?? 0);
+        $pos_show_logo = (int)($_POST['pos_show_logo'] ?? 0);
+        $pos_show_cashier = (int)($_POST['pos_show_cashier'] ?? 0);
+        $pos_show_customer_mobile = (int)($_POST['pos_show_customer_mobile'] ?? 0);
+        $pos_show_hsn = (int)($_POST['pos_show_hsn'] ?? 0);
+        $pos_show_gst_breakdown = (int)($_POST['pos_show_gst_breakdown'] ?? 0);
+        $pos_header_text = trim($_POST['pos_header_text'] ?? '');
+        $pos_footer_text = trim($_POST['pos_footer_text'] ?? '');
         $system_language = trim($_POST['system_language'] ?? 'en');
         $bank_name = trim($_POST['bank_name'] ?? '');
         $bank_account_no = trim($_POST['bank_account_no'] ?? '');
@@ -167,6 +181,8 @@ switch ($action) {
                     gst_slabs = ?, state_code = ?, invoice_footer = ?, invoice_terms = ?,
                     loyalty_enabled = ?, loyalty_points_per_100 = ?, loyalty_redeem_value = ?,
                     invoice_template = ?, pos_template = ?, thermal_width = ?, pos_mode = ?, system_language = ?,
+                    pos_show_logo = ?, pos_show_cashier = ?, pos_show_customer_mobile = ?, pos_show_hsn = ?,
+                    pos_show_gst_breakdown = ?, pos_header_text = ?, pos_footer_text = ?,
                     bank_name = ?, bank_account_no = ?, bank_ifsc = ?, bank_branch = ?, upi_id = ?";
             $params = [
                 $company_name, $gst_number, $email, $phone, $address,
@@ -176,6 +192,8 @@ switch ($action) {
                 $gst_slabs, $state_code, $invoice_footer, $invoice_terms,
                 $loyalty_enabled, $loyalty_points_per_100, $loyalty_redeem_value,
                 $invoice_template, $pos_template, $thermal_width, $pos_mode, $system_language,
+                $pos_show_logo, $pos_show_cashier, $pos_show_customer_mobile, $pos_show_hsn,
+                $pos_show_gst_breakdown, $pos_header_text, $pos_footer_text,
                 $bank_name, $bank_account_no, $bank_ifsc, $bank_branch, $upi_id
             ];
 

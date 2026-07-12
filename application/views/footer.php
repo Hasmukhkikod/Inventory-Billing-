@@ -118,7 +118,67 @@ function googleTranslateElementInit() {
 <!-- DataTables Core & Bootstrap 5 Integration -->
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-<script>$.fn.dataTable.ext.errMode = 'none';</script>
+<script>
+    $.fn.dataTable.ext.errMode = 'none';
+    // Show a branded skeleton-row loading effect on every DataTable while its data
+    // is being fetched, shaped to that table's own columns, instead of a blank or
+    // flashing table. Applies app-wide by default - driven off DataTables' own
+    // processing.dt event rather than the built-in indicator.
+    $.extend(true, $.fn.dataTable.defaults, { processing: true });
+
+    // Minimum time the loader stays visible once shown, so a fast (e.g. local/
+    // cached) response doesn't flash it on and off faster than the eye can register.
+    const DT_LOADER_MIN_VISIBLE_MS = 450;
+    const DT_LOADER_ROW_COUNT = 6;
+
+    function buildSkeletonRows($table) {
+        const $headCells = $table.find('thead tr').first().find('th');
+        const widths = $headCells.map(function () { return $(this).outerWidth(); }).get();
+        if (!widths.length) return '';
+
+        const gridCols = widths.map(w => w + 'px').join(' ');
+        let rowsHtml = '';
+        for (let r = 0; r < DT_LOADER_ROW_COUNT; r++) {
+            let cellsHtml = '';
+            widths.forEach(function (w, i) {
+                // Narrow columns (checkboxes, icons, short numbers) get a short
+                // centered bar; wider text columns get a longer, varied-length one
+                // so the rows don't look like a uniform, robotic grid.
+                const isNarrow = w < 70;
+                const pct = isNarrow ? 45 : (50 + ((r * 37 + i * 53) % 40));
+                const delay = ((r * 0.06) + (i * 0.03)).toFixed(2);
+                cellsHtml += `<div class="dt-skel-cell${isNarrow ? ' dt-skel-cell-narrow' : ''}"><span class="dt-skel-bar" style="width:${pct}%; animation-delay:${delay}s;"></span></div>`;
+            });
+            rowsHtml += `<div class="dt-skel-row" style="grid-template-columns:${gridCols};">${cellsHtml}</div>`;
+        }
+        return rowsHtml;
+    }
+
+    $(document).on('processing.dt', function (e, settings, isProcessing) {
+        const $wrapper = $(settings.nTableWrapper);
+        const $table = $(settings.nTable);
+        let $overlay = $wrapper.find('> .dt-loader-overlay');
+
+        if (isProcessing) {
+            if (!$overlay.length) {
+                $overlay = $('<div class="dt-loader-overlay"><div class="dt-skel-topbar"></div><div class="dt-skel-table"></div></div>');
+                $wrapper.css('position', 'relative').append($overlay);
+            }
+            $overlay.find('.dt-skel-table').html(buildSkeletonRows($table));
+            clearTimeout($overlay.data('hideTimer'));
+            $overlay.data('shownAt', Date.now()).show();
+        } else if ($overlay.length) {
+            const elapsed = Date.now() - ($overlay.data('shownAt') || 0);
+            const remaining = DT_LOADER_MIN_VISIBLE_MS - elapsed;
+            if (remaining > 0) {
+                const hideTimer = setTimeout(() => $overlay.hide(), remaining);
+                $overlay.data('hideTimer', hideTimer);
+            } else {
+                $overlay.hide();
+            }
+        }
+    });
+</script>
 <!-- SweetAlert 2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <!-- Chart.js -->
