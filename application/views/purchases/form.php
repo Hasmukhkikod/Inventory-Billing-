@@ -61,7 +61,7 @@ $isEdit = !empty($purchase);
     <div class="panel-body">
         <!-- Cart Table -->
         <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0" id="pur-cart-table">
+            <table class="table table-bordered align-middle mb-0 cart-items-table" id="pur-cart-table">
                 <thead>
                     <tr>
                         <th style="width:40px;">#</th>
@@ -274,6 +274,7 @@ $(document).ready(function() {
         placeholder: 'Add Product — search by name, SKU or barcode...',
         allowClear: true,
         theme: 'bootstrap-5', width: '100%',
+        dropdownParent: $(document.body),
         ajax: {
             url: BASE_URL + '/api/billing.php',
             dataType: 'json',
@@ -323,7 +324,8 @@ $(document).ready(function() {
         const data = e.params.data;
         if (data && data.product) {
             addToCart(data.product);
-            $(this).val(null).trigger('change');
+            const $select = $(this);
+            setTimeout(function () { $select.val(null).trigger('change'); }, 0);
         }
     });
 

@@ -134,6 +134,11 @@ $(document).ready(function() {
     // Global AJAX Error Handler to prevent silent UI failures
     $.ajaxSetup({
         error: function(jqXHR, textStatus, errorThrown) {
+            // Ignore intentionally cancelled requests (e.g. Select2 aborting a stale
+            // in-flight search as the user keeps typing) - these are not real errors.
+            if (textStatus === 'abort' || jqXHR.statusText === 'abort') {
+                return;
+            }
             console.error("AJAX Error: ", textStatus, errorThrown, jqXHR.responseText);
             Swal.fire({
                 icon: 'error',

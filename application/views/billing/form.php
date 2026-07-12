@@ -89,7 +89,7 @@ $posMode = (int)($compSettings['pos_mode'] ?? 0);
 
         <!-- Cart Table -->
         <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0" id="pos-cart-table">
+            <table class="table table-bordered align-middle mb-0 cart-items-table" id="pos-cart-table">
                 <thead>
                     <tr>
                         <th style="width:40px;">#</th>

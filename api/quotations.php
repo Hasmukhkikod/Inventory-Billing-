@@ -171,7 +171,7 @@ switch ($action) {
                         ", [$quotation_id, $vi['product_id'], $vi['billing_unit_id'] ?: null, $vi['billing_unit_name'] ?: null, $vi['quantity'], $vi['primary_qty'], $vi['rate'], $vi['gst'], $vi['discount'], $vi['amount'], $_SESSION['user_id']]);
                     }
 
-                    Helpers::logActivity($db, "quotations", "Updated quotation: " . $existing['quotation_no'], $quotation_id);
+                    Helpers::logActivity($t, "quotations", "Updated quotation: " . $existing['quotation_no'], $quotation_id);
 
                     return ['quotation_id' => $quotation_id, 'quotation_no' => $existing['quotation_no'], 'action' => 'updated'];
 
@@ -215,7 +215,7 @@ switch ($action) {
                         ", [$qId, $vi['product_id'], $vi['quantity'], $vi['rate'], $vi['gst'], $vi['discount'], $vi['amount'], $_SESSION['user_id']]);
                     }
 
-                    Helpers::logActivity($db, "quotations", "Created quotation: $quotation_no (Total: $grand_total)", $qId);
+                    Helpers::logActivity($t, "quotations", "Created quotation: $quotation_no (Total: $grand_total)", $qId);
 
                     return ['quotation_id' => $qId, 'quotation_no' => $quotation_no, 'action' => 'created'];
                 }

@@ -91,7 +91,7 @@ switch ($action) {
                         VALUES ('Expense', ?, ?, ?, ?, ?, ?)
                     ", [$expenseId, $payment_method, $amount, $date, "Expense: $desc", $_SESSION['user_id']]);
 
-                    Helpers::logActivity($db, "expenses", "Created expense ID: $expenseId (Amount: $amount)", $expenseId);
+                    Helpers::logActivity($t, "expenses", "Created expense ID: $expenseId (Amount: $amount)", $expenseId);
                 });
 
                 Helpers::jsonResponse(true, "Expense logged successfully.");

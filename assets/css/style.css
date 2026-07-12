@@ -1789,8 +1789,14 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     .main-content {
         margin-left: 0 !important;
         padding: 1rem !important;
+        padding-bottom: calc(1rem + 65px + env(safe-area-inset-bottom)) !important;
     }
-    
+    /* Reserve room above the fixed bottom nav so scrolling/tapping an element near the
+       end of the page (e.g. the product search box) never leaves it hidden underneath it. */
+    html {
+        scroll-padding-bottom: calc(65px + env(safe-area-inset-bottom) + 16px);
+    }
+
     /* Convert POS Terminal screen into a stacked list view */
     .pos-container {
         grid-template-columns: 1fr !important;
@@ -1853,6 +1859,127 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     }
     .panel-card .nav-tabs .nav-link {
         white-space: nowrap;
+    }
+
+    /* ============ Line-item entry tables (Billing/POS, Purchases, Quotations,
+       Delivery Challans, Returns) -> stacked cards instead of a cramped,
+       horizontally-scrolling table with tiny inputs ============ */
+    .cart-items-table {
+        border: none;
+    }
+    .cart-items-table thead {
+        display: none;
+    }
+    .cart-items-table tbody,
+    .cart-items-table tr,
+    .cart-items-table td {
+        display: block;
+        width: 100% !important;
+    }
+    .cart-items-table tr:not(.cart-add-row):not(.cart-empty-row):not(.doc-empty-row) {
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+        margin-bottom: 0.75rem;
+        background: var(--bg-secondary);
+    }
+    .cart-items-table tr.cart-add-row,
+    .cart-items-table tr.cart-empty-row,
+    .cart-items-table tr.doc-empty-row {
+        border: none;
+        padding: 0;
+    }
+    .cart-items-table tr:not(.cart-add-row):not(.cart-empty-row):not(.doc-empty-row) td {
+        border: none;
+        padding: 0.4rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        text-align: right;
+    }
+    .cart-items-table tr:not(.cart-add-row):not(.cart-empty-row):not(.doc-empty-row) td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--text-secondary);
+        text-align: left;
+        flex-shrink: 0;
+    }
+    /* Row index (#) column: redundant once cards stack vertically */
+    .cart-items-table tr:not(.cart-add-row):not(.cart-empty-row):not(.doc-empty-row) td:first-child {
+        display: none;
+    }
+    /* Product name/details column: card title, not a label:value row */
+    .cart-items-table tr:not(.cart-add-row):not(.cart-empty-row):not(.doc-empty-row) td:nth-child(2) {
+        display: block;
+        text-align: left;
+        padding: 0 0 0.6rem 0;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px dashed var(--border-color);
+        font-size: 0.95rem;
+    }
+    .cart-items-table tr:not(.cart-add-row):not(.cart-empty-row):not(.doc-empty-row) td:nth-child(2)::before {
+        content: none;
+    }
+    .cart-items-table tr:not(.cart-add-row) td input,
+    .cart-items-table tr:not(.cart-add-row) td select,
+    .cart-items-table tr:not(.cart-add-row) td .input-group {
+        width: 130px !important;
+        max-width: 55vw;
+    }
+    .cart-items-table td:last-child {
+        justify-content: flex-end;
+    }
+
+    /* Billing / Quotations (10 cols: #, Product, HSN, Qty, Unit, Price, Discount, GST%, Total, Action) */
+    #pos-cart-table td:nth-child(3)::before,
+    #qt-cart-table td:nth-child(3)::before { content: "HSN/SAC"; }
+    #pos-cart-table td:nth-child(4)::before,
+    #qt-cart-table td:nth-child(4)::before { content: "Qty"; }
+    #pos-cart-table td:nth-child(5)::before,
+    #qt-cart-table td:nth-child(5)::before { content: "Unit"; }
+    #pos-cart-table td:nth-child(6)::before { content: "Price (₹)"; }
+    #qt-cart-table td:nth-child(6)::before { content: "Rate (₹)"; }
+    #pos-cart-table td:nth-child(7)::before,
+    #qt-cart-table td:nth-child(7)::before { content: "Discount"; }
+    #pos-cart-table td:nth-child(8)::before,
+    #qt-cart-table td:nth-child(8)::before { content: "GST %"; }
+    #pos-cart-table td:nth-child(9)::before,
+    #qt-cart-table td:nth-child(9)::before { content: "Total"; }
+    #pos-cart-table td:nth-child(9),
+    #qt-cart-table td:nth-child(9) { font-size: 1.05rem; }
+    #pos-cart-table td:nth-child(10)::before,
+    #qt-cart-table td:nth-child(10)::before { content: none; }
+
+    /* Purchases (9 cols: #, Product, HSN, Qty, Unit, Cost Price, GST%, Total, Action) */
+    #pur-cart-table td:nth-child(3)::before { content: "HSN/SAC"; }
+    #pur-cart-table td:nth-child(4)::before { content: "Qty"; }
+    #pur-cart-table td:nth-child(5)::before { content: "Unit"; }
+    #pur-cart-table td:nth-child(6)::before { content: "Cost Price (₹)"; }
+    #pur-cart-table td:nth-child(7)::before { content: "GST %"; }
+    #pur-cart-table td:nth-child(8)::before { content: "Total"; }
+    #pur-cart-table td:nth-child(8) { font-size: 1.05rem; }
+    #pur-cart-table td:nth-child(9)::before { content: none; }
+
+    /* Delivery Challans (6 cols: #, Product, HSN, Qty, Unit, Action) */
+    #dc-cart-table td:nth-child(3)::before { content: "HSN/SAC"; }
+    #dc-cart-table td:nth-child(4)::before { content: "Qty"; }
+    #dc-cart-table td:nth-child(5)::before { content: "Unit"; }
+    #dc-cart-table td:nth-child(6)::before { content: none; }
+
+    /* Returns (6 cols: #, Product Details, Purchased Qty, Return Qty, Price, Refund Total) */
+    #ret-items-table td:nth-child(3)::before { content: "Purchased Qty"; }
+    #ret-items-table td:nth-child(4)::before { content: "Return Qty"; }
+    #ret-items-table td:nth-child(5)::before { content: "Price (₹)"; }
+    #ret-items-table td:nth-child(6)::before { content: "Refund Total"; }
+    #ret-items-table td:nth-child(6) { font-size: 1.05rem; }
+
+    /* Product search / "Add Product" row: full-width, no card chrome */
+    .cart-add-row td {
+        padding: 0 !important;
     }
 }
 

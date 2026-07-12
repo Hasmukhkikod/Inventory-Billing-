@@ -95,7 +95,7 @@ switch ($action) {
         if (empty($cart)) Helpers::jsonResponse(false, "No items selected to return.");
 
         try {
-            $db->transaction(function($t) use ($invoice_id, $return_date, $remarks, $cart) {
+            $result = $db->transaction(function($t) use ($invoice_id, $return_date, $remarks, $cart) {
                 // Fetch Invoice metadata
                 $invoice = $t->query("SELECT * FROM invoices WHERE id = ? LIMIT 1", [$invoice_id])->fetch();
                 if (!$invoice) throw new Exception("Invoice not found.");
@@ -164,9 +164,10 @@ switch ($action) {
                     ", [$item['product_id'], $return_no, $item['quantity'], $item['stock_before'], $newStock, "Returned from customer under SR: $return_no", $_SESSION['user_id']]);
                 }
 
-                Helpers::logActivity($db, "returns", "Logged sales return: $return_no (Total Credit Note: $total_amount)", $returnId);
-                Helpers::jsonResponse(true, "Sales Return processed successfully.", ['return_id' => $returnId, 'return_no' => $return_no]);
+                Helpers::logActivity($t, "returns", "Logged sales return: $return_no (Total Credit Note: $total_amount)", $returnId);
+                return ['return_id' => $returnId, 'return_no' => $return_no];
             });
+            Helpers::jsonResponse(true, "Sales Return processed successfully.", $result);
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Transaction failed: " . $e->getMessage());
         }
@@ -185,7 +186,7 @@ switch ($action) {
         if (empty($cart)) Helpers::jsonResponse(false, "No items selected to return.");
 
         try {
-            $db->transaction(function($t) use ($purchase_id, $return_date, $remarks, $cart) {
+            $result = $db->transaction(function($t) use ($purchase_id, $return_date, $remarks, $cart) {
                 // Fetch Purchase order metadata
                 $purchase = $t->query("SELECT * FROM purchases WHERE id = ? LIMIT 1", [$purchase_id])->fetch();
                 if (!$purchase) throw new Exception("Purchase Order not found.");
@@ -258,9 +259,10 @@ switch ($action) {
                     ", [$item['product_id'], $return_no, -$item['quantity'], $item['stock_before'], $newStock, "Returned to supplier under PR: $return_no", $_SESSION['user_id']]);
                 }
 
-                Helpers::logActivity($db, "returns", "Logged purchase return: $return_no (Total Debit Note: $total_amount)", $returnId);
-                Helpers::jsonResponse(true, "Purchase Return processed successfully.", ['return_id' => $returnId, 'return_no' => $return_no]);
+                Helpers::logActivity($t, "returns", "Logged purchase return: $return_no (Total Debit Note: $total_amount)", $returnId);
+                return ['return_id' => $returnId, 'return_no' => $return_no];
             });
+            Helpers::jsonResponse(true, "Purchase Return processed successfully.", $result);
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Transaction failed: " . $e->getMessage());
         }

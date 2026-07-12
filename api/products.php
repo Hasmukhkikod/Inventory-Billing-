@@ -159,7 +159,7 @@ switch ($action) {
                             VALUES (?, 'Adjustment', 'Initial', ?, 0.00, ?, 'Initial Stock Entry', ?)
                         ", [$productId, $initial_stock, $initial_stock, $_SESSION['user_id']]);
                     }
-                    Helpers::logActivity($db, "inventory", "Created product: $name", $productId);
+                    Helpers::logActivity($t, "inventory", "Created product: $name", $productId);
                 });
 
                 Helpers::jsonResponse(true, "Product created successfully.");
