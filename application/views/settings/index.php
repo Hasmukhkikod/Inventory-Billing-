@@ -46,6 +46,11 @@
                             <i class="fa-solid fa-database me-2"></i>Data & Backups
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="printer-tab" data-bs-toggle="tab" data-bs-target="#printer-pane" type="button" role="tab" aria-controls="printer-pane" aria-selected="false">
+                            <i class="fa-solid fa-print me-2"></i>Printer Settings
+                        </button>
+                    </li>
                 </ul>
             </div>
             
@@ -815,7 +820,97 @@
                         </div>
                     </div>
 
+                    <!-- PRINTER SETTINGS PANE -->
+                    <div class="tab-pane fade" id="printer-pane" role="tabpanel" aria-labelledby="printer-tab" tabindex="0">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                            <div>
+                                <h6 class="text-indigo mb-1"><i class="fa-solid fa-print me-2"></i>Printers</h6>
+                                <p class="text-muted small mb-0">Manage USB, Bluetooth and WiFi/LAN receipt printers. The default printer is used automatically when printing.</p>
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="btn-add-printer"><i class="fa-solid fa-plus me-1"></i>Add Printer</button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="printersTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:36px;"></th>
+                                        <th>Name</th>
+                                        <th>Connection</th>
+                                        <th>Details</th>
+                                        <th>Paper Width</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="printers-tbody">
+                                    <tr><td colspan="6" class="text-center py-4 text-secondary">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="alert alert-light border small text-secondary mt-2 mb-0">
+                            <i class="fa-solid fa-circle-info text-indigo me-1"></i>
+                            USB and Bluetooth printers must be paired once from <strong>this browser</strong> (those permissions aren't shared across computers) - use "Pair Now" next to a printer below, or pair directly from a receipt's print screen. WiFi/LAN printers work from any computer on the same network as this server.
+                        </div>
+                    </div>
+
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Printer Modal -->
+    <div class="modal fade" id="printerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="printerModalTitle"><i class="fa-solid fa-print text-indigo me-2"></i>Add Printer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="printerForm">
+                    <?php echo \App\Models\Helpers::csrfField(); ?>
+                    <input type="hidden" name="id" id="pf-id" value="0">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Printer Name *</label>
+                                <input type="text" class="form-control" name="name" id="pf-name" placeholder="e.g. Front Counter Thermal" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Connection Type *</label>
+                                <select class="form-select" name="connection_type" id="pf-connection-type">
+                                    <option value="USB">USB</option>
+                                    <option value="BLUETOOTH">Bluetooth</option>
+                                    <option value="LAN">WiFi / LAN</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8" id="pf-ip-row" style="display:none;">
+                                <label class="form-label">Printer IP Address *</label>
+                                <input type="text" class="form-control" name="ip_address" id="pf-ip" placeholder="192.168.1.50">
+                            </div>
+                            <div class="col-md-4" id="pf-port-row" style="display:none;">
+                                <label class="form-label">Port</label>
+                                <input type="number" class="form-control" name="port" id="pf-port" value="9100">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Paper Width</label>
+                                <select class="form-select" name="paper_width_dots" id="pf-width">
+                                    <option value="384">384 dots (58mm)</option>
+                                    <option value="576" selected>576 dots (80mm - most common)</option>
+                                    <option value="512">512 dots (80mm - some models)</option>
+                                    <option value="832">832 dots (80mm - high-res)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12" id="pf-pair-row" style="display:none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm" id="btn-pf-pair"><i class="fa-solid fa-link me-1"></i>Pair Now</button>
+                                <span id="pf-pair-status" class="small ms-2"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i>Save Printer</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -887,6 +982,7 @@
     </div>
 </div>
 
+<script src="<?php echo BASE_URL; ?>/assets/js/thermal-printer.js"></script>
 <script>
 $(document).ready(function() {
     // 1. Fetch current settings details
@@ -1385,6 +1481,136 @@ $(document).ready(function() {
             if (r.isConfirmed) {
                 $.post(BASE_URL + '/api/coupons.php?action=delete', { csrf_token: couponCsrf, id: id }, function(res) {
                     if (res.status) { loadCoupons(); }
+                }, 'json');
+            }
+        });
+    });
+});
+</script>
+
+<script>
+$(document).ready(function () {
+    const printerCsrf = $('#printerForm input[name="csrf_token"]').val();
+    const CONN_LABELS = { USB: 'USB', BLUETOOTH: 'Bluetooth', LAN: 'WiFi/LAN' };
+    const CONN_ICONS = { USB: 'fa-solid fa-plug', BLUETOOTH: 'fa-brands fa-bluetooth-b', LAN: 'fa-solid fa-wifi' };
+
+    $('button[data-bs-target="#printer-pane"]').on('shown.bs.tab', function () { loadPrinters(); });
+
+    function loadPrinters() {
+        $.get(BASE_URL + '/api/printers.php?action=list', function (res) {
+            const $tbody = $('#printers-tbody');
+            $tbody.empty();
+            const printers = (res.status && res.data.printers) ? res.data.printers : [];
+
+            if (printers.length === 0) {
+                $tbody.append('<tr><td colspan="6" class="text-center py-4 text-secondary">No printers added yet. Click "Add Printer" to get started.</td></tr>');
+                return;
+            }
+
+            printers.forEach(function (p) {
+                const details = p.connection_type === 'LAN'
+                    ? Helpers_escape(p.ip_address) + ':' + p.port
+                    : '<span class="text-muted">Pair from this browser</span>';
+                const defaultBtn = p.is_default == 1
+                    ? '<i class="fa-solid fa-star text-warning" title="Default printer"></i>'
+                    : '<button class="btn btn-sm btn-link p-0 btn-set-default" data-id="' + p.id + '" title="Set as default"><i class="fa-regular fa-star"></i></button>';
+
+                $tbody.append(
+                    '<tr>' +
+                    '<td class="text-center">' + defaultBtn + '</td>' +
+                    '<td class="fw-semibold text-dark">' + Helpers_escape(p.name) + '</td>' +
+                    '<td><span class="badge bg-light-primary text-indigo"><i class="' + CONN_ICONS[p.connection_type] + ' me-1"></i>' + CONN_LABELS[p.connection_type] + '</span></td>' +
+                    '<td class="small">' + details + '</td>' +
+                    '<td class="small">' + p.paper_width_dots + ' dots</td>' +
+                    '<td class="text-end">' +
+                    '<button class="btn btn-sm btn-outline-secondary py-1 px-2 btn-edit-printer" data-id="' + p.id + '" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button> ' +
+                    '<button class="btn btn-sm btn-outline-danger py-1 px-2 btn-delete-printer" data-id="' + p.id + '" data-name="' + Helpers_escape(p.name) + '" title="Remove"><i class="fa-solid fa-trash"></i></button>' +
+                    '</td>' +
+                    '</tr>'
+                );
+            });
+        }, 'json');
+    }
+
+    function Helpers_escape(str) {
+        return $('<div>').text(str || '').html();
+    }
+
+    function toggleConnectionFields() {
+        const type = $('#pf-connection-type').val();
+        $('#pf-ip-row, #pf-port-row').toggle(type === 'LAN');
+        $('#pf-pair-row').toggle(type === 'USB' || type === 'BLUETOOTH');
+        $('#pf-ip').prop('required', type === 'LAN');
+    }
+    $('#pf-connection-type').on('change', toggleConnectionFields);
+
+    $('#btn-add-printer').on('click', function () {
+        $('#printerForm')[0].reset();
+        $('#pf-id').val(0);
+        $('#printerModalTitle').html('<i class="fa-solid fa-print text-indigo me-2"></i>Add Printer');
+        $('#pf-pair-status').text('');
+        toggleConnectionFields();
+        new bootstrap.Modal(document.getElementById('printerModal')).show();
+    });
+
+    $(document).on('click', '.btn-edit-printer', function () {
+        const id = $(this).data('id');
+        $.get(BASE_URL + '/api/printers.php?action=list', function (res) {
+            const printer = (res.data.printers || []).find(p => p.id == id);
+            if (!printer) return;
+            $('#pf-id').val(printer.id);
+            $('#pf-name').val(printer.name);
+            $('#pf-connection-type').val(printer.connection_type);
+            $('#pf-ip').val(printer.ip_address || '');
+            $('#pf-port').val(printer.port || 9100);
+            $('#pf-width').val(printer.paper_width_dots);
+            $('#pf-pair-status').text('');
+            toggleConnectionFields();
+            $('#printerModalTitle').html('<i class="fa-solid fa-print text-indigo me-2"></i>Edit Printer');
+            new bootstrap.Modal(document.getElementById('printerModal')).show();
+        }, 'json');
+    });
+
+    $('#btn-pf-pair').on('click', async function () {
+        const type = $('#pf-connection-type').val();
+        $('#pf-pair-status').removeClass('text-danger text-success').text('Opening device picker…');
+        try {
+            const name = type === 'USB' ? await GrovixoThermalPrinter.pairUsb() : await GrovixoThermalPrinter.pairBluetooth();
+            $('#pf-pair-status').addClass('text-success').text('Paired: ' + name);
+        } catch (err) {
+            $('#pf-pair-status').addClass('text-danger').text(err.message);
+        }
+    });
+
+    $('#printerForm').on('submit', function (e) {
+        e.preventDefault();
+        $.post(BASE_URL + '/api/printers.php?action=save', $(this).serialize(), function (res) {
+            if (res.status) {
+                bootstrap.Modal.getInstance(document.getElementById('printerModal')).hide();
+                loadPrinters();
+                Swal.fire({ icon: 'success', title: 'Saved', text: res.message, timer: 1500, showConfirmButton: false, background: '#ffffff', color: '#0f172a' });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#0f172a' });
+            }
+        }, 'json');
+    });
+
+    $(document).on('click', '.btn-set-default', function () {
+        $.post(BASE_URL + '/api/printers.php?action=set_default', { csrf_token: printerCsrf, id: $(this).data('id') }, function (res) {
+            if (res.status) loadPrinters();
+        }, 'json');
+    });
+
+    $(document).on('click', '.btn-delete-printer', function () {
+        const id = $(this).data('id'), name = $(this).data('name');
+        Swal.fire({
+            title: 'Remove Printer?', text: 'Remove "' + name + '" from your printer list?',
+            icon: 'warning', showCancelButton: true, confirmButtonText: 'Remove', confirmButtonColor: '#dc2626',
+            background: '#ffffff', color: '#0f172a'
+        }).then(function (r) {
+            if (r.isConfirmed) {
+                $.post(BASE_URL + '/api/printers.php?action=delete', { csrf_token: printerCsrf, id: id }, function (res) {
+                    if (res.status) loadPrinters();
                 }, 'json');
             }
         });
