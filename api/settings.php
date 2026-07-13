@@ -40,7 +40,7 @@ switch ($action) {
                     'loyalty_redeem_value' => 0,
                     'invoice_template' => 'standard',
                     'pos_template' => 'pos_standard',
-                    'thermal_width' => '80mm',
+                    'thermal_width' => '576',
                     'pos_mode' => 0,
                     'pos_show_logo' => 1,
                     'pos_show_cashier' => 1,
@@ -109,7 +109,6 @@ switch ($action) {
         $loyalty_redeem_value = (float)($_POST['loyalty_redeem_value'] ?? 0);
         $invoice_template = trim($_POST['invoice_template'] ?? 'standard');
         $pos_template = trim($_POST['pos_template'] ?? 'pos_standard');
-        $thermal_width = trim($_POST['thermal_width'] ?? '80mm');
         $pos_mode = (int)($_POST['pos_mode'] ?? 0);
         $pos_show_logo = (int)($_POST['pos_show_logo'] ?? 0);
         $pos_show_cashier = (int)($_POST['pos_show_cashier'] ?? 0);
@@ -180,7 +179,7 @@ switch ($action) {
                     purchase_start = ?, purchase_end = ?, challan_start = ?, challan_end = ?,
                     gst_slabs = ?, state_code = ?, invoice_footer = ?, invoice_terms = ?,
                     loyalty_enabled = ?, loyalty_points_per_100 = ?, loyalty_redeem_value = ?,
-                    invoice_template = ?, pos_template = ?, thermal_width = ?, pos_mode = ?, system_language = ?,
+                    invoice_template = ?, pos_template = ?, pos_mode = ?, system_language = ?,
                     pos_show_logo = ?, pos_show_cashier = ?, pos_show_customer_mobile = ?, pos_show_hsn = ?,
                     pos_show_gst_breakdown = ?, pos_header_text = ?, pos_footer_text = ?,
                     bank_name = ?, bank_account_no = ?, bank_ifsc = ?, bank_branch = ?, upi_id = ?";
@@ -191,7 +190,7 @@ switch ($action) {
                 $purchase_start, $purchase_end, $challan_start, $challan_end,
                 $gst_slabs, $state_code, $invoice_footer, $invoice_terms,
                 $loyalty_enabled, $loyalty_points_per_100, $loyalty_redeem_value,
-                $invoice_template, $pos_template, $thermal_width, $pos_mode, $system_language,
+                $invoice_template, $pos_template, $pos_mode, $system_language,
                 $pos_show_logo, $pos_show_cashier, $pos_show_customer_mobile, $pos_show_hsn,
                 $pos_show_gst_breakdown, $pos_header_text, $pos_footer_text,
                 $bank_name, $bank_account_no, $bank_ifsc, $bank_branch, $upi_id
@@ -209,6 +208,27 @@ switch ($action) {
             Helpers::jsonResponse(true, "Settings updated successfully.");
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed to save settings: " . $e->getMessage());
+        }
+        break;
+
+    case 'save_thermal_width':
+        // Default/fallback thermal receipt paper size (dots @ 203dpi), managed
+        // from Settings > Printer Settings. Independent of the main 'save'
+        // action so switching other setting tabs never resets it.
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed.");
+
+        $widthDots = (int)($_POST['paper_width_dots'] ?? 0);
+        if ($widthDots < 128 || $widthDots > 1200) {
+            Helpers::jsonResponse(false, "Enter a valid paper width in dots (128-1200).");
+        }
+
+        try {
+            $db->query("UPDATE company_settings SET thermal_width = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1", [(string)$widthDots]);
+            Helpers::logActivity($db, "settings", "Updated default receipt paper size to {$widthDots} dots.");
+            Helpers::jsonResponse(true, "Default receipt paper size saved.", ['thermal_width' => (string)$widthDots]);
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed to save paper size: " . $e->getMessage());
         }
         break;
 

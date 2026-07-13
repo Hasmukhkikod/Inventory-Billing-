@@ -1782,11 +1782,92 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     padding: 0.45rem 0.9rem !important;
     min-height: 42px !important;
     font-size: 0.95rem !important;
+    /* Without this, touchscreens fire a real touch event immediately followed
+       by a synthetic "ghost click" ~which toggles the dropdown open then
+       instantly closed again on the same tap. manipulation tells the browser
+       to skip that delayed synthetic click entirely. */
+    touch-action: manipulation;
 }
 
 .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
     color: var(--text-primary) !important;
     line-height: 1.6 !important;
+}
+
+/* "Add Product" search (Billing/Purchases/Quotations/Delivery Challans): a
+   plain input + custom results panel, not Select2 - fully owned interaction
+   with no native open/close race, identical behavior on touch and mouse. */
+.product-search {
+    position: relative;
+}
+/* Seamless input group styling */
+.product-search .input-group {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    transition: all 0.2s ease-in-out;
+}
+.product-search .input-group:focus-within {
+    border-color: var(--bs-primary, #0d6efd);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.product-search .input-group-text,
+.product-search .form-control,
+.product-search .btn {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.product-search .form-control {
+    min-height: 42px;
+    font-size: 0.95rem;
+}
+.product-search-results {
+    display: none;
+    position: relative;
+    top: 0;
+    margin-top: 8px;
+    z-index: 10;
+    max-height: 320px;
+    overflow-y: auto;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.product-search-results.show {
+    display: block;
+}
+.product-result-item {
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+}
+.product-result-item:last-child {
+    border-bottom: none;
+}
+.product-result-item:hover,
+.product-result-item.active {
+    background: var(--bg-secondary);
+}
+.product-result-empty {
+    padding: 1.1rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+@media (max-width: 767px) {
+    /* Bigger tap targets and a taller visible list on mobile */
+    .product-search .form-control {
+        min-height: 46px;
+        font-size: 1rem;
+    }
+    .product-result-item {
+        padding: 0.85rem 1rem;
+    }
+    .product-search-results {
+        max-height: 40vh;
+    }
 }
 
 .select2-container--bootstrap-5 .select2-dropdown {
@@ -1960,22 +2041,46 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
        horizontally-scrolling table with tiny inputs ============ */
     .cart-items-table {
         border: none;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+    /* The stacked-card layout below needs no horizontal scroll - letting the
+       wrapper scroll anyway (from intrinsic table sizing hints in the hidden
+       <thead>) causes mobile browsers to auto-scroll it when the "Add
+       Product" search field gets focus, which Select2 reads as the trigger
+       scrolling and immediately closes the dropdown it just opened. */
+    .cart-items-table.table-responsive,
+    .cart-table-wrapper {
+        overflow-x: hidden;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+    .cart-items-table {
+        border: none !important;
+        background: transparent !important;
     }
     .cart-items-table thead {
         display: none;
     }
-    .cart-items-table tbody,
+    .cart-items-table tbody {
+        display: flex !important;
+        flex-direction: column;
+        gap: 1rem;
+    }
     .cart-items-table tr,
     .cart-items-table td {
         display: block;
         width: 100% !important;
     }
     .cart-items-table tr:not(.cart-add-row):not(.cart-empty-row):not(.doc-empty-row) {
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        padding: 0.85rem;
-        margin-bottom: 0.75rem;
-        background: var(--bg-secondary);
+        position: relative;
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--radius-lg) !important;
+        padding: 1rem !important;
+        margin: 0 !important;
+        background: var(--bg-primary) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     .cart-items-table tr.cart-add-row,
     .cart-items-table tr.cart-empty-row,
@@ -2010,7 +2115,7 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     .cart-items-table tr:not(.cart-add-row):not(.cart-empty-row):not(.doc-empty-row) td:nth-child(2) {
         display: block;
         text-align: left;
-        padding: 0 0 0.6rem 0;
+        padding: 0 40px 0.6rem 0;
         margin-bottom: 0.5rem;
         border-bottom: 1px dashed var(--border-color);
         font-size: 0.95rem;
@@ -2026,6 +2131,19 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     }
     .cart-items-table td:last-child {
         justify-content: flex-end;
+    }
+
+    /* Move delete button to top right of the card */
+    #pos-cart-table tr:not(.cart-add-row):not(.cart-empty-row) td:last-child,
+    #pur-cart-table tr:not(.cart-add-row):not(.cart-empty-row) td:last-child,
+    #qt-cart-table tr:not(.cart-add-row):not(.cart-empty-row) td:last-child,
+    #dc-cart-table tr:not(.cart-add-row):not(.cart-empty-row) td:last-child {
+        position: absolute;
+        top: 0.85rem;
+        right: 0.85rem;
+        width: auto !important;
+        padding: 0;
+        margin: 0;
     }
 
     /* Billing / Quotations (10 cols: #, Product, HSN, Qty, Unit, Price, Discount, GST%, Total, Action) */
@@ -2074,6 +2192,76 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     /* Product search / "Add Product" row: full-width, no card chrome */
     .cart-add-row td {
         padding: 0 !important;
+    }
+
+    /* ============ Printer Settings (Settings > Printer Settings) -> stacked
+       cards, same treatment as the line-item tables above. Without this the
+       Name/Connection/Details/Paper Width/Actions columns overflow into a
+       cramped horizontal scroll region that hides the edit/delete buttons
+       off-screen entirely. ============ */
+    #printersTable thead {
+        display: none;
+    }
+    #printersTable,
+    #printersTable tbody,
+    #printersTable tr,
+    #printersTable td {
+        display: block;
+        width: 100% !important;
+    }
+    #printersTable tbody tr:not(:has(td[colspan])) {
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+        margin-bottom: 0.75rem;
+        background: var(--bg-secondary);
+    }
+    #printersTable tbody tr:has(td[colspan]) {
+        border: none;
+        padding: 0;
+    }
+    #printersTable tbody tr:not(:has(td[colspan])) td {
+        border: none;
+        padding: 0.4rem 0;
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        text-align: right;
+    }
+    #printersTable tbody tr:not(:has(td[colspan])) td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--text-secondary);
+        text-align: left;
+        flex-shrink: 0;
+    }
+    #printersTable tbody tr td:nth-child(1)::before { content: "Default" !important; }
+    #printersTable tbody tr td:nth-child(3)::before { content: "Connection" !important; }
+    #printersTable tbody tr td:nth-child(4)::before { content: "Details" !important; }
+    #printersTable tbody tr td:nth-child(5)::before { content: "Paper Width" !important; }
+    /* Printer name: card title, not a label:value row */
+    #printersTable tbody tr td:nth-child(2) {
+        display: block !important;
+        text-align: left;
+        padding: 0 0 0.6rem 0;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px dashed var(--border-color);
+        font-size: 1rem;
+    }
+    #printersTable tbody tr td:nth-child(2)::before {
+        content: none !important;
+    }
+    /* Actions: full-width row, buttons right-aligned, no label */
+    #printersTable tbody tr td:nth-child(6) {
+        justify-content: flex-end;
+        padding-top: 0.6rem;
+    }
+    #printersTable tbody tr td:nth-child(6)::before {
+        content: none !important;
     }
 }
 

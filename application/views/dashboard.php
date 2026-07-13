@@ -292,4 +292,4 @@
     </div>
 </section>
 
-<script src="<?php echo BASE_URL; ?>/assets/js/dashboard.js" defer></script>
+<script src="<?php echo BASE_URL; ?>/assets/js/dashboard.js?v=<?php echo \App\Models\Helpers::assetVersion('/assets/js/dashboard.js'); ?>" defer></script>

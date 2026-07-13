@@ -17,77 +17,135 @@ $(document).ready(function () {
     loadHeldBillsCount();
 
 
-    // ==================== PRODUCT SELECT DROPDOWN ====================
-    let allProducts = [];
+    // ==================== PRODUCT SEARCH (Add Product) ====================
+    // A small purpose-built typeahead instead of Select2: Select2 opens its
+    // dropdown synchronously on mousedown, and when this row sits low on a
+    // mobile screen it flips to render *above* the trigger, right under the
+    // finger that's still down - the matching touchend/mouseup then lands on
+    // a result row instead of the trigger and Select2 immediately closes
+    // itself again. Owning the whole interaction here avoids that class of
+    // bug entirely and lets the same code work identically on touch and
+    // mouse, plus keeps results open after each add for fast repeat scanning.
+    let searchResults = [];
+    let activeResultIndex = -1;
+    let searchDebounce = null;
+    let searchRequestSeq = 0;
 
-    function loadProductsList() {
-        $.getJSON(BASE_URL + '/api/billing.php?action=search_product&q=*', function (res) {
-            if (res.status) allProducts = res.data;
+    const $search = $('#cart-product-search');
+    const $searchResults = $('#product-search-results');
+    const $searchClear = $('#cart-product-search-clear');
+
+    function escapeHtml(str) {
+        return $('<div>').text(str == null ? '' : str).html();
+    }
+
+    function renderSearchResults(products) {
+        searchResults = products;
+        activeResultIndex = -1;
+        if (!products.length) {
+            $searchResults.html('<div class="product-result-empty">No products found</div>');
+        } else {
+            $searchResults.html(products.map(function (p, idx) {
+                const stock = parseFloat(p.current_stock);
+                let stockTxt = stock + ' ' + (p.unit_name || 'Pcs');
+                if (p.secondary_unit_name && p.conversion_factor) {
+                    stockTxt += ' (' + parseFloat((stock * parseFloat(p.conversion_factor)).toFixed(2)) + ' ' + p.secondary_unit_name + ')';
+                }
+                const badge = stock > 0
+                    ? '<span class="badge bg-light-success float-end">' + stockTxt + '</span>'
+                    : '<span class="badge bg-light-danger float-end">Out of stock</span>';
+                return '<div class="product-result-item" data-idx="' + idx + '">' +
+                    '<strong>' + escapeHtml(p.product_name) + '</strong> <span class="text-muted small">(' + escapeHtml(p.sku) + ')</span>' + badge +
+                    '<div class="small text-indigo">₹' + parseFloat(p.selling_price).toFixed(2) + ' | GST: ' + parseFloat(p.gst_percentage) + '%</div>' +
+                    '</div>';
+            }).join(''));
+        }
+        $searchResults.addClass('show');
+    }
+
+    function hideSearchResults() {
+        $searchResults.removeClass('show');
+    }
+
+    function fetchAndShowResults(term) {
+        // Guard against out-of-order responses: e.g. selecting a result kicks
+        // off a "refresh with all products" request, and if the user is
+        // already typing the next search, that request can resolve *after*
+        // the newer filtered one and silently clobber it with stale results.
+        // Only the response to the most recently *sent* request is ever
+        // rendered, no matter what order they come back in.
+        term = (term || '').trim();
+        if (!term) {
+            hideSearchResults();
+            return;
+        }
+        const seq = ++searchRequestSeq;
+        $.getJSON(BASE_URL + '/api/billing.php', { action: 'search_product', q: term }, function (res) {
+            if (seq !== searchRequestSeq) return;
+            renderSearchResults(res.status ? res.data : []);
         });
     }
 
-    $('#cart-product-select').select2({
-        placeholder: 'Add Product — search by name, SKU or barcode...',
-        allowClear: true,
-        theme: 'bootstrap-5', width: '100%',
-        dropdownParent: $(document.body),
-        ajax: {
-            url: BASE_URL + '/api/billing.php',
-            dataType: 'json',
-            delay: 200,
-            data: function (params) {
-                return { action: 'search_product', q: params.term || '*' };
-            },
-            processResults: function (res) {
-                if (!res.status) return { results: [] };
-                return {
-                    results: res.data.map(function (p) {
-                        const stock = parseFloat(p.current_stock);
-                        let stockTxt = stock + ' ' + (p.unit_name || 'Pcs');
-                        if (p.secondary_unit_name && p.conversion_factor) {
-                            stockTxt += ' (' + parseFloat((stock * parseFloat(p.conversion_factor)).toFixed(2)) + ' ' + p.secondary_unit_name + ')';
-                        }
-                        return {
-                            id: p.id,
-                            text: p.product_name + ' (' + p.sku + ')',
-                            product: p,
-                            stock: stockTxt,
-                            price: parseFloat(p.selling_price).toFixed(2),
-                            inStock: stock > 0
-                        };
-                    })
-                };
-            },
-            cache: true
-        },
-        minimumInputLength: 0,
-        templateResult: function (item) {
-            if (item.loading) return 'Searching...';
-            if (!item.product) return item.text;
-            const badge = item.inStock
-                ? '<span class="badge bg-light-success float-end">' + item.stock + '</span>'
-                : '<span class="badge bg-light-danger float-end">Out of stock</span>';
-            return $('<div>' +
-                '<strong>' + item.product.product_name + '</strong> <span class="text-muted small">(' + item.product.sku + ')</span>' + badge +
-                '<div class="small text-indigo">₹' + item.price + ' | GST: ' + parseFloat(item.product.gst_percentage) + '%</div>' +
-                '</div>');
-        },
-        templateSelection: function () {
-            return 'Add Product';
+    function setActiveResult(idx) {
+        activeResultIndex = idx;
+        $searchResults.find('.product-result-item').removeClass('active');
+        if (idx >= 0) {
+            const $item = $searchResults.find('.product-result-item').eq(idx).addClass('active');
+            if ($item.length) $item[0].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function selectSearchResult(product) {
+        addToCart(product);
+        playBeep();
+        $search.val('').focus();
+        $searchClear.addClass('d-none');
+        fetchAndShowResults('');
+    }
+
+    $search.on('focus', function () {
+        fetchAndShowResults($(this).val());
+    });
+
+    $search.on('input', function () {
+        const term = $(this).val();
+        $searchClear.toggleClass('d-none', !term);
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(function () { fetchAndShowResults(term); }, 200);
+    });
+
+    $search.on('keydown', function (e) {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (searchResults.length) setActiveResult((activeResultIndex + 1) % searchResults.length);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (searchResults.length) setActiveResult((activeResultIndex - 1 + searchResults.length) % searchResults.length);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (activeResultIndex >= 0 && searchResults[activeResultIndex]) {
+                selectSearchResult(searchResults[activeResultIndex]);
+            } else if (searchResults.length === 1) {
+                selectSearchResult(searchResults[0]);
+            }
+        } else if (e.key === 'Escape') {
+            hideSearchResults();
         }
     });
 
-    $('#cart-product-select').on('select2:select', function (e) {
-        const data = e.params.data;
-        if (data && data.product) {
-            addToCart(data.product);
-            const $select = $(this);
-            setTimeout(function () {
-                $select.val(null).trigger('change');
-                $select.select2('close');
-            }, 0);
-            playBeep();
-        }
+    $searchResults.on('click', '.product-result-item', function () {
+        const idx = parseInt($(this).data('idx'), 10);
+        if (searchResults[idx]) selectSearchResult(searchResults[idx]);
+    });
+
+    $searchClear.on('click', function () {
+        $search.val('').focus();
+        $(this).addClass('d-none');
+        fetchAndShowResults('');
+    });
+
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#product-search').length) hideSearchResults();
     });
 
     // ==================== POS SCANNER MODE ====================
@@ -641,7 +699,7 @@ $(document).ready(function () {
 
     // ==================== KEYBOARD SHORTCUTS ====================
     $(window).on('keydown', function (e) {
-        if (e.key === 'F2') { e.preventDefault(); $('#cart-product-select').select2('open'); }
+        if (e.key === 'F2') { e.preventDefault(); $('#cart-product-search').focus(); }
         if (e.key === 'F3') { e.preventDefault(); $('#btn-hold-bill').click(); }
         if (e.key === 'F4') { e.preventDefault(); $('#btn-save-invoice').click(); }
         if (e.key === 'F5') { e.preventDefault(); $('#btn-toggle-held').click(); }
@@ -697,7 +755,7 @@ $(document).ready(function () {
     }
 
     // ==================== NEW UI BUTTONS ====================
-    $('#btn-focus-search').click(function () { $('#cart-product-select').select2('open'); });
+    $('#btn-focus-search').click(function () { $('#cart-product-search').focus(); });
     $('#btn-clear-cart').click(function () {
         if (cart.length === 0) return;
         Swal.fire({

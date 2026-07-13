@@ -34,7 +34,19 @@ $items = $db->query("
 $company = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
 if (!$company) $company = ['company_name' => 'Grovixo', 'phone' => '', 'address' => '', 'gst_number' => '', 'invoice_footer' => 'Thank you!'];
 $pos_template = $company['pos_template'] ?? 'pos_standard';
-$thermal_width = $company['thermal_width'] ?? '80mm';
+
+// Default/fallback receipt paper width in dots @ 203dpi, set from Settings >
+// Printer Settings. Older rows may still hold a legacy '80mm'/'58mm' string
+// from before that control stored an exact dot width - normalize both.
+$raw_thermal_width = trim((string)($company['thermal_width'] ?? '576'));
+if ($raw_thermal_width === '58mm') {
+    $default_width_dots = 384;
+} elseif ($raw_thermal_width === '80mm' || $raw_thermal_width === '') {
+    $default_width_dots = 576;
+} else {
+    $default_width_dots = max(128, min(1200, (int)$raw_thermal_width));
+}
+$thermal_width_mm = round($default_width_dots / (203 / 25.4), 1) . 'mm';
 $pos_show_logo = (int)($company['pos_show_logo'] ?? 1);
 $pos_show_cashier = (int)($company['pos_show_cashier'] ?? 1);
 $pos_show_customer_mobile = (int)($company['pos_show_customer_mobile'] ?? 1);
@@ -167,7 +179,7 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
         <button onclick="window.close();" style="padding:8px 16px;font-size:14px;cursor:pointer;">Close</button>
     </div>
 </div>
-<div class="receipt <?php echo htmlspecialchars($pos_template); ?>" style="width: <?php echo htmlspecialchars($thermal_width); ?>;">
+<div class="receipt <?php echo htmlspecialchars($pos_template); ?>" style="width: <?php echo htmlspecialchars($thermal_width_mm); ?>;">
     
     <?php if ($pos_template === 'pos_bold'): ?>
         <div class="header-box">
@@ -295,11 +307,11 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
      USB print path needs it directly (to rasterize the receipt without generating
      a PDF first), so it's loaded separately here. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="<?php echo BASE_URL; ?>/assets/js/thermal-printer.js"></script>
+<script src="<?php echo BASE_URL; ?>/assets/js/thermal-printer.js?v=<?php echo \App\Models\Helpers::assetVersion('/assets/js/thermal-printer.js'); ?>"></script>
 <script>
     // Server-computed fallback (from Settings' saved thermal width), used until
     // the user picks/confirms an exact width for their specific printer.
-    const DEFAULT_PRINTER_WIDTH_DOTS = <?php echo $thermal_width === '58mm' ? 384 : 576; ?>;
+    const DEFAULT_PRINTER_WIDTH_DOTS = <?php echo (int)$default_width_dots; ?>;
     const DOTS_PER_MM = 203 / 25.4; // 203dpi is the near-universal ESC/POS thermal printer resolution
     const CSRF_TOKEN = document.querySelector('input[name="csrf_token"]').value;
 

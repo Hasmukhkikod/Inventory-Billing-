@@ -87,10 +87,20 @@ $posMode = (int)($compSettings['pos_mode'] ?? 0);
         </div>
         <?php endif; ?>
 
+        <!-- Product Search (Mobile Friendly) -->
+        <div class="mb-3 product-search" id="product-search">
+            <div class="input-group input-group-lg shadow-sm border-indigo rounded">
+                <span class="input-group-text bg-white border-end-0 text-indigo"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0" id="cart-product-search" placeholder="Add Product — search by name, SKU or barcode..." autocomplete="off">
+                <button class="btn btn-outline-secondary d-none" type="button" id="cart-product-search-clear" title="Clear"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="product-search-results shadow-lg" id="product-search-results"></div>
+        </div>
+
         <!-- Cart Table -->
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0 cart-items-table" id="pos-cart-table">
-                <thead>
+        <div class="table-responsive shadow-sm rounded border cart-table-wrapper">
+            <table class="table table-hover align-middle mb-0 cart-items-table" id="pos-cart-table">
+                <thead class="table-light">
                     <tr>
                         <th style="width:40px;">#</th>
                         <th>Product Name</th>
@@ -105,13 +115,7 @@ $posMode = (int)($compSettings['pos_mode'] ?? 0);
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="cart-add-row">
-                        <td colspan="10" class="py-2">
-                            <select class="form-select" id="cart-product-select" style="width:100%;">
-                                <option value="">Add Product</option>
-                            </select>
-                        </td>
-                    </tr>
+                    <tr class="cart-add-row d-none"></tr>
                     <tr class="cart-empty-row">
                         <td colspan="10" class="text-center py-4 text-secondary">
                             <i class="fa-solid fa-cart-shopping fs-3 mb-2 d-block text-muted"></i>
@@ -331,4 +335,4 @@ $posMode = (int)($compSettings['pos_mode'] ?? 0);
 <input type="hidden" id="config-loyalty-redeem-value" value="<?php echo $loyaltyRedeemValue; ?>">
 <input type="hidden" id="config-company-state" value="<?php echo htmlspecialchars($companyState); ?>">
 
-<script src="<?php echo BASE_URL; ?>/assets/js/billing.js" defer></script>
+<script src="<?php echo BASE_URL; ?>/assets/js/billing.js?v=<?php echo \App\Models\Helpers::assetVersion('/assets/js/billing.js'); ?>" defer></script>

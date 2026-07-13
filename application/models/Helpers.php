@@ -79,6 +79,16 @@ class Helpers {
     }
 
     /**
+     * Cache-busting version string for a local asset (e.g. '/assets/js/billing.js')
+     * so browsers fetch the latest file immediately after a deploy instead of
+     * serving a stale cached copy indefinitely.
+     */
+    public static function assetVersion(string $relativePath): int {
+        $path = BASE_DIR . $relativePath;
+        return file_exists($path) ? filemtime($path) : time();
+    }
+
+    /**
      * Audit logger matching Part 2 columns
      */
     public static function logActivity(Database $db, string $module, string $action, ?int $recordId = null): bool {

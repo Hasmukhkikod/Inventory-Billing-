@@ -594,13 +594,6 @@
                                 <div class="col-md-12">
                                     <hr class="my-3">
                                 </div>
-                                <div class="col-md-4" id="thermal-width-section">
-                                    <label class="form-label">Thermal Width</label>
-                                    <select class="form-select" name="thermal_width" id="set-thermal-width">
-                                        <option value="80mm">80mm</option>
-                                        <option value="58mm">58mm</option>
-                                    </select>
-                                </div>
                                 <div class="col-md-4">
                                     <label class="form-label"><i class="fa-solid fa-language text-indigo me-1"></i>System Language</label>
                                     <select class="form-select" name="system_language" id="set-system-language">
@@ -822,6 +815,37 @@
 
                     <!-- PRINTER SETTINGS PANE -->
                     <div class="tab-pane fade" id="printer-pane" role="tabpanel" aria-labelledby="printer-tab" tabindex="0">
+
+                        <div class="card border mb-4">
+                            <div class="card-body">
+                                <h6 class="text-indigo mb-1"><i class="fa-solid fa-ruler-horizontal me-2"></i>Default Receipt Paper Size</h6>
+                                <p class="text-muted small mb-3">Thermal printer / paper width used for the on-screen receipt preview and PDF, and as the fallback when printing before a specific printer's own width is known. Common sizes: 58mm printers use 384 dots, 80mm printers use 576 dots (some 80mm models use 512 or 832) - all at 203dpi.</p>
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-sm-5 col-md-4">
+                                        <label class="form-label">Paper Width</label>
+                                        <input type="hidden" id="dw-width-final" value="576">
+                                        <select class="form-select" id="dw-width">
+                                            <option value="384">384 dots (58mm)</option>
+                                            <option value="576" selected>576 dots (80mm - most common)</option>
+                                            <option value="512">512 dots (80mm - some models)</option>
+                                            <option value="832">832 dots (80mm - high-res)</option>
+                                            <option value="custom">Custom…</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-4 col-md-3" id="dw-custom-row" style="display:none;">
+                                        <label class="form-label">Exact Dot Width</label>
+                                        <input type="number" class="form-control" id="dw-width-custom" min="128" max="1200" step="8" placeholder="e.g. 640">
+                                    </div>
+                                    <div class="col-sm-3 col-md-2">
+                                        <button type="button" class="btn btn-primary w-100" id="btn-save-default-width"><i class="fa-solid fa-floppy-disk me-1"></i>Save</button>
+                                    </div>
+                                    <div class="col-12">
+                                        <span id="dw-save-status" class="small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                             <div>
                                 <h6 class="text-indigo mb-1"><i class="fa-solid fa-print me-2"></i>Printers</h6>
@@ -894,12 +918,16 @@
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">Paper Width</label>
-                                <select class="form-select" name="paper_width_dots" id="pf-width">
+                                <input type="hidden" name="paper_width_dots" id="pf-width-final" value="576">
+                                <select class="form-select" id="pf-width">
                                     <option value="384">384 dots (58mm)</option>
                                     <option value="576" selected>576 dots (80mm - most common)</option>
                                     <option value="512">512 dots (80mm - some models)</option>
                                     <option value="832">832 dots (80mm - high-res)</option>
+                                    <option value="custom">Custom…</option>
                                 </select>
+                                <input type="number" class="form-control mt-2" id="pf-width-custom" min="128" max="1200" step="8" placeholder="Exact dot width for your machine" style="display:none;">
+                                <small class="text-muted">Most 80mm printers use 576 dots and most 58mm printers use 384 dots at 203dpi. If receipts print too narrow, wide, or cut off, check your printer's manual for its exact dot width and enter it as Custom.</small>
                             </div>
                             <div class="col-md-12" id="pf-pair-row" style="display:none;">
                                 <button type="button" class="btn btn-outline-primary btn-sm" id="btn-pf-pair"><i class="fa-solid fa-link me-1"></i>Pair Now</button>
@@ -982,7 +1010,7 @@
     </div>
 </div>
 
-<script src="<?php echo BASE_URL; ?>/assets/js/thermal-printer.js"></script>
+<script src="<?php echo BASE_URL; ?>/assets/js/thermal-printer.js?v=<?php echo \App\Models\Helpers::assetVersion('/assets/js/thermal-printer.js'); ?>"></script>
 <script>
 $(document).ready(function() {
     // 1. Fetch current settings details
@@ -1023,7 +1051,6 @@ $(document).ready(function() {
                 $("#set-loyalty-points").val(s.loyalty_points_per_100 || '');
                 $("#set-loyalty-redeem").val(s.loyalty_redeem_value || '');
                 $("#set-invoice-template").val(s.invoice_template || 'standard');
-                $("#set-thermal-width").val(s.thermal_width || '80mm');
                 $("#set-system-language").val(s.system_language || 'en');
                 $("#set-pos-mode").prop('checked', s.pos_mode == 1);
                 $("#pos-mode-hidden").val(s.pos_mode || 0);
@@ -1494,7 +1521,16 @@ $(document).ready(function () {
     const CONN_LABELS = { USB: 'USB', BLUETOOTH: 'Bluetooth', LAN: 'WiFi/LAN' };
     const CONN_ICONS = { USB: 'fa-solid fa-plug', BLUETOOTH: 'fa-brands fa-bluetooth-b', LAN: 'fa-solid fa-wifi' };
 
-    $('button[data-bs-target="#printer-pane"]').on('shown.bs.tab', function () { loadPrinters(); });
+    $('button[data-bs-target="#printer-pane"]').on('shown.bs.tab', function () { loadPrinters(); loadDefaultWidth(); });
+    loadDefaultWidth();
+
+    function loadDefaultWidth() {
+        $.get(BASE_URL + '/api/settings.php?action=list', function (res) {
+            if (res.status) {
+                setDefaultWidthControl(normalizeThermalWidth(res.data.thermal_width));
+            }
+        });
+    }
 
     function loadPrinters() {
         $.get(BASE_URL + '/api/printers.php?action=list', function (res) {
@@ -1544,11 +1580,107 @@ $(document).ready(function () {
     }
     $('#pf-connection-type').on('change', toggleConnectionFields);
 
+    const WIDTH_PRESETS = ['384', '576', '512', '832'];
+
+    function setWidthControl(widthDots) {
+        if (WIDTH_PRESETS.includes(String(widthDots))) {
+            $('#pf-width').val(String(widthDots));
+            $('#pf-width-custom').hide().val('');
+        } else {
+            $('#pf-width').val('custom');
+            $('#pf-width-custom').show().val(widthDots);
+        }
+        $('#pf-width-final').val(widthDots);
+    }
+
+    function onWidthControlChange() {
+        const isCustom = $('#pf-width').val() === 'custom';
+        $('#pf-width-custom').toggle(isCustom);
+        const widthDots = isCustom
+            ? (parseInt($('#pf-width-custom').val(), 10) || 576)
+            : parseInt($('#pf-width').val(), 10);
+        $('#pf-width-final').val(widthDots);
+    }
+    $('#pf-width').on('change', onWidthControlChange);
+    $('#pf-width-custom').on('input', onWidthControlChange);
+
+    // ==================== Default Receipt Paper Size (Printer Settings tab) ====================
+
+    function normalizeThermalWidth(value) {
+        if (value === '58mm') return 384;
+        if (value === '80mm' || !value) return 576;
+        const dots = parseInt(value, 10);
+        return (dots >= 128 && dots <= 1200) ? dots : 576;
+    }
+
+    function setDefaultWidthControl(widthDots) {
+        if (WIDTH_PRESETS.includes(String(widthDots))) {
+            $('#dw-width').val(String(widthDots));
+            $('#dw-custom-row').hide();
+            $('#dw-width-custom').val('');
+        } else {
+            $('#dw-width').val('custom');
+            $('#dw-custom-row').show();
+            $('#dw-width-custom').val(widthDots);
+        }
+        $('#dw-width-final').val(widthDots);
+    }
+
+    function onDefaultWidthControlChange() {
+        const isCustom = $('#dw-width').val() === 'custom';
+        $('#dw-custom-row').toggle(isCustom);
+        const widthDots = isCustom
+            ? (parseInt($('#dw-width-custom').val(), 10) || 576)
+            : parseInt($('#dw-width').val(), 10);
+        $('#dw-width-final').val(widthDots);
+    }
+    $('#dw-width').on('change', onDefaultWidthControlChange);
+    $('#dw-width-custom').on('input', onDefaultWidthControlChange);
+
+    $('#btn-save-default-width').on('click', function () {
+        onDefaultWidthControlChange();
+        const widthDots = parseInt($('#dw-width-final').val(), 10);
+        const $status = $('#dw-save-status');
+        const $btn = $(this);
+
+        if (!widthDots || widthDots < 128 || widthDots > 1200) {
+            $status.removeClass('text-success').addClass('text-danger').text('Enter a valid width (128-1200 dots).');
+            return;
+        }
+
+        $btn.prop('disabled', true);
+        $status.removeClass('text-danger text-success').text('Saving...');
+
+        $.ajax({
+            url: BASE_URL + '/api/settings.php?action=save_thermal_width',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                csrf_token: $('#printerForm input[name="csrf_token"]').val(),
+                paper_width_dots: widthDots
+            },
+            success: function (res) {
+                if (res.status) {
+                    $status.removeClass('text-danger').addClass('text-success').text('Saved.');
+                } else {
+                    $status.removeClass('text-success').addClass('text-danger').text(res.message || 'Failed to save.');
+                }
+            },
+            error: function () {
+                $status.removeClass('text-success').addClass('text-danger').text('Failed to save.');
+            },
+            complete: function () {
+                $btn.prop('disabled', false);
+            }
+        });
+    });
+
     $('#btn-add-printer').on('click', function () {
         $('#printerForm')[0].reset();
         $('#pf-id').val(0);
         $('#printerModalTitle').html('<i class="fa-solid fa-print text-indigo me-2"></i>Add Printer');
         $('#pf-pair-status').text('');
+        setWidthControl(576);
         toggleConnectionFields();
         new bootstrap.Modal(document.getElementById('printerModal')).show();
     });
@@ -1563,7 +1695,7 @@ $(document).ready(function () {
             $('#pf-connection-type').val(printer.connection_type);
             $('#pf-ip').val(printer.ip_address || '');
             $('#pf-port').val(printer.port || 9100);
-            $('#pf-width').val(printer.paper_width_dots);
+            setWidthControl(printer.paper_width_dots);
             $('#pf-pair-status').text('');
             toggleConnectionFields();
             $('#printerModalTitle').html('<i class="fa-solid fa-print text-indigo me-2"></i>Edit Printer');
@@ -1584,6 +1716,7 @@ $(document).ready(function () {
 
     $('#printerForm').on('submit', function (e) {
         e.preventDefault();
+        onWidthControlChange(); // make sure a manually-typed custom width is captured
         $.post(BASE_URL + '/api/printers.php?action=save', $(this).serialize(), function (res) {
             if (res.status) {
                 bootstrap.Modal.getInstance(document.getElementById('printerModal')).hide();

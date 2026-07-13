@@ -59,10 +59,20 @@ $isEdit = !empty($purchase);
 <!-- Section 2: Product Search & Cart -->
 <div class="panel-card mb-4">
     <div class="panel-body">
+        <!-- Product Search (Mobile Friendly) -->
+        <div class="mb-3 product-search" id="product-search">
+            <div class="input-group input-group-lg shadow-sm border-indigo rounded">
+                <span class="input-group-text bg-white border-end-0 text-indigo"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0" id="cart-product-search" placeholder="Add Product — search by name, SKU or barcode..." autocomplete="off">
+                <button class="btn btn-outline-secondary d-none" type="button" id="cart-product-search-clear" title="Clear"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="product-search-results shadow-lg" id="product-search-results"></div>
+        </div>
+
         <!-- Cart Table -->
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle mb-0 cart-items-table" id="pur-cart-table">
-                <thead>
+        <div class="table-responsive shadow-sm rounded border cart-table-wrapper">
+            <table class="table table-hover align-middle mb-0 cart-items-table" id="pur-cart-table">
+                <thead class="table-light">
                     <tr>
                         <th style="width:40px;">#</th>
                         <th>Product Name</th>
@@ -76,13 +86,7 @@ $isEdit = !empty($purchase);
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="cart-add-row">
-                        <td colspan="9" class="py-2">
-                            <select class="form-select" id="cart-product-select" style="width:100%;">
-                                <option value="">Add Product</option>
-                            </select>
-                        </td>
-                    </tr>
+                    <tr class="cart-add-row d-none"></tr>
                     <tr class="cart-empty-row">
                         <td colspan="9" class="text-center py-4 text-secondary">
                             <i class="fa-solid fa-cart-shopping fs-3 mb-2 d-block text-muted"></i>
@@ -269,64 +273,116 @@ $(document).ready(function() {
         });
     });
 
-    // Product search using Select2 (like Invoices)
-    $('#cart-product-select').select2({
-        placeholder: 'Add Product — search by name, SKU or barcode...',
-        allowClear: true,
-        theme: 'bootstrap-5', width: '100%',
-        dropdownParent: $(document.body),
-        ajax: {
-            url: BASE_URL + '/api/billing.php',
-            dataType: 'json',
-            delay: 300,
-            data: function (params) {
-                return { action: 'search_product', q: params.term || '*' };
-            },
-            processResults: function (data) {
-                if (!data.status) return { results: [] };
-                return {
-                    results: data.data.map(function (p) {
-                        const stock = parseFloat(p.current_stock);
-                        let stockTxt = stock + ' ' + (p.unit_name || 'PCS');
-                        if (p.secondary_unit_name && p.conversion_factor) {
-                            const secStock = parseFloat((stock * parseFloat(p.conversion_factor)).toFixed(2));
-                            stockTxt += ' (' + secStock + ' ' + p.secondary_unit_name + ')';
-                        }
-                        return {
-                            id: p.id,
-                            text: p.product_name + ' (' + p.sku + ')',
-                            product: p,
-                            stock: stockTxt,
-                            price: parseFloat(p.cost_price || p.selling_price || 0).toFixed(2),
-                            inStock: true // always allow ordering more even if out of stock
-                        };
-                    })
-                };
-            },
-            cache: true
-        },
-        minimumInputLength: 0,
-        templateResult: function (item) {
-            if (item.loading) return 'Searching...';
-            if (!item.product) return item.text;
-            return $('<div>' +
-                '<strong>' + item.product.product_name + '</strong> <span class="text-muted small">(' + item.product.sku + ')</span>' +
-                '<span class="badge bg-light-secondary float-end">' + item.stock + '</span>' +
-                '<div class="small text-indigo">Cost: ₹' + item.price + ' | GST: ' + parseFloat(item.product.gst_percentage || 0) + '%</div>' +
-                '</div>');
-        },
-        templateSelection: function () {
-            return 'Add Product';
+    // Product search: a small purpose-built typeahead instead of Select2 -
+    // Select2 opens its dropdown synchronously on mousedown, and when this
+    // row sits low on a mobile screen it flips to render *above* the
+    // trigger, right under the finger that's still down - the matching
+    // touchend/mouseup then lands on a result row instead of the trigger
+    // and Select2 immediately closes itself again. Owning the interaction
+    // here avoids that entirely and behaves identically on touch and mouse.
+    let searchResults = [];
+    let activeResultIndex = -1;
+    let searchDebounce = null;
+    let searchRequestSeq = 0;
+    const $search = $('#cart-product-search');
+    const $searchResults = $('#product-search-results');
+    const $searchClear = $('#cart-product-search-clear');
+
+    function escapeHtml(str) {
+        return $('<div>').text(str == null ? '' : str).html();
+    }
+
+    function renderSearchResults(products) {
+        searchResults = products;
+        activeResultIndex = -1;
+        if (!products.length) {
+            $searchResults.html('<div class="product-result-empty">No products found</div>');
+        } else {
+            $searchResults.html(products.map(function (p, idx) {
+                const stock = parseFloat(p.current_stock);
+                let stockTxt = stock + ' ' + (p.unit_name || 'PCS');
+                if (p.secondary_unit_name && p.conversion_factor) {
+                    stockTxt += ' (' + parseFloat((stock * parseFloat(p.conversion_factor)).toFixed(2)) + ' ' + p.secondary_unit_name + ')';
+                }
+                const price = parseFloat(p.cost_price || p.selling_price || 0).toFixed(2);
+                return '<div class="product-result-item" data-idx="' + idx + '">' +
+                    '<strong>' + escapeHtml(p.product_name) + '</strong> <span class="text-muted small">(' + escapeHtml(p.sku) + ')</span>' +
+                    '<span class="badge bg-light-secondary float-end">' + stockTxt + '</span>' +
+                    '<div class="small text-indigo">Cost: ₹' + price + ' | GST: ' + parseFloat(p.gst_percentage || 0) + '%</div>' +
+                    '</div>';
+            }).join(''));
+        }
+        $searchResults.addClass('show');
+    }
+
+    function hideSearchResults() { $searchResults.removeClass('show'); }
+
+    function fetchAndShowResults(term) {
+        // Guard against out-of-order responses (e.g. the "refresh with all
+        // products" request fired after selecting a result resolving after a
+        // newer, already-typed filtered search) silently clobbering fresher
+        // results. Only the most recently *sent* request is ever rendered.
+        term = (term || '').trim();
+        if (!term) {
+            hideSearchResults();
+            return;
+        }
+        const seq = ++searchRequestSeq;
+        $.getJSON(BASE_URL + '/api/billing.php', { action: 'search_product', q: term }, function (res) {
+            if (seq !== searchRequestSeq) return;
+            renderSearchResults(res.status ? res.data : []);
+        });
+    }
+
+    function setActiveResult(idx) {
+        activeResultIndex = idx;
+        $searchResults.find('.product-result-item').removeClass('active');
+        if (idx >= 0) {
+            const $item = $searchResults.find('.product-result-item').eq(idx).addClass('active');
+            if ($item.length) $item[0].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function selectSearchResult(product) {
+        addToCart(product);
+        $search.val('').focus();
+        $searchClear.addClass('d-none');
+        fetchAndShowResults('');
+    }
+
+    $search.on('focus', function () { fetchAndShowResults($(this).val()); });
+    $search.on('input', function () {
+        const term = $(this).val();
+        $searchClear.toggleClass('d-none', !term);
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(function () { fetchAndShowResults(term); }, 200);
+    });
+    $search.on('keydown', function (e) {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (searchResults.length) setActiveResult((activeResultIndex + 1) % searchResults.length);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (searchResults.length) setActiveResult((activeResultIndex - 1 + searchResults.length) % searchResults.length);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (activeResultIndex >= 0 && searchResults[activeResultIndex]) selectSearchResult(searchResults[activeResultIndex]);
+            else if (searchResults.length === 1) selectSearchResult(searchResults[0]);
+        } else if (e.key === 'Escape') {
+            hideSearchResults();
         }
     });
-
-    $('#cart-product-select').on('select2:select', function (e) {
-        const data = e.params.data;
-        if (data && data.product) {
-            addToCart(data.product);
-            const $select = $(this);
-            setTimeout(function () { $select.val(null).trigger('change'); }, 0);
-        }
+    $searchResults.on('click', '.product-result-item', function () {
+        const idx = parseInt($(this).data('idx'), 10);
+        if (searchResults[idx]) selectSearchResult(searchResults[idx]);
+    });
+    $searchClear.on('click', function () {
+        $search.val('').focus();
+        $(this).addClass('d-none');
+        fetchAndShowResults('');
+    });
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('#product-search').length) hideSearchResults();
     });
 
     function addToCart(item) {

@@ -42,7 +42,7 @@ $type = $_GET['type'] ?? 'SALES'; // SALES or PURCHASE
                 </div>
 
                 <!-- Document Items Table -->
-                <div class="table-responsive" style="min-height: 250px;">
+                <div class="table-responsive cart-table-wrapper" style="min-height: 250px;">
                     <table class="table table-hover align-middle mb-0 cart-items-table" id="ret-items-table">
                         <thead>
                             <tr class="bg-light text-dark">
