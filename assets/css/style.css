@@ -386,6 +386,13 @@
     opacity: 0.75;
 }
 
+/* Bootstrap bumps a focused input-group member to z-index:5 so its border
+   overlaps neighbors cleanly - not needed for this borderless input, and it
+   was climbing above the "/" kbd hint (a sibling outside the group). */
+.global-search-input-group .form-control:focus {
+    z-index: 1;
+}
+
 /* Floats over the pill's straight edge rather than sitting inside it as a
    flex child - the pill uses overflow:hidden to keep its rounded corners
    clean, which was clipping a squared-off badge placed right at that curve. */
@@ -393,6 +400,7 @@
     position: absolute;
     top: 50%;
     right: 0.7rem;
+    z-index: 10;
     transform: translateY(-50%);
     align-items: center;
     justify-content: center;
