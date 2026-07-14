@@ -10,7 +10,7 @@ $isEdit = !empty($customer);
         <h5 class="mb-0 text-indigo">
             <i class="fa-solid fa-user-plus me-2"></i><?php echo $isEdit ? 'Edit Customer Details' : 'Add New Customer'; ?>
         </h5>
-        <a href="<?php echo BASE_URL; ?>/customers/index.php" class="btn btn-outline-secondary btn-sm">
+        <a href="<?php echo BASE_URL; ?>/customers/index" class="btn btn-outline-secondary btn-sm">
             <i class="fa-solid fa-arrow-left me-1"></i> Back to CRM
         </a>
     </div>
@@ -95,7 +95,7 @@ $isEdit = !empty($customer);
             </div>
             
             <div class="mt-4 pt-3 border-top border-secondary text-end">
-                <a href="<?php echo BASE_URL; ?>/customers/index.php" class="btn btn-outline-secondary me-2">Cancel</a>
+                <a href="<?php echo BASE_URL; ?>/customers/index" class="btn btn-outline-secondary me-2">Cancel</a>
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-circle-check me-1"></i><?php echo $isEdit ? 'Update Details' : 'Save Customer'; ?>
                 </button>
@@ -122,7 +122,7 @@ $(document).ready(function() {
                         background: '#ffffff', 
                         color: '#0f172a' 
                     }).then(() => {
-                        window.location.href = BASE_URL + '/customers/index.php';
+                        window.location.href = BASE_URL + '/customers/index';
                     });
                 } else {
                     Swal.fire({ 

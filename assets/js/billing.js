@@ -260,13 +260,13 @@ $(document).ready(function () {
                 '<td class="text-secondary">' + (idx + 1) + '</td>' +
                 '<td><strong>' + item.product_name + '</strong><div class="text-muted small">Code: ' + item.sku + '</div></td>' +
                 '<td class="small">' + (item.hsn_code || '-') + '</td>' +
-                '<td><input type="number" step="0.01" min="0.01" max="' + maxStock + '" class="form-control form-control-sm py-1 text-center cart-qty" value="' + item.qty + '" style="width:70px;"></td>' +
+                '<td><input type="number" step="1" min="0" max="' + maxStock + '" class="form-control form-control-sm py-1 text-center cart-qty" value="' + item.qty + '" style="width:70px;"></td>' +
                 unitCell +
-                '<td><input type="number" step="0.01" min="0" class="form-control form-control-sm py-1 cart-rate" value="' + item.rate.toFixed(2) + '"></td>' +
+                '<td><input type="number" step="1" min="0" class="form-control form-control-sm py-1 cart-rate" value="' + item.rate.toFixed(2) + '"></td>' +
                 '<td>' +
                 '<div class="d-flex align-items-center gap-1">' +
-                '<input type="number" min="0" class="form-control form-control-sm py-1 cart-discount-val" value="' + item.discount_val + '" style="width:55px;">' +
-                '<select class="form-select form-select-sm py-1 cart-discount-type" style="width:45px;padding:2px 4px;font-size:0.75rem;">' +
+                '<input type="number" step="1" min="0" class="form-control form-control-sm py-1 cart-discount-val" value="' + item.discount_val + '" style="width:55px;">' +
+                '<select class="form-select form-select-sm py-1 cart-discount-type" style="width:62px;font-size:0.8rem;">' +
                 '<option value="pct"' + (item.discount_type === 'pct' ? ' selected' : '') + '>%</option>' +
                 '<option value="flat"' + (item.discount_type === 'flat' ? ' selected' : '') + '>₹</option></select>' +
                 '</div>' +
@@ -647,11 +647,11 @@ $(document).ready(function () {
                     lastInvoiceId = res.data.invoice_id;
                     let printButtons = '';
                     if (posMode === 1) {
-                        printButtons = '<a href="' + BASE_URL + '/invoice_thermal.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Print Thermal</a>' +
-                                       '<a href="' + BASE_URL + '/invoice_print.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-print me-1"></i>A4 Print</a>';
+                        printButtons = '<a href="' + BASE_URL + '/invoice_thermal?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Print Thermal</a>' +
+                                       '<a href="' + BASE_URL + '/invoice_print?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-print me-1"></i>A4 Print</a>';
                     } else {
-                        printButtons = '<a href="' + BASE_URL + '/invoice_print.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-print me-1"></i>Print</a>' +
-                                       '<a href="' + BASE_URL + '/invoice_thermal.php?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>';
+                        printButtons = '<a href="' + BASE_URL + '/invoice_print?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-print me-1"></i>Print</a>' +
+                                       '<a href="' + BASE_URL + '/invoice_thermal?id=' + res.data.invoice_id + '" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>';
                     }
 
                     Swal.fire({
@@ -668,7 +668,7 @@ $(document).ready(function () {
                         color: '#1e293b'
                     }).then(function () {
                         resetCheckout();
-                        window.location.href = BASE_URL + '/billing/index.php';
+                        window.location.href = BASE_URL + '/billing/index';
                     });
                 } else {
                     Swal.fire({ icon: 'error', title: 'Failed', text: res.message, background: '#ffffff', color: '#1e293b' });
@@ -706,7 +706,7 @@ $(document).ready(function () {
         if (e.key === 'F6') {
             e.preventDefault();
             if (lastInvoiceId) {
-                const printUrl = posMode === 1 ? '/invoice_thermal.php?id=' : '/invoice_print.php?id=';
+                const printUrl = posMode === 1 ? '/invoice_thermal?id=' : '/invoice_print?id=';
                 window.open(BASE_URL + printUrl + lastInvoiceId, '_blank');
             } else Swal.fire({ icon: 'info', title: 'No Invoice', text: 'Generate an invoice first.', timer: 1500, showConfirmButton: false, background: '#151e30', color: '#f3f4f6' });
         }

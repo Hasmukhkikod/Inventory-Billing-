@@ -22,7 +22,7 @@ $posMode = (int)($compSettings['pos_mode'] ?? 0);
             <i class="fa-solid fa-pause-circle me-1"></i>Held Bills
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="held-bills-count">0</span>
         </button>
-        <a href="<?php echo BASE_URL; ?>/billing/index.php" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>All Invoices</a>
+        <a href="<?php echo BASE_URL; ?>/billing/index" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>All Invoices</a>
     </div>
 </div>
 

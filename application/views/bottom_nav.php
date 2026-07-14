@@ -3,28 +3,30 @@
  * Invoice & Inventory Management System (IIMS)
  * Floating Bottom Navigation for Mobile First UI (Screens < 768px)
  */
-$currentDir = basename(dirname($_SERVER['PHP_SELF']));
-$currentPage = basename($_SERVER['PHP_SELF']);
+$requestPath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+$uriSegments = $requestPath === '' ? [] : explode('/', $requestPath);
+$currentDir = $uriSegments[0] ?? 'index';
+$currentPage = end($uriSegments) ?: 'index';
 $validModules = ['products', 'customers', 'suppliers', 'expenses', 'billing', 'reports', 'users', 'settings', 'purchases', 'returns', 'quotations', 'challans'];
 $currentModule = in_array($currentDir, $validModules) ? $currentDir : $currentPage;
 ?>
 <nav class="mobile-bottom-nav d-flex d-lg-none">
-    <a href="<?php echo BASE_URL; ?>/index.php" class="nav-item <?php echo $currentModule === 'index.php' ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/index" class="nav-item <?php echo $currentModule === 'index' ? 'active' : ''; ?>">
         <i class="fa-solid fa-chart-pie"></i>
         <span>Dashboard</span>
     </a>
     
-    <a href="<?php echo BASE_URL; ?>/products/index.php" class="nav-item <?php echo $currentModule === 'products' ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/products/index" class="nav-item <?php echo $currentModule === 'products' ? 'active' : ''; ?>">
         <i class="fa-solid fa-box-open"></i>
         <span>Inventory</span>
     </a>
     
-    <a href="<?php echo BASE_URL; ?>/billing/index.php" class="nav-item <?php echo $currentModule === 'billing' ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/billing/index" class="nav-item <?php echo $currentModule === 'billing' ? 'active' : ''; ?>">
         <i class="fa-solid fa-file-invoice-dollar"></i>
         <span>Billing POS</span>
     </a>
     
-    <a href="<?php echo BASE_URL; ?>/customers/index.php" class="nav-item <?php echo $currentModule === 'customers' ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/customers/index" class="nav-item <?php echo $currentModule === 'customers' ? 'active' : ''; ?>">
         <i class="fa-solid fa-users"></i>
         <span>CRM</span>
     </a>

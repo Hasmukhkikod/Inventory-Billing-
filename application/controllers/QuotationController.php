@@ -66,7 +66,7 @@ class QuotationController {
         ", [(int)$id])->fetch();
 
         if (!$quotation) {
-            header("Location: " . BASE_URL . "/quotations/index.php");
+            header("Location: " . BASE_URL . "/quotations/index");
             exit;
         }
 

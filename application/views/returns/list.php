@@ -20,10 +20,10 @@
             </li>
         </ul>
         <div class="d-flex gap-2">
-            <a href="<?php echo BASE_URL; ?>/returns/form.php?type=SALES" class="btn btn-outline-primary btn-sm">
+            <a href="<?php echo BASE_URL; ?>/returns/form?type=SALES" class="btn btn-outline-primary btn-sm">
                 <i class="fa-solid fa-plus me-1"></i> Log Sales Return
             </a>
-            <a href="<?php echo BASE_URL; ?>/returns/form.php?type=PURCHASE" class="btn btn-outline-secondary btn-sm">
+            <a href="<?php echo BASE_URL; ?>/returns/form?type=PURCHASE" class="btn btn-outline-secondary btn-sm">
                 <i class="fa-solid fa-plus me-1"></i> Log Purchase Return
             </a>
         </div>
@@ -89,7 +89,7 @@ $(document).ready(function() {
                 data: 'return_no', 
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/returns/view.php?id=${row.id}&type=SALES" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/returns/view?id=${row.id}&type=SALES" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'invoice_no', defaultContent: '-' },
@@ -110,7 +110,7 @@ $(document).ready(function() {
                 orderable: false,
                 render: function(data, type, row) {
                     return `
-                        <a href="${BASE_URL}/returns/view.php?id=${row.id}&type=SALES" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo">
+                        <a href="${BASE_URL}/returns/view?id=${row.id}&type=SALES" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo">
                             <i class="fa-solid fa-eye"></i> View
                         </a>
                     `;
@@ -131,7 +131,7 @@ $(document).ready(function() {
                 data: 'return_no', 
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/returns/view.php?id=${row.id}&type=PURCHASE" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/returns/view?id=${row.id}&type=PURCHASE" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'purchase_no', defaultContent: '-' },
@@ -152,7 +152,7 @@ $(document).ready(function() {
                 orderable: false,
                 render: function(data, type, row) {
                     return `
-                        <a href="${BASE_URL}/returns/view.php?id=${row.id}&type=PURCHASE" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo">
+                        <a href="${BASE_URL}/returns/view?id=${row.id}&type=PURCHASE" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo">
                             <i class="fa-solid fa-eye"></i> View
                         </a>
                     `;

@@ -59,7 +59,7 @@ class BillingController {
         ", [(int)$id])->fetch();
         
         if (!$invoice) {
-            header("Location: " . BASE_URL . "/billing/index.php");
+            header("Location: " . BASE_URL . "/billing/index");
             exit;
         }
 

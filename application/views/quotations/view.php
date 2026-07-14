@@ -9,7 +9,7 @@
             <div class="panel-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-indigo"><i class="fa-solid fa-file-signature me-2"></i>Quotation Details</h5>
                 <div class="d-flex gap-2">
-                    <a href="<?php echo BASE_URL; ?>/quotation_print.php?id=<?php echo $quotation['id']; ?>" target="_blank" class="btn btn-primary btn-sm">
+                    <a href="<?php echo BASE_URL; ?>/quotation_print?id=<?php echo $quotation['id']; ?>" target="_blank" class="btn btn-primary btn-sm">
                         <i class="fa-solid fa-print me-1"></i>Print
                     </a>
                     <?php if ($quotation['status'] === 'ACCEPTED'): ?>
@@ -23,7 +23,7 @@
                     <a href="https://api.whatsapp.com/send?text=<?php echo urlencode($waMsg); ?>" target="_blank" class="btn btn-success btn-sm">
                         <i class="fa-brands fa-whatsapp me-1"></i>WhatsApp
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/quotations/index.php" class="btn btn-outline-secondary btn-sm">
+                    <a href="<?php echo BASE_URL; ?>/quotations/index" class="btn btn-outline-secondary btn-sm">
                         <i class="fa-solid fa-arrow-left me-1"></i>Back
                     </a>
                 </div>
@@ -138,7 +138,7 @@ $('#btn-convert-invoice').click(function() {
         icon: 'question', showCancelButton: true, confirmButtonText: 'Convert', confirmButtonColor: '#10b981',
         background: '#151e30', color: '#f3f4f6'
     }).then(function(r) {
-        if (r.isConfirmed) window.location.href = BASE_URL + '/billing/form.php?from_quotation=' + id;
+        if (r.isConfirmed) window.location.href = BASE_URL + '/billing/form?from_quotation=' + id;
     });
 });
 </script>

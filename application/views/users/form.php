@@ -10,7 +10,7 @@ $isEdit = !empty($user);
         <h5 class="mb-0 text-indigo">
             <i class="fa-solid fa-user-shield me-2"></i><?php echo $isEdit ? 'Edit User Credentials' : 'Create User Profile'; ?>
         </h5>
-        <a href="<?php echo BASE_URL; ?>/users/index.php" class="btn btn-outline-secondary btn-sm">
+        <a href="<?php echo BASE_URL; ?>/users/index" class="btn btn-outline-secondary btn-sm">
             <i class="fa-solid fa-arrow-left me-1"></i> Back to Directory
         </a>
     </div>
@@ -62,7 +62,7 @@ $isEdit = !empty($user);
             </div>
             
             <div class="mt-4 pt-3 border-top border-secondary text-end">
-                <a href="<?php echo BASE_URL; ?>/users/index.php" class="btn btn-outline-secondary me-2">Cancel</a>
+                <a href="<?php echo BASE_URL; ?>/users/index" class="btn btn-outline-secondary me-2">Cancel</a>
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-circle-check me-1"></i><?php echo $isEdit ? 'Update User' : 'Save User'; ?>
                 </button>
@@ -89,7 +89,7 @@ $(document).ready(function() {
                         background: '#ffffff', 
                         color: '#0f172a' 
                     }).then(() => {
-                        window.location.href = BASE_URL + '/users/index.php';
+                        window.location.href = BASE_URL + '/users/index';
                     });
                 } else {
                     Swal.fire({ 

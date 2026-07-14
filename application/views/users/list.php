@@ -27,10 +27,10 @@
                     </li>
                 </ul>
                 <div class="d-flex gap-2">
-                    <a href="<?php echo BASE_URL; ?>/roles/index.php" class="btn btn-outline-secondary btn-sm">
+                    <a href="<?php echo BASE_URL; ?>/roles/index" class="btn btn-outline-secondary btn-sm">
                         <i class="fa-solid fa-user-shield me-1"></i> Manage Roles
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/users/form.php" class="btn btn-primary btn-sm btn-action-add" id="btn-add-user">
+                    <a href="<?php echo BASE_URL; ?>/users/form" class="btn btn-primary btn-sm btn-action-add" id="btn-add-user">
                         <i class="fa-solid fa-user-plus me-1"></i> Add User
                     </a>
                 </div>
@@ -124,7 +124,7 @@ $(document).ready(function() {
                 data: 'name', 
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/users/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/users/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'role_name', className: 'text-indigo fw-semibold' },
@@ -146,10 +146,10 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     return `
                         <div class="btn-group">
-                            <a href="${BASE_URL}/users/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View Profile">
+                            <a href="${BASE_URL}/users/view?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View Profile">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
-                            <a href="${BASE_URL}/users/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald" title="Edit user">
+                            <a href="${BASE_URL}/users/form?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald" title="Edit user">
                                 <i class="fa-solid fa-pencil"></i>
                             </a>
                             <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-danger btn-delete" data-id="${row.id}" title="De-activate User">

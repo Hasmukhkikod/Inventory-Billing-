@@ -52,7 +52,7 @@ class SupplierController {
         $supplier = $db->query("SELECT * FROM suppliers WHERE id = ? LIMIT 1", [(int)$id])->fetch();
         
         if (!$supplier) {
-            header("Location: " . BASE_URL . "/suppliers/index.php");
+            header("Location: " . BASE_URL . "/suppliers/index");
             exit;
         }
         

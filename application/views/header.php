@@ -10,21 +10,34 @@ use App\Models\Database;
 
 $auth = $this->auth;
 if (!$auth->check()) {
-    header("Location: " . BASE_URL . "/login.php");
+    header("Location: " . BASE_URL . "/login");
     exit;
 }
 $currentUser = $auth->user();
 
-$currentDir = basename(dirname($_SERVER['PHP_SELF']));
-$currentPage = basename($_SERVER['PHP_SELF']);
+$hourOfDay = (int)date('G');
+if ($hourOfDay < 12) {
+    $greetingPeriod = 'Morning';
+} elseif ($hourOfDay < 17) {
+    $greetingPeriod = 'Afternoon';
+} else {
+    $greetingPeriod = 'Evening';
+}
+
+// Derived from the request path rather than PHP_SELF/SCRIPT_NAME: those
+// reflect whichever script *internally* ends up require()'d to serve a
+// clean URL (server.php locally, mod_rewrite's resolved file in production)
+// and don't reliably point back at the page the user actually asked for.
+$requestPath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+$uriSegments = $requestPath === '' ? [] : explode('/', $requestPath);
+$currentDir = $uriSegments[0] ?? 'index';
+$currentPage = end($uriSegments) ?: 'index';
 $validModules = ['products', 'customers', 'suppliers', 'expenses', 'billing', 'reports', 'users', 'settings', 'purchases', 'returns', 'quotations', 'challans'];
 $currentModule = in_array($currentDir, $validModules) ? $currentDir : $currentPage;
 
 // Fetch Company Settings
 $db = $this->db;
 $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
-
-$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,7 +48,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <meta name="csrf-token" content="<?php echo \App\Models\Helpers::getCsrfToken(); ?>">
     <title><?php echo Helpers::sanitize($compSettings['company_name'] ?? COMPANY_NAME); ?> - IIMS</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/images/favicon.png" error="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>'">
+    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/images/favicon.png?v=<?php echo Helpers::assetVersion('/assets/images/favicon.png'); ?>">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 Icons -->
@@ -61,7 +74,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <!-- Sidebar -->
     <aside class="sidebar d-flex" id="app-sidebar">
         <div class="sidebar-header d-flex justify-content-between align-items-center">
-            <a href="index.php" class="sidebar-brand">
+            <a href="<?php echo BASE_URL; ?>/index" class="sidebar-brand">
                 <?php if (!empty($compSettings['company_logo']) && file_exists(BASE_DIR . '/uploads/' . $compSettings['company_logo'])): ?>
                     <img src="<?php echo BASE_URL . '/uploads/' . $compSettings['company_logo']; ?>" alt="Logo" style="height: 32px; width: 32px; object-fit: contain; border-radius: 6px;">
                 <?php else: ?>
@@ -74,8 +87,8 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         
         <ul class="sidebar-menu">
             <?php if ($auth->hasPermission('Access Dashboard')): ?>
-            <li class="sidebar-item <?php echo $currentModule === 'index.php' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/index.php" class="sidebar-link">
+            <li class="sidebar-item <?php echo $currentModule === 'index' ? 'active' : ''; ?>">
+                <a href="<?php echo BASE_URL; ?>/index" class="sidebar-link">
                     <i class="fa-solid fa-chart-pie"></i>
                     <span>Dashboard</span>
                 </a>
@@ -84,13 +97,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Manage Inventory')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'products' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/products/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/products/index" class="sidebar-link">
                     <i class="fa-solid fa-box-open"></i>
                     <span>Inventory</span>
                 </a>
             </li>
             <li class="sidebar-item <?php echo $currentModule === 'purchases' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/purchases/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/purchases/index" class="sidebar-link">
                     <i class="fa-solid fa-cart-flatbed"></i>
                     <span>Purchases</span>
                 </a>
@@ -99,7 +112,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Create Invoice')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'billing' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/billing/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/billing/index" class="sidebar-link">
                     <i class="fa-solid fa-file-invoice-dollar"></i>
                     <span>Billing</span>
                 </a>
@@ -108,7 +121,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Manage Inventory')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'returns' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/returns/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/returns/index" class="sidebar-link">
                     <i class="fa-solid fa-rotate-left"></i>
                     <span>Returns Log</span>
                 </a>
@@ -117,7 +130,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Manage Quotations')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'quotations' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/quotations/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/quotations/index" class="sidebar-link">
                     <i class="fa-solid fa-file-signature"></i>
                     <span>Quotations</span>
                 </a>
@@ -126,7 +139,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Manage Challans')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'challans' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/challans/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/challans/index" class="sidebar-link">
                     <i class="fa-solid fa-truck-fast"></i>
                     <span>Delivery Challans</span>
                 </a>
@@ -135,7 +148,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Manage Customers')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'customers' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/customers/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/customers/index" class="sidebar-link">
                     <i class="fa-solid fa-users"></i>
                     <span>Customers</span>
                 </a>
@@ -144,7 +157,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Manage Suppliers')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'suppliers' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/suppliers/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/suppliers/index" class="sidebar-link">
                     <i class="fa-solid fa-truck-field"></i>
                     <span>Suppliers</span>
                 </a>
@@ -153,7 +166,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Manage Expenses')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'expenses' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/expenses/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/expenses/index" class="sidebar-link">
                     <i class="fa-solid fa-wallet"></i>
                     <span>Expenses</span>
                 </a>
@@ -162,7 +175,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('View Reports')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'reports' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/reports/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/reports/index" class="sidebar-link">
                     <i class="fa-solid fa-file-waveform"></i>
                     <span>Reports</span>
                 </a>
@@ -171,7 +184,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Manage Users')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'users' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/users/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/users/index" class="sidebar-link">
                     <i class="fa-solid fa-users-gear"></i>
                     <span>Users</span>
                 </a>
@@ -180,7 +193,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 
             <?php if ($auth->hasPermission('Manage Settings')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'settings' ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/settings/index.php" class="sidebar-link">
+                <a href="<?php echo BASE_URL; ?>/settings/index" class="sidebar-link">
                     <i class="fa-solid fa-gears"></i>
                     <span>Settings</span>
                 </a>
@@ -198,7 +211,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <span class="sidebar-role"><?php echo Helpers::sanitize($currentUser['role_name']); ?></span>
                 </div>
             </div>
-            <a href="<?php echo BASE_URL; ?>/logout.php" class="text-danger btn-logout-icon" title="Logout">
+            <a href="<?php echo BASE_URL; ?>/logout" class="text-danger btn-logout-icon" title="Logout">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </a>
         </div>
@@ -207,20 +220,24 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <!-- Main Content Panel -->
     <main class="main-content">
         <?php
-        $isDashboard = ($currentModule === 'index.php');
-        $isFormPage = in_array($currentPage, ['form.php', 'view.php', 'day_end.php']);
+        $isDashboard = ($currentModule === 'index');
+        $isFormPage = in_array($currentPage, ['form', 'view', 'day_end']);
         $showHeader = !$isFormPage; // Show header on dashboard + listing pages, hide on form/view/edit pages
         ?>
 
         <?php if ($showHeader): ?>
         <!-- Top Navbar (Dashboard + Listing pages) -->
-        <header class="top-navbar d-flex justify-content-between align-items-center">
+        <header class="top-navbar <?php echo $isDashboard ? 'top-navbar-dashboard' : ''; ?> d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
                 <button class="btn btn-outline-secondary d-lg-none py-1.5 px-2.5" id="sidebar-toggle-btn" type="button" aria-label="Toggle Menu">
                     <i class="fa-solid fa-bars fs-5"></i>
                 </button>
                 <?php if ($isDashboard): ?>
-                    <h4 class="mb-0 d-none d-lg-block">Business Performance Dashboard</h4>
+                    <div class="dashboard-greeting d-none d-lg-block">
+                        <div class="dashboard-greeting-eyebrow">Dashboard</div>
+                        <h4 class="dashboard-greeting-title mb-0">Good <?php echo $greetingPeriod; ?> <span class="dashboard-greeting-wave">👋</span></h4>
+                        <div class="dashboard-greeting-sub">Today's business summary</div>
+                    </div>
                 <?php else: ?>
                     <h4 class="mb-0 text-capitalize d-none d-lg-block">
                         <?php
@@ -244,18 +261,23 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <?php endif; ?>
             </div>
             <?php if ($isDashboard): ?>
-            <div class="global-search-container mx-2 flex-grow-1 flex-sm-grow-0" style="max-width: 320px;">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text"><i class="fa-solid fa-magnifying-glass text-indigo"></i></span>
-                    <input type="text" class="form-control" id="global-search-input" placeholder="Search..." autocomplete="off">
+            <div class="global-search-container global-search-container-polished mx-2 flex-grow-1 flex-sm-grow-0">
+                <div class="input-group global-search-input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" class="form-control" id="global-search-input" placeholder="Search anything…" autocomplete="off">
                 </div>
+                <span class="global-search-kbd d-none d-xl-inline-flex">/</span>
                 <div class="global-search-results d-none" id="global-search-results-box"></div>
             </div>
             <?php endif; ?>
             <div class="d-flex align-items-center gap-3">
                 <?php if ($isDashboard): ?>
-                <div class="text-secondary small d-none d-xl-block">
-                    <i class="fa-regular fa-clock me-1"></i> <?php echo date('d-M-Y H:i'); ?>
+                <div class="dash-datetime-card align-items-center">
+                    <div class="dash-datetime-icon"><i class="fa-solid fa-calendar-day"></i></div>
+                    <div class="dash-datetime-text">
+                        <div class="dash-datetime-date"><span class="dash-datetime-today">Today</span> · <span id="dash-date-value"><?php echo date('d F Y'); ?></span></div>
+                        <div class="dash-datetime-time"><i class="fa-regular fa-clock me-1"></i><span id="dash-time-value"><?php echo date('g:i A'); ?></span></div>
+                    </div>
                 </div>
                 <?php endif; ?>
         <?php else: ?>
@@ -297,9 +319,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                         <span class="d-none d-sm-inline"><?php echo Helpers::sanitize($currentUser['email']); ?></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border">
-                        <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/settings/index.php"><i class="fa-solid fa-cog me-2"></i>Settings</a></li>
+                        <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/settings/index"><i class="fa-solid fa-cog me-2"></i>Settings</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="<?php echo BASE_URL; ?>/logout.php"><i class="fa-solid fa-sign-out me-2"></i>Sign Out</a></li>
+                        <li><a class="dropdown-item text-danger" href="<?php echo BASE_URL; ?>/logout"><i class="fa-solid fa-sign-out me-2"></i>Sign Out</a></li>
                     </ul>
                 </div>
             </div>
@@ -309,6 +331,28 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
         $(document).ready(function() {
+            // Live-updating dashboard clock (date rolls over at midnight too)
+            const $dashDate = $("#dash-date-value");
+            const $dashTime = $("#dash-time-value");
+            if ($dashTime.length) {
+                const updateDashClock = function () {
+                    const now = new Date();
+                    $dashDate.text(now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }));
+                    $dashTime.text(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }));
+                };
+                updateDashClock();
+                setInterval(updateDashClock, 1000);
+            }
+
+            // Press "/" to jump into the global search box, unless already
+            // typing in some other field.
+            $(document).on('keydown', function(e) {
+                if (e.key === '/' && !$(e.target).is('input, textarea, select') && $("#global-search-input").length) {
+                    e.preventDefault();
+                    $("#global-search-input").trigger('focus');
+                }
+            });
+
             // 1. Live Global Search autocomplete
             let searchTimeout = null;
             $("#global-search-input").on('input', function() {
@@ -336,7 +380,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                     box.append('<div class="global-search-group-header">Inventory Products</div>');
                                     d.products.forEach(p => {
                                         box.append(`
-                                            <div class="global-search-item" onclick="window.location='${BASE_URL}/products/index.php'">
+                                            <div class="global-search-item" onclick="window.location='${BASE_URL}/products/index'">
                                                 <span><strong>${p.title}</strong> <small class="text-muted">(${p.subtitle})</small></span>
                                                 <span class="badge bg-light-primary">₹${parseFloat(p.price).toFixed(2)} | Stock: ${parseFloat(p.stock)}</span>
                                             </div>
@@ -349,7 +393,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                     box.append('<div class="global-search-group-header">CRM Customers</div>');
                                     d.customers.forEach(c => {
                                         box.append(`
-                                            <div class="global-search-item" onclick="window.location='${BASE_URL}/customers/index.php'">
+                                            <div class="global-search-item" onclick="window.location='${BASE_URL}/customers/index'">
                                                 <span><strong>${c.title}</strong></span>
                                                 <span class="text-muted small">${c.subtitle}</span>
                                             </div>
@@ -362,7 +406,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                     box.append('<div class="global-search-group-header">Suppliers Directory</div>');
                                     d.suppliers.forEach(s => {
                                         box.append(`
-                                            <div class="global-search-item" onclick="window.location='${BASE_URL}/suppliers/index.php'">
+                                            <div class="global-search-item" onclick="window.location='${BASE_URL}/suppliers/index'">
                                                 <span><strong>${s.title}</strong></span>
                                                 <span class="text-muted small">${s.subtitle}</span>
                                             </div>
@@ -375,7 +419,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                                     box.append('<div class="global-search-group-header">Invoices Log</div>');
                                     d.invoices.forEach(i => {
                                         box.append(`
-                                            <div class="global-search-item" onclick="window.open('${BASE_URL}/invoice_print.php?id=${i.id}', '_blank')">
+                                            <div class="global-search-item" onclick="window.open('${BASE_URL}/invoice_print?id=${i.id}', '_blank')">
                                                 <span><i class="fa-solid fa-receipt me-1 text-indigo"></i><strong>${i.title}</strong> <small class="text-muted">(${i.subtitle})</small></span>
                                                 <span class="fw-bold text-rose">₹${parseFloat(i.price).toFixed(2)}</span>
                                             </div>

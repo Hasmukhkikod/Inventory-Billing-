@@ -336,7 +336,7 @@ $(document).ready(function() {
                 data: 'invoice_no', 
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/billing/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/billing/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'customer_name', defaultContent: 'Walk-in Customer' },
@@ -366,7 +366,7 @@ $(document).ready(function() {
                 data: 'product_name', 
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/products/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/products/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'sku' },
@@ -419,7 +419,7 @@ $(document).ready(function() {
                 data: 'customer_name', 
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/customers/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/customers/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'mobile' },
@@ -438,7 +438,7 @@ $(document).ready(function() {
                 data: 'supplier_name', 
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/suppliers/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/suppliers/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'contact_person', defaultContent: '-' },
@@ -451,7 +451,7 @@ $(document).ready(function() {
     gstTable = $('#gstReportTable').DataTable({
         ajax: { url: BASE_URL + `/api/reports.php?action=gst&start_date=${start}&end_date=${end}`, dataSrc: 'data' },
         columns: [
-            { data: 'invoice_no', className: 'fw-semibold', render: (d, t, r) => `<a href="${BASE_URL}/billing/view.php?id=${r.id}" class="text-indigo text-decoration-none">${d}</a>` },
+            { data: 'invoice_no', className: 'fw-semibold', render: (d, t, r) => `<a href="${BASE_URL}/billing/view?id=${r.id}" class="text-indigo text-decoration-none">${d}</a>` },
             { data: 'invoice_date', render: d => { if(!d) return '-'; return new Date(d).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}); } },
             { data: 'customer_name', defaultContent: 'Walk-in' },
             { data: 'subtotal', render: d => '₹' + parseFloat(d).toFixed(2), className: 'text-end font-monospace' },
@@ -475,7 +475,7 @@ $(document).ready(function() {
     overdueTable = $('#overdueReportTable').DataTable({
         ajax: { url: BASE_URL + '/api/reports.php?action=overdue', dataSrc: 'data' },
         columns: [
-            { data: 'invoice_no', className: 'fw-semibold', render: (d, t, r) => `<a href="${BASE_URL}/billing/view.php?id=${r.id}" class="text-indigo text-decoration-none">${d}</a>` },
+            { data: 'invoice_no', className: 'fw-semibold', render: (d, t, r) => `<a href="${BASE_URL}/billing/view?id=${r.id}" class="text-indigo text-decoration-none">${d}</a>` },
             { data: 'customer_name', defaultContent: 'Walk-in' },
             { data: 'invoice_date', render: d => d ? new Date(d).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) : '-' },
             { data: 'due_date', render: d => d ? new Date(d).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) : '-', className: 'text-rose fw-bold' },

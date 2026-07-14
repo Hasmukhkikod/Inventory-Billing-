@@ -13,7 +13,7 @@
                     <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
                         <i class="fa-solid fa-print me-1"></i> Print
                     </button>
-                    <a href="<?php echo BASE_URL; ?>/challans/index.php" class="btn btn-outline-secondary btn-sm">
+                    <a href="<?php echo BASE_URL; ?>/challans/index" class="btn btn-outline-secondary btn-sm">
                         <i class="fa-solid fa-arrow-left me-1"></i> Back to List
                     </a>
                 </div>

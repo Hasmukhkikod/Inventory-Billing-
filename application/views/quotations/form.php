@@ -12,7 +12,7 @@ $isEdit = !empty($quotation);
         <nav class="text-muted small">Home / Quotations / <?php echo $isEdit ? 'Edit' : 'Create'; ?> Quotation</nav>
     </div>
     <div>
-        <a href="<?php echo BASE_URL; ?>/quotations/index.php" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>Back to List</a>
+        <a href="<?php echo BASE_URL; ?>/quotations/index" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>Back to List</a>
     </div>
 </div>
 
@@ -20,7 +20,7 @@ $isEdit = !empty($quotation);
 <div class="panel-card mb-4">
     <div class="panel-body py-3">
         <div class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-<?php echo $isEdit ? '3' : '4'; ?>">
                 <label class="form-label fw-semibold">Customer Name</label>
                 <div class="input-group">
                     <select class="form-select searchable-select" id="qt-customer-select">
@@ -39,7 +39,23 @@ $isEdit = !empty($quotation);
                 <label class="form-label fw-semibold">Valid Until</label>
                 <input type="date" class="form-control" id="qt-valid-until" value="<?php echo $isEdit ? ($quotation['valid_until'] ?? '') : date('Y-m-d', strtotime('+30 days')); ?>">
             </div>
-            <div class="col-md-4">
+            <?php if ($isEdit): ?>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">Status</label>
+                <?php if ($quotation['status'] === 'CONVERTED'): ?>
+                    <div class="form-control bg-light-primary text-indigo fw-semibold border-0">
+                        <i class="fa-solid fa-check-double me-1"></i>Converted
+                    </div>
+                <?php else: ?>
+                    <select class="form-select" id="qt-status-select">
+                        <?php foreach (['DRAFT' => 'Draft', 'SENT' => 'Sent', 'ACCEPTED' => 'Accepted', 'REJECTED' => 'Rejected'] as $val => $label): ?>
+                            <option value="<?php echo $val; ?>" <?php echo $quotation['status'] === $val ? 'selected' : ''; ?>><?php echo $label; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+            <div class="col-md-<?php echo $isEdit ? '3' : '4'; ?>">
                 <label class="form-label fw-semibold">Notes</label>
                 <input type="text" class="form-control" id="qt-notes-short" placeholder="Quick note..." value="<?php echo $isEdit ? htmlspecialchars($quotation['notes'] ?? '') : ''; ?>">
             </div>
@@ -132,7 +148,7 @@ $isEdit = !empty($quotation);
                     <tr>
                         <td class="text-secondary">Flat Discount (&#8377;)</td>
                         <td class="text-end">
-                            <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end d-inline-block" style="width:100px;" id="qt-discount-input" value="<?php echo $isEdit ? number_format((float)$quotation['discount'], 2, '.', '') : '0.00'; ?>">
+                            <input type="number" step="1" min="0" class="form-control form-control-sm text-end d-inline-block" style="width:100px;" id="qt-discount-input" value="<?php echo $isEdit ? number_format((float)$quotation['discount'], 2, '.', '') : '0.00'; ?>">
                         </td>
                     </tr>
                 </table>
@@ -195,6 +211,34 @@ $(document).ready(function() {
 
     // Focus search on Add Product click
     $('#btn-focus-search').click(function() { $('#cart-product-search').focus(); });
+
+    // Status update - independent of the main Save action, matches how the
+    // backend already separates 'update_status' from 'save' (status is never
+    // touched by the save endpoint).
+    $('#qt-status-select').on('change', function () {
+        const $sel = $(this);
+        const newStatus = $sel.val();
+        const previousStatus = $sel.data('prev') || $sel.find('option[selected]').val();
+        $sel.prop('disabled', true);
+        $.post(BASE_URL + '/api/quotations.php?action=update_status', {
+            csrf_token: csrfToken,
+            id: editId,
+            status: newStatus
+        }, function (res) {
+            if (res.status) {
+                $sel.data('prev', newStatus);
+                Swal.fire({ icon: 'success', title: 'Status Updated', text: res.message, timer: 1500, showConfirmButton: false, background: '#ffffff', color: '#1e293b' });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Update Failed', text: res.message, background: '#ffffff', color: '#1e293b' });
+                $sel.val(previousStatus);
+            }
+        }, 'json').fail(function () {
+            Swal.fire({ icon: 'error', title: 'Update Failed', text: 'Could not reach the server.', background: '#ffffff', color: '#1e293b' });
+            $sel.val(previousStatus);
+        }).always(function () {
+            $sel.prop('disabled', false);
+        });
+    }).each(function () { $(this).data('prev', $(this).val()); });
 
     // Clear All
     $('#btn-clear-cart').click(function() {
@@ -460,15 +504,15 @@ $(document).ready(function() {
                     </td>
                     <td class="small">${item.hsn_code || '-'}</td>
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width:70px;" min="0.01">
+                        <input type="number" step="1" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width:70px;" min="0">
                     </td>
                     ${unitCell}
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-rate-input" data-index="${index}" value="${item.rate.toFixed(2)}" style="width:100px;" min="0">
+                        <input type="number" step="1" class="form-control form-control-sm item-rate-input" data-index="${index}" value="${item.rate.toFixed(2)}" style="width:100px;" min="0">
                     </td>
                     <td>
                         <div class="input-group input-group-sm" style="width:150px;">
-                            <input type="number" step="0.01" class="form-control item-disc-input" data-index="${index}" value="${item.discount_value}" min="0">
+                            <input type="number" step="1" class="form-control item-disc-input" data-index="${index}" value="${item.discount_value}" min="0">
                             <select class="form-select item-disc-type" data-index="${index}" style="max-width:62px;">
                                 <option value="percent" ${item.discount_type==='percent'?'selected':''}>%</option>
                                 <option value="amount" ${item.discount_type==='amount'?'selected':''}>&#8377;</option>
@@ -476,7 +520,7 @@ $(document).ready(function() {
                         </div>
                     </td>
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-gst-input" data-index="${index}" value="${item.gst_percentage}" style="width:70px;" min="0">
+                        <input type="number" step="1" class="form-control form-control-sm item-gst-input" data-index="${index}" value="${item.gst_percentage}" style="width:70px;" min="0">
                     </td>
                     <td class="text-end fw-bold font-monospace">&#8377;${row_total.toFixed(2)}</td>
                     <td class="text-center">
@@ -585,7 +629,7 @@ $(document).ready(function() {
                     Swal.fire({
                         icon: 'success', title: isEdit ? 'Quotation Updated' : 'Quotation Created',
                         text: res.message, background: '#ffffff', color: '#1e293b'
-                    }).then(() => { window.location.href = BASE_URL + '/quotations/view.php?id=' + res.data.quotation_id; });
+                    }).then(() => { window.location.href = BASE_URL + '/quotations/view?id=' + res.data.quotation_id; });
                 } else {
                     Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#1e293b' });
                 }

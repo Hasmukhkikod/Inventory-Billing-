@@ -61,7 +61,7 @@ class ProductController {
         ", [(int)$id])->fetch();
         
         if (!$product) {
-            header("Location: " . BASE_URL . "/products/index.php");
+            header("Location: " . BASE_URL . "/products/index");
             exit;
         }
 

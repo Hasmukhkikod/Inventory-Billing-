@@ -5,7 +5,7 @@
                 <h5 class="mb-0 text-indigo">
                     <i class="fa-solid fa-user-shield me-2"></i><?php echo $id > 0 ? 'Edit Role' : 'Create New Role'; ?>
                 </h5>
-                <a href="<?php echo BASE_URL; ?>/roles/index.php" class="btn btn-outline-secondary btn-sm">
+                <a href="<?php echo BASE_URL; ?>/roles/index" class="btn btn-outline-secondary btn-sm">
                     <i class="fa-solid fa-arrow-left me-1"></i> Back to Roles
                 </a>
             </div>
@@ -75,7 +75,7 @@
                     </div>
 
                     <div class="mt-4 text-end border-top pt-3">
-                        <a href="<?php echo BASE_URL; ?>/roles/index.php" class="btn btn-light border me-2">Cancel</a>
+                        <a href="<?php echo BASE_URL; ?>/roles/index" class="btn btn-light border me-2">Cancel</a>
                         <button type="submit" class="btn btn-primary px-4" <?php echo $id == 1 ? 'disabled' : ''; ?>>
                             <i class="fa-solid fa-floppy-disk me-2"></i>Save Role
                         </button>
@@ -133,7 +133,7 @@ function saveRole(e) {
     .then(response => response.json())
     .then(data => {
         if (data.status) {
-            window.location.href = '<?php echo BASE_URL; ?>/roles/index.php';
+            window.location.href = '<?php echo BASE_URL; ?>/roles/index';
         } else {
             Swal.fire({ icon: 'error', title: 'Failed', text: data.message, background: '#ffffff', color: '#0f172a' });
             submitBtn.disabled = false;

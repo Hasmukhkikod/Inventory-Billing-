@@ -74,7 +74,7 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
 <div class="container my-4 no-print text-end" style="max-width:800px;">
     <button class="btn btn-primary btn-sm" onclick="window.print();"><i class="fa-solid fa-print me-1"></i>Print</button>
     <button class="btn btn-danger btn-sm" onclick="downloadPDF();"><i class="fa-solid fa-file-pdf me-1"></i>PDF</button>
-    <a href="invoice_thermal.php?id=<?php echo $id; ?>" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>
+    <a href="invoice_thermal?id=<?php echo $id; ?>" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>
     <?php
     $waMsg = 'Invoice ' . $invoice['invoice_no'] . ' - Total: ' . Helpers::formatCurrency($invoice['grand_total']) . '. Thank you for your business!';
     ?>

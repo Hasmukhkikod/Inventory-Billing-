@@ -58,7 +58,7 @@ class ExpenseController {
         ", [(int)$id])->fetch();
         
         if (!$expense) {
-            header("Location: " . BASE_URL . "/expenses/index.php");
+            header("Location: " . BASE_URL . "/expenses/index");
             exit;
         }
         

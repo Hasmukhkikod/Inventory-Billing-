@@ -1,4 +1,23 @@
 RewriteEngine On
+
+# 1) If a page is visibly requested with .php in the address bar, redirect to
+#    the clean, extensionless version (permanent redirect, so bookmarks and
+#    links update). Skip /api/ - those are AJAX endpoints the app calls
+#    directly, never a browser-visible URL, and must keep responding at their
+#    exact .php path with no redirect hop.
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[\s?] [NC]
+RewriteCond %1 !^api/ [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+# 2) Transparently resolve a clean URL back to its real .php file server-side
+#    (covers standalone files like login.php and the per-module front-
+#    controller stub files like billing/form.php), so nothing else changes.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# Front-controller fallback for anything else (virtual root routes)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]

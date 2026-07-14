@@ -10,10 +10,10 @@
             <div class="panel-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark"><i class="fa-solid fa-file-invoice me-2"></i>Purchase Order Summary</h5>
                 <div class="d-flex gap-2">
-                    <a href="<?php echo BASE_URL; ?>/purchase_print.php?id=<?php echo $purchase['id']; ?>" target="_blank" class="btn btn-primary btn-sm">
+                    <a href="<?php echo BASE_URL; ?>/purchase_print?id=<?php echo $purchase['id']; ?>" target="_blank" class="btn btn-primary btn-sm">
                         <i class="fa-solid fa-print me-1"></i> Print A4
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/purchases/index.php" class="btn btn-outline-secondary btn-sm">
+                    <a href="<?php echo BASE_URL; ?>/purchases/index" class="btn btn-outline-secondary btn-sm">
                         <i class="fa-solid fa-arrow-left me-1"></i> Back to List
                     </a>
                 </div>

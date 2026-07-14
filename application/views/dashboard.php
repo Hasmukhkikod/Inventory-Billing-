@@ -13,10 +13,10 @@
                 <p>Sales, cash flow, inventory pressure, and recent movement in one focused workspace.</p>
             </div>
             <div class="dashboard-hero-actions">
-                <a href="<?php echo BASE_URL; ?>/billing/form.php" class="btn btn-light">
+                <a href="<?php echo BASE_URL; ?>/billing/form" class="btn btn-light">
                     <i class="fa-solid fa-cash-register me-2"></i>New Invoice
                 </a>
-                <a href="<?php echo BASE_URL; ?>/billing/day_end.php" class="btn btn-outline-light">
+                <a href="<?php echo BASE_URL; ?>/billing/day_end" class="btn btn-outline-light">
                     <i class="fa-solid fa-chart-column me-2"></i>Day-End
                 </a>
             </div>
@@ -76,23 +76,23 @@
     </div>
 
     <div class="dashboard-actions mb-4">
-        <a href="<?php echo BASE_URL; ?>/billing/form.php" class="dashboard-action-card">
+        <a href="<?php echo BASE_URL; ?>/billing/form" class="dashboard-action-card">
             <i class="fa-solid fa-file-invoice-dollar"></i>
             <span>Invoice</span>
         </a>
-        <a href="<?php echo BASE_URL; ?>/quotations/form.php" class="dashboard-action-card">
+        <a href="<?php echo BASE_URL; ?>/quotations/form" class="dashboard-action-card">
             <i class="fa-solid fa-file-signature"></i>
             <span>Quotation</span>
         </a>
-        <a href="<?php echo BASE_URL; ?>/products/form.php" class="dashboard-action-card">
+        <a href="<?php echo BASE_URL; ?>/products/form" class="dashboard-action-card">
             <i class="fa-solid fa-box"></i>
             <span>Product</span>
         </a>
-        <a href="<?php echo BASE_URL; ?>/customers/index.php" class="dashboard-action-card">
+        <a href="<?php echo BASE_URL; ?>/customers/index" class="dashboard-action-card">
             <i class="fa-solid fa-user-group"></i>
             <span>Customers</span>
         </a>
-        <a href="<?php echo BASE_URL; ?>/reports/index.php" class="dashboard-action-card">
+        <a href="<?php echo BASE_URL; ?>/reports/index" class="dashboard-action-card">
             <i class="fa-solid fa-file-waveform"></i>
             <span>Reports</span>
         </a>
@@ -234,7 +234,7 @@
                         <span class="panel-kicker">Recent activity</span>
                         <h5 class="mb-0 text-dark"><i class="fa-solid fa-file-invoice me-2 text-indigo"></i>Recent Invoices</h5>
                     </div>
-                    <a href="<?php echo BASE_URL; ?>/billing/form.php" class="btn btn-sm btn-outline-secondary">New Invoice</a>
+                    <a href="<?php echo BASE_URL; ?>/billing/form" class="btn btn-sm btn-outline-secondary">New Invoice</a>
                 </div>
                 <div class="panel-body p-0">
                     <div class="table-responsive">

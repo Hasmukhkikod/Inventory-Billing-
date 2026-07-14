@@ -60,7 +60,7 @@ class UserController {
         ", [(int)$id])->fetch();
         
         if (!$user) {
-            header("Location: " . BASE_URL . "/users/index.php");
+            header("Location: " . BASE_URL . "/users/index");
             exit;
         }
         

@@ -91,7 +91,7 @@ class ReturnController {
         }
         
         if (!$return) {
-            header("Location: " . BASE_URL . "/returns/index.php");
+            header("Location: " . BASE_URL . "/returns/index");
             exit;
         }
 

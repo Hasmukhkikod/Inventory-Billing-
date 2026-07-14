@@ -15,7 +15,7 @@ $auth = new Auth($db);
 
 // If already logged in, redirect to Dashboard
 if ($auth->check()) {
-    header("Location: index.php");
+    header("Location: index");
     exit;
 }
 
@@ -71,8 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grovixo - System Authentication</title>
+    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/images/favicon.png?v=<?php echo Helpers::assetVersion('/assets/images/favicon.png'); ?>">
     <?php if ($loginSuccess): ?>
-    <meta http-equiv="refresh" content="1.5;url=index.php">
+    <meta http-equiv="refresh" content="1.5;url=index">
     <?php endif; ?>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -170,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <form action="login.php" method="POST" autocomplete="off">
+        <form action="login" method="POST" autocomplete="off">
             <?php echo Helpers::csrfField(); ?>
 
             <div class="mb-3">

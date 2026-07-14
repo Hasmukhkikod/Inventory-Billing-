@@ -52,7 +52,7 @@ class CustomerController {
         $customer = $db->query("SELECT * FROM customers WHERE id = ? LIMIT 1", [(int)$id])->fetch();
         
         if (!$customer) {
-            header("Location: " . BASE_URL . "/customers/index.php");
+            header("Location: " . BASE_URL . "/customers/index");
             exit;
         }
         

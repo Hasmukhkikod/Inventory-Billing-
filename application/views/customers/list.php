@@ -8,7 +8,7 @@
 <div class="panel-card">
     <div class="panel-header">
         <h5 class="mb-0 text-dark"><i class="fa-solid fa-users me-2 text-indigo"></i>Customer Directory</h5>
-        <a href="<?php echo BASE_URL; ?>/customers/form.php" class="btn btn-primary btn-sm" id="btn-add-customer">
+        <a href="<?php echo BASE_URL; ?>/customers/form" class="btn btn-primary btn-sm" id="btn-add-customer">
             <i class="fa-solid fa-user-plus me-1"></i> Add Customer
         </a>
     </div>
@@ -131,7 +131,7 @@ $(document).ready(function() {
                 data: 'customer_name',
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/customers/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/customers/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'mobile' },
@@ -154,13 +154,13 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     return `
                         <div class="btn-group">
-                            <a href="${BASE_URL}/customers/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="Statement Ledger">
+                            <a href="${BASE_URL}/customers/view?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="Statement Ledger">
                                 <i class="fa-solid fa-list-ul"></i> <span class="d-none d-md-inline">Statement</span>
                             </a>
                             <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-success btn-pay" data-id="${row.id}" data-name="${row.customer_name}" data-bal="${row.credit_balance}" title="Receive Payment" ${parseFloat(row.credit_balance) <= 0 ? 'disabled' : ''}>
                                 <i class="fa-solid fa-indian-rupee-sign"></i> <span class="d-none d-md-inline">Receive</span>
                             </button>
-                            <a href="${BASE_URL}/customers/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald" title="Edit customer">
+                            <a href="${BASE_URL}/customers/form?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald" title="Edit customer">
                                 <i class="fa-solid fa-pencil"></i>
                             </a>
                         </div>

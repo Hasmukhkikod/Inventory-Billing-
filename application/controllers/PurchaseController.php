@@ -58,7 +58,7 @@ class PurchaseController {
         ", [(int)$id])->fetch();
         
         if (!$purchase) {
-            header("Location: " . BASE_URL . "/purchases/index.php");
+            header("Location: " . BASE_URL . "/purchases/index");
             exit;
         }
 

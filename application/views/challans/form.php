@@ -12,7 +12,7 @@ $isEdit = !empty($challan);
         <nav class="text-muted small">Home / Delivery Challans / <?php echo $isEdit ? 'Edit' : 'Create'; ?></nav>
     </div>
     <div>
-        <a href="<?php echo BASE_URL; ?>/challans/index.php" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>Back to List</a>
+        <a href="<?php echo BASE_URL; ?>/challans/index" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>Back to List</a>
     </div>
 </div>
 
@@ -531,7 +531,7 @@ $(document).ready(function() {
                     Swal.fire({
                         icon: 'success', title: 'Challan Saved', text: res.message,
                         background: '#ffffff', color: '#1e293b'
-                    }).then(() => { window.location.href = BASE_URL + '/challans/view.php?id=' + (res.data.challan_id || editId); });
+                    }).then(() => { window.location.href = BASE_URL + '/challans/view?id=' + (res.data.challan_id || editId); });
                 } else {
                     Swal.fire({
                         icon: 'error', title: 'Error Saving Challan', text: res.message,

@@ -8,7 +8,7 @@
 <div class="panel-card">
     <div class="panel-header">
         <h5 class="mb-0 text-dark"><i class="fa-solid fa-truck me-2 text-indigo"></i>Delivery Challans</h5>
-        <a href="<?php echo BASE_URL; ?>/challans/form.php" class="btn btn-primary btn-sm">
+        <a href="<?php echo BASE_URL; ?>/challans/form" class="btn btn-primary btn-sm">
             <i class="fa-solid fa-plus me-1"></i> New Challan
         </a>
     </div>
@@ -70,7 +70,7 @@ $(document).ready(function() {
                 data: 'challan_no',
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/challans/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/challans/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'customer_name', render: d => d || '<span class="text-muted">Walk-in</span>' },
@@ -104,13 +104,13 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     let actions = `
                         <div class="btn-group">
-                            <a href="${BASE_URL}/challans/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
+                            <a href="${BASE_URL}/challans/view?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
                                 <i class="fa-solid fa-eye"></i>
                             </a>`;
 
                     if (row.challan_status !== 'CANCELLED' && row.challan_status !== 'DELIVERED') {
                         actions += `
-                            <a href="${BASE_URL}/challans/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Edit">
+                            <a href="${BASE_URL}/challans/form?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Edit">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </a>
                             <button class="btn btn-sm btn-outline-success py-1 px-2 btn-mark-delivered" data-id="${row.id}" title="Mark Delivered">

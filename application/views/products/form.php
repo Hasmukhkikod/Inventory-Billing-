@@ -12,7 +12,7 @@ $gstSlabs = explode(',', $compSettings['gst_slabs'] ?? '0,5,12,18,28');
         <h5 class="mb-0 text-indigo">
             <i class="fa-solid fa-box-open me-2"></i><?php echo $isEdit ? 'Edit Product Details' : 'Add New Product'; ?>
         </h5>
-        <a href="<?php echo BASE_URL; ?>/products/index.php" class="btn btn-outline-secondary btn-sm">
+        <a href="<?php echo BASE_URL; ?>/products/index" class="btn btn-outline-secondary btn-sm">
             <i class="fa-solid fa-arrow-left me-1"></i> Back to Inventory
         </a>
     </div>
@@ -133,7 +133,7 @@ $gstSlabs = explode(',', $compSettings['gst_slabs'] ?? '0,5,12,18,28');
             </div>
 
             <div class="mt-4 pt-3 border-top text-end">
-                <a href="<?php echo BASE_URL; ?>/products/index.php" class="btn btn-outline-secondary me-2">Cancel</a>
+                <a href="<?php echo BASE_URL; ?>/products/index" class="btn btn-outline-secondary me-2">Cancel</a>
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-circle-check me-1"></i><?php echo $isEdit ? 'Update Product' : 'Save Product'; ?>
                 </button>
@@ -236,7 +236,7 @@ $(document).ready(function() {
             success: function(res) {
                 if (res.status) {
                     Swal.fire({ icon: 'success', title: 'Saved', text: res.message, background: '#ffffff', color: '#0f172a' }).then(() => {
-                        window.location.href = BASE_URL + '/products/index.php';
+                        window.location.href = BASE_URL + '/products/index';
                     });
                 } else {
                     Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#ffffff', color: '#0f172a' });

@@ -173,7 +173,7 @@ class Auth {
             if ($this->isAjaxRequest()) {
                 Helpers::jsonResponse(false, "Session expired. Please log in again.");
             } else {
-                header("Location: login.php");
+                header("Location: " . BASE_URL . "/login");
                 exit;
             }
         }
@@ -183,7 +183,7 @@ class Auth {
                 header('HTTP/1.1 403 Forbidden');
                 Helpers::jsonResponse(false, "Unauthorized: You do not have permissions.");
             } else {
-                header("Location: index.php?error=unauthorized");
+                header("Location: " . BASE_URL . "/index?error=unauthorized");
                 exit;
             }
         }

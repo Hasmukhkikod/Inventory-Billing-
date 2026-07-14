@@ -63,7 +63,7 @@ class ChallanController {
         ", [(int)$id])->fetch();
 
         if (!$challan) {
-            header("Location: " . BASE_URL . "/challans/index.php");
+            header("Location: " . BASE_URL . "/challans/index");
             exit;
         }
 

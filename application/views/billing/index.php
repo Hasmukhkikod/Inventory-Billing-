@@ -9,10 +9,10 @@
     <div class="panel-header">
         <h5 class="mb-0 text-dark"><i class="fa-solid fa-file-invoice me-2 text-indigo"></i>Invoices Directory</h5>
         <div class="d-flex gap-2">
-            <a href="<?php echo BASE_URL; ?>/billing/day_end.php" class="btn btn-outline-secondary btn-sm">
+            <a href="<?php echo BASE_URL; ?>/billing/day_end" class="btn btn-outline-secondary btn-sm">
                 <i class="fa-solid fa-chart-column me-1"></i> Day-End Report
             </a>
-            <a href="<?php echo BASE_URL; ?>/billing/form.php" class="btn btn-primary btn-sm">
+            <a href="<?php echo BASE_URL; ?>/billing/form" class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-cash-register me-1"></i> Create Bill 
             </a>
         </div>
@@ -75,7 +75,7 @@ $(document).ready(function() {
                 data: 'invoice_no',
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/billing/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/billing/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             {
@@ -124,10 +124,10 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     return `
                         <div class="btn-group">
-                            <a href="${BASE_URL}/billing/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
+                            <a href="${BASE_URL}/billing/view?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
                                 <i class="fa-solid fa-eye"></i> View
                             </a>
-                            <a href="${BASE_URL}/invoice_print.php?id=${row.id}" target="_blank" class="btn btn-sm btn-outline-secondary py-1 px-2 text-dark" title="Print Invoice">
+                            <a href="${BASE_URL}/invoice_print?id=${row.id}" target="_blank" class="btn btn-sm btn-outline-secondary py-1 px-2 text-dark" title="Print Invoice">
                                 <i class="fa-solid fa-print"></i> Print
                             </a>
                         </div>

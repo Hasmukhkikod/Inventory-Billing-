@@ -15,7 +15,7 @@ $type = $_GET['type'] ?? 'SALES'; // SALES or PURCHASE
                     <i class="fa-solid fa-rotate-left me-2 text-indigo"></i>
                     Log <?php echo $type === 'SALES' ? 'Sales Return (Credit Note)' : 'Purchase Return (Debit Note)'; ?>
                 </h5>
-                <a href="<?php echo BASE_URL; ?>/returns/index.php" class="btn btn-sm btn-outline-secondary">
+                <a href="<?php echo BASE_URL; ?>/returns/index" class="btn btn-sm btn-outline-secondary">
                     <i class="fa-solid fa-arrow-left me-1"></i> Back to List
                 </a>
             </div>
@@ -289,7 +289,7 @@ $(document).ready(function() {
                         background: '#ffffff', 
                         color: '#0f172a' 
                     }).then(() => {
-                        window.location.href = BASE_URL + '/returns/index.php';
+                        window.location.href = BASE_URL + '/returns/index';
                     });
                 } else {
                     Swal.fire({ 

@@ -12,7 +12,7 @@ $isEdit = !empty($purchase);
         <nav class="text-muted small">Home / Purchases / <?php echo $isEdit ? 'Edit' : 'New'; ?> Purchase Order</nav>
     </div>
     <div>
-        <a href="<?php echo BASE_URL; ?>/purchases/index.php" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>Back to List</a>
+        <a href="<?php echo BASE_URL; ?>/purchases/index" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-list me-1"></i>Back to List</a>
     </div>
 </div>
 
@@ -137,7 +137,7 @@ $isEdit = !empty($purchase);
                     <tr>
                         <td class="text-secondary">Flat Discount (&#8377;)</td>
                         <td class="text-end">
-                            <input type="number" step="0.01" min="0" class="form-control form-control-sm text-end d-inline-block" style="width:100px;" id="pur-discount-input" value="<?php echo $isEdit ? number_format((float)$purchase['discount'], 2, '.', '') : '0.00'; ?>">
+                            <input type="number" step="1" min="0" class="form-control form-control-sm text-end d-inline-block" style="width:100px;" id="pur-discount-input" value="<?php echo $isEdit ? number_format((float)$purchase['discount'], 2, '.', '') : '0.00'; ?>">
                         </td>
                     </tr>
                 </table>
@@ -452,14 +452,14 @@ $(document).ready(function() {
                     </td>
                     <td class="small">${item.hsn_code || '-'}</td>
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width:70px;" min="0.01">
+                        <input type="number" step="1" class="form-control form-control-sm item-qty-input" data-index="${index}" value="${item.qty}" style="width:70px;" min="0">
                     </td>
                     ${unitCell}
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-cost-input" data-index="${index}" value="${item.cost_price.toFixed(2)}" style="width:110px;" min="0">
+                        <input type="number" step="1" class="form-control form-control-sm item-cost-input" data-index="${index}" value="${item.cost_price.toFixed(2)}" style="width:110px;" min="0">
                     </td>
                     <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm item-gst-input" data-index="${index}" value="${item.gst_percentage}" style="width:70px;" min="0">
+                        <input type="number" step="1" class="form-control form-control-sm item-gst-input" data-index="${index}" value="${item.gst_percentage}" style="width:70px;" min="0">
                     </td>
                     <td class="text-end fw-bold font-monospace">&#8377;${row_total.toFixed(2)}</td>
                     <td class="text-center">
@@ -557,7 +557,7 @@ $(document).ready(function() {
                     Swal.fire({
                         icon: 'success', title: editId > 0 ? 'Purchase Order Updated' : 'Purchase Order Logged', text: res.message,
                         background: '#ffffff', color: '#1e293b'
-                    }).then(() => { window.location.href = BASE_URL + '/purchases/index.php'; });
+                    }).then(() => { window.location.href = BASE_URL + '/purchases/index'; });
                 } else {
                     Swal.fire({
                         icon: 'error', title: 'Error Saving PO', text: res.message,

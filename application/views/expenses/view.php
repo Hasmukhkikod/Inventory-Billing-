@@ -10,10 +10,10 @@
             <div class="panel-header">
                 <h5 class="mb-0 text-indigo"><i class="fa-solid fa-receipt me-2"></i>Expense Record Voucher</h5>
                 <div>
-                    <a href="<?php echo BASE_URL; ?>/expenses/form.php?id=<?php echo $expense['id']; ?>" class="btn btn-sm btn-outline-secondary text-emerald me-2">
+                    <a href="<?php echo BASE_URL; ?>/expenses/form?id=<?php echo $expense['id']; ?>" class="btn btn-sm btn-outline-secondary text-emerald me-2">
                         <i class="fa-solid fa-pencil me-1"></i> Edit
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/expenses/index.php" class="btn btn-sm btn-outline-secondary">
+                    <a href="<?php echo BASE_URL; ?>/expenses/index" class="btn btn-sm btn-outline-secondary">
                         <i class="fa-solid fa-arrow-left me-1"></i> Back
                     </a>
                 </div>

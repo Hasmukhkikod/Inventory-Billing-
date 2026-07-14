@@ -8,7 +8,7 @@
 <div class="panel-card">
     <div class="panel-header">
         <h5 class="mb-0 text-dark"><i class="fa-solid fa-cart-flatbed me-2 text-indigo"></i>Purchases Directory</h5>
-        <a href="<?php echo BASE_URL; ?>/purchases/form.php" class="btn btn-primary btn-sm">
+        <a href="<?php echo BASE_URL; ?>/purchases/form" class="btn btn-primary btn-sm">
             <i class="fa-solid fa-plus me-1"></i> New Purchase Order
         </a>
     </div>
@@ -73,7 +73,7 @@ $(document).ready(function() {
                 data: 'purchase_no',
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/purchases/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/purchases/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'supplier_name' },
@@ -117,10 +117,10 @@ $(document).ready(function() {
                 orderable: false,
                 render: function(data, type, row) {
                     let actions = `<div class="btn-group">
-                            <a href="${BASE_URL}/purchases/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
+                            <a href="${BASE_URL}/purchases/view?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
-                            <a href="${BASE_URL}/purchases/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Edit">
+                            <a href="${BASE_URL}/purchases/form?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Edit">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </a>
                         </div>`;

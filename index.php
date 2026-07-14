@@ -44,50 +44,50 @@ use App\Models\Auth;
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     // Dashboard
     $r->addRoute('GET', '/', [DashboardController::class, 'index']);
-    $r->addRoute('GET', '/index.php', [DashboardController::class, 'index']);
+    $r->addRoute('GET', '/index', [DashboardController::class, 'index']);
 
     // Modules (Index)
-    $r->addRoute('GET', '/products/index.php', [ProductController::class, 'index']);
-    $r->addRoute('GET', '/purchases/index.php', [PurchaseController::class, 'index']);
-    $r->addRoute('GET', '/billing/index.php', [BillingController::class, 'index']);
-    $r->addRoute('GET', '/customers/index.php', [CustomerController::class, 'index']);
-    $r->addRoute('GET', '/suppliers/index.php', [SupplierController::class, 'index']);
-    $r->addRoute('GET', '/expenses/index.php', [ExpenseController::class, 'index']);
-    $r->addRoute('GET', '/returns/index.php', [ReturnController::class, 'index']);
-    $r->addRoute('GET', '/reports/index.php', [ReportsController::class, 'index']);
-    $r->addRoute('GET', '/users/index.php', [UserController::class, 'index']);
-    $r->addRoute('GET', '/roles/index.php', [RoleController::class, 'index']);
-    $r->addRoute('GET', '/settings/index.php', [SettingsController::class, 'index']);
-    $r->addRoute('GET', '/quotations/index.php', [QuotationController::class, 'index']);
-    $r->addRoute('GET', '/challans/index.php', [ChallanController::class, 'index']);
+    $r->addRoute('GET', '/products/index', [ProductController::class, 'index']);
+    $r->addRoute('GET', '/purchases/index', [PurchaseController::class, 'index']);
+    $r->addRoute('GET', '/billing/index', [BillingController::class, 'index']);
+    $r->addRoute('GET', '/customers/index', [CustomerController::class, 'index']);
+    $r->addRoute('GET', '/suppliers/index', [SupplierController::class, 'index']);
+    $r->addRoute('GET', '/expenses/index', [ExpenseController::class, 'index']);
+    $r->addRoute('GET', '/returns/index', [ReturnController::class, 'index']);
+    $r->addRoute('GET', '/reports/index', [ReportsController::class, 'index']);
+    $r->addRoute('GET', '/users/index', [UserController::class, 'index']);
+    $r->addRoute('GET', '/roles/index', [RoleController::class, 'index']);
+    $r->addRoute('GET', '/settings/index', [SettingsController::class, 'index']);
+    $r->addRoute('GET', '/quotations/index', [QuotationController::class, 'index']);
+    $r->addRoute('GET', '/challans/index', [ChallanController::class, 'index']);
 
     // Modules (Form)
-    $r->addRoute('GET', '/products/form.php', [ProductController::class, 'form']);
-    $r->addRoute('GET', '/purchases/form.php', [PurchaseController::class, 'form']);
-    $r->addRoute('GET', '/billing/form.php', [BillingController::class, 'form']);
-    $r->addRoute('GET', '/customers/form.php', [CustomerController::class, 'form']);
-    $r->addRoute('GET', '/suppliers/form.php', [SupplierController::class, 'form']);
-    $r->addRoute('GET', '/expenses/form.php', [ExpenseController::class, 'form']);
-    $r->addRoute('GET', '/returns/form.php', [ReturnController::class, 'form']);
-    $r->addRoute('GET', '/users/form.php', [UserController::class, 'form']);
-    $r->addRoute('GET', '/roles/form.php', [RoleController::class, 'form']);
-    $r->addRoute('GET', '/quotations/form.php', [QuotationController::class, 'form']);
-    $r->addRoute('GET', '/challans/form.php', [ChallanController::class, 'form']);
+    $r->addRoute('GET', '/products/form', [ProductController::class, 'form']);
+    $r->addRoute('GET', '/purchases/form', [PurchaseController::class, 'form']);
+    $r->addRoute('GET', '/billing/form', [BillingController::class, 'form']);
+    $r->addRoute('GET', '/customers/form', [CustomerController::class, 'form']);
+    $r->addRoute('GET', '/suppliers/form', [SupplierController::class, 'form']);
+    $r->addRoute('GET', '/expenses/form', [ExpenseController::class, 'form']);
+    $r->addRoute('GET', '/returns/form', [ReturnController::class, 'form']);
+    $r->addRoute('GET', '/users/form', [UserController::class, 'form']);
+    $r->addRoute('GET', '/roles/form', [RoleController::class, 'form']);
+    $r->addRoute('GET', '/quotations/form', [QuotationController::class, 'form']);
+    $r->addRoute('GET', '/challans/form', [ChallanController::class, 'form']);
 
     // Modules (View)
-    $r->addRoute('GET', '/products/view.php', [ProductController::class, 'view']);
-    $r->addRoute('GET', '/purchases/view.php', [PurchaseController::class, 'view']);
-    $r->addRoute('GET', '/billing/view.php', [BillingController::class, 'view']);
-    $r->addRoute('GET', '/customers/view.php', [CustomerController::class, 'view']);
-    $r->addRoute('GET', '/suppliers/view.php', [SupplierController::class, 'view']);
-    $r->addRoute('GET', '/expenses/view.php', [ExpenseController::class, 'view']);
-    $r->addRoute('GET', '/returns/view.php', [ReturnController::class, 'view']);
-    $r->addRoute('GET', '/quotations/view.php', [QuotationController::class, 'view']);
-    $r->addRoute('GET', '/challans/view.php', [ChallanController::class, 'view']);
+    $r->addRoute('GET', '/products/view', [ProductController::class, 'view']);
+    $r->addRoute('GET', '/purchases/view', [PurchaseController::class, 'view']);
+    $r->addRoute('GET', '/billing/view', [BillingController::class, 'view']);
+    $r->addRoute('GET', '/customers/view', [CustomerController::class, 'view']);
+    $r->addRoute('GET', '/suppliers/view', [SupplierController::class, 'view']);
+    $r->addRoute('GET', '/expenses/view', [ExpenseController::class, 'view']);
+    $r->addRoute('GET', '/returns/view', [ReturnController::class, 'view']);
+    $r->addRoute('GET', '/quotations/view', [QuotationController::class, 'view']);
+    $r->addRoute('GET', '/challans/view', [ChallanController::class, 'view']);
 
     // Day-End Report
-    $r->addRoute('GET', '/billing/day_end.php', [BillingController::class, 'dayEnd']);
-    $r->addRoute('GET', '/users/view.php', [UserController::class, 'view']);
+    $r->addRoute('GET', '/billing/day_end', [BillingController::class, 'dayEnd']);
+    $r->addRoute('GET', '/users/view', [UserController::class, 'view']);
 });
 
 // Fetch method and URI from somewhere
@@ -108,6 +108,9 @@ switch ($routeInfo[0]) {
         // Fallback for not-yet-refactored endpoints (temporary during migration)
         if ($uri !== '/' && file_exists(__DIR__ . $uri)) {
             require __DIR__ . $uri;
+        } else if ($uri !== '/' && file_exists(__DIR__ . $uri . '.php')) {
+            // Clean URL (extension hidden) for a standalone file, e.g. /login -> login.php
+            require __DIR__ . $uri . '.php';
         } else if ($uri !== '/' && file_exists(__DIR__ . $uri . '/index.php')) {
             require __DIR__ . $uri . '/index.php';
         } else {

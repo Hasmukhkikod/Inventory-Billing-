@@ -10,7 +10,7 @@ $isEdit = !empty($expense);
         <h5 class="mb-0 text-indigo">
             <i class="fa-solid fa-receipt me-2"></i><?php echo $isEdit ? 'Edit Expense Details' : 'Log Business Expense'; ?>
         </h5>
-        <a href="<?php echo BASE_URL; ?>/expenses/index.php" class="btn btn-outline-secondary btn-sm">
+        <a href="<?php echo BASE_URL; ?>/expenses/index" class="btn btn-outline-secondary btn-sm">
             <i class="fa-solid fa-arrow-left me-1"></i> Back to Expenses
         </a>
     </div>
@@ -73,7 +73,7 @@ $isEdit = !empty($expense);
             </div>
             
             <div class="mt-4 pt-3 border-top border-secondary text-end">
-                <a href="<?php echo BASE_URL; ?>/expenses/index.php" class="btn btn-outline-secondary me-2">Cancel</a>
+                <a href="<?php echo BASE_URL; ?>/expenses/index" class="btn btn-outline-secondary me-2">Cancel</a>
                 <button type="submit" class="btn btn-primary">
                     <i class="fa-solid fa-circle-check me-1"></i><?php echo $isEdit ? 'Update Expense' : 'Save Expense'; ?>
                 </button>
@@ -168,7 +168,7 @@ $(document).ready(function() {
                         background: '#ffffff', 
                         color: '#0f172a' 
                     }).then(() => {
-                        window.location.href = BASE_URL + '/expenses/index.php';
+                        window.location.href = BASE_URL + '/expenses/index';
                     });
                 } else {
                     Swal.fire({ 

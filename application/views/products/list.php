@@ -34,7 +34,7 @@
             </li>
         </ul>
         <div>
-            <a href="<?php echo BASE_URL; ?>/products/form.php" class="btn btn-primary btn-sm">
+            <a href="<?php echo BASE_URL; ?>/products/form" class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-plus me-1"></i> Add Product
             </a>
         </div>
@@ -322,7 +322,7 @@ $(document).ready(function() {
                 data: 'product_name', 
                 className: 'fw-semibold',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/products/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/products/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'sku' },
@@ -373,7 +373,7 @@ $(document).ready(function() {
                             <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo btn-adjust" data-id="${row.id}" data-name="${row.product_name}" title="Adjust Stock">
                                 <i class="fa-solid fa-sliders"></i>
                             </button>
-                            <a href="${BASE_URL}/products/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald" title="Edit Product">
+                            <a href="${BASE_URL}/products/form?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald" title="Edit Product">
                                 <i class="fa-solid fa-pencil"></i>
                             </a>
                             <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-danger btn-delete" data-id="${row.id}" title="Delete Product">

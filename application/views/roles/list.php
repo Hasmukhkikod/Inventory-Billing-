@@ -10,10 +10,10 @@
                     </li>
                 </ul>
                 <div class="d-flex gap-2">
-                    <a href="<?php echo BASE_URL; ?>/users/index.php" class="btn btn-outline-secondary btn-sm">
+                    <a href="<?php echo BASE_URL; ?>/users/index" class="btn btn-outline-secondary btn-sm">
                         <i class="fa-solid fa-arrow-left me-1"></i> Back to Users
                     </a>
-                    <a href="<?php echo BASE_URL; ?>/roles/form.php" class="btn btn-primary btn-sm btn-action-add">
+                    <a href="<?php echo BASE_URL; ?>/roles/form" class="btn btn-primary btn-sm btn-action-add">
                         <i class="fa-solid fa-plus me-1"></i> Create Role
                     </a>
                 </div>
@@ -59,7 +59,7 @@
                                         </td>
                                         <td class="text-end">
                                             <?php if ($role['id'] != 1): ?>
-                                                <a href="<?php echo BASE_URL; ?>/roles/form.php?id=<?php echo $role['id']; ?>" class="btn btn-sm btn-light text-primary border-0 me-1" title="Edit Role">
+                                                <a href="<?php echo BASE_URL; ?>/roles/form?id=<?php echo $role['id']; ?>" class="btn btn-sm btn-light text-primary border-0 me-1" title="Edit Role">
                                                     <i class="fa-solid fa-pen-to-square"></i>
                                                 </a>
                                                 <button type="button" class="btn btn-sm btn-light text-danger border-0 btn-delete" data-id="<?php echo $role['id']; ?>" title="Delete Role">

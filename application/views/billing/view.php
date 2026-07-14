@@ -12,13 +12,13 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
             <div class="panel-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-indigo"><i class="fa-solid fa-file-invoice me-2"></i>Invoice Details</h5>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="<?php echo BASE_URL; ?>/invoice_print.php?id=<?php echo $invoice['id']; ?>" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-print me-1"></i>Print A4</a>
-                    <a href="<?php echo BASE_URL; ?>/invoice_thermal.php?id=<?php echo $invoice['id']; ?>" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>
+                    <a href="<?php echo BASE_URL; ?>/invoice_print?id=<?php echo $invoice['id']; ?>" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-print me-1"></i>Print A4</a>
+                    <a href="<?php echo BASE_URL; ?>/invoice_thermal?id=<?php echo $invoice['id']; ?>" target="_blank" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-receipt me-1"></i>Thermal</a>
                     <?php
                     $waMsg = 'Invoice ' . $invoice['invoice_no'] . ' - Total: ' . \App\Models\Helpers::formatCurrency($invoice['grand_total']) . '. Thank you!';
                     ?>
                     <a href="https://api.whatsapp.com/send?text=<?php echo urlencode($waMsg); ?>" target="_blank" class="btn btn-success btn-sm"><i class="fa-brands fa-whatsapp me-1"></i>WhatsApp</a>
-                    <a href="<?php echo BASE_URL; ?>/billing/index.php" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-arrow-left me-1"></i>Back</a>
+                    <a href="<?php echo BASE_URL; ?>/billing/index" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-arrow-left me-1"></i>Back</a>
                 </div>
             </div>
         </div>

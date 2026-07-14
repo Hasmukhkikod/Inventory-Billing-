@@ -139,7 +139,7 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
 
     <div id="no-printer-card" style="display:none; max-width:360px; margin:0 auto 16px; padding:16px 20px; border:1px solid #fde68a; border-radius:10px; background:#fffbeb; text-align:center; font-size:13px; color:#92400e;">
         No printer configured yet.
-        <a href="<?php echo BASE_URL; ?>/settings/index.php" target="_blank" style="color:#4f46e5;">Add one in Printer Settings</a>,
+        <a href="<?php echo BASE_URL; ?>/settings/index" target="_blank" style="color:#4f46e5;">Add one in Printer Settings</a>,
         or print this once using the options below.
     </div>
 

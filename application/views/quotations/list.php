@@ -8,7 +8,7 @@
 <div class="panel-card">
     <div class="panel-header">
         <h5 class="mb-0 text-dark"><i class="fa-solid fa-file-lines me-2 text-indigo"></i>Quotations & Estimates</h5>
-        <a href="<?php echo BASE_URL; ?>/quotations/form.php" class="btn btn-primary btn-sm">
+        <a href="<?php echo BASE_URL; ?>/quotations/form" class="btn btn-primary btn-sm">
             <i class="fa-solid fa-plus me-1"></i> Create Quotation
         </a>
     </div>
@@ -72,7 +72,7 @@ $(document).ready(function() {
                 data: 'quotation_no',
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/quotations/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/quotations/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             {
@@ -121,14 +121,14 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     let actions = `
                         <div class="btn-group">
-                            <a href="${BASE_URL}/quotations/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
+                            <a href="${BASE_URL}/quotations/view?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="View details">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
                     `;
 
                     if (row.status !== 'CONVERTED') {
                         actions += `
-                            <a href="${BASE_URL}/quotations/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Edit">
+                            <a href="${BASE_URL}/quotations/form?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Edit">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </a>
                         `;
@@ -228,7 +228,7 @@ $(document).ready(function() {
                                 timer: 1500,
                                 showConfirmButton: false
                             }).then(() => {
-                                window.location.href = BASE_URL + '/billing/form.php';
+                                window.location.href = BASE_URL + '/billing/form';
                             });
                         } else {
                             Swal.fire({ icon: 'error', title: 'Error', text: res.message, background: '#151e30', color: '#f3f4f6' });

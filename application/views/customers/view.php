@@ -10,7 +10,7 @@
         <div class="panel-card h-100">
             <div class="panel-header">
                 <h6 class="mb-0 text-indigo"><i class="fa-solid fa-circle-info me-2"></i>Customer Profile</h6>
-                <a href="<?php echo BASE_URL; ?>/customers/form.php?id=<?php echo $customer['id']; ?>" class="btn btn-sm btn-outline-secondary text-emerald py-1">
+                <a href="<?php echo BASE_URL; ?>/customers/form?id=<?php echo $customer['id']; ?>" class="btn btn-sm btn-outline-secondary text-emerald py-1">
                     <i class="fa-solid fa-pencil me-1"></i> Edit
                 </a>
             </div>

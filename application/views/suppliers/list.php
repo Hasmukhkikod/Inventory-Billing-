@@ -8,7 +8,7 @@
 <div class="panel-card">
     <div class="panel-header">
         <h5 class="mb-0 text-dark"><i class="fa-solid fa-truck-field me-2 text-indigo"></i>Supplier Directory</h5>
-        <a href="<?php echo BASE_URL; ?>/suppliers/form.php" class="btn btn-primary btn-sm" id="btn-add-supplier">
+        <a href="<?php echo BASE_URL; ?>/suppliers/form" class="btn btn-primary btn-sm" id="btn-add-supplier">
             <i class="fa-solid fa-plus me-1"></i> Add Supplier
         </a>
     </div>
@@ -132,7 +132,7 @@ $(document).ready(function() {
                 data: 'supplier_name',
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/suppliers/view.php?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<a href="${BASE_URL}/suppliers/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             { data: 'contact_person', defaultContent: '-' },
@@ -156,13 +156,13 @@ $(document).ready(function() {
                 render: function(data, type, row) {
                     return `
                         <div class="btn-group">
-                            <a href="${BASE_URL}/suppliers/view.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="Statement Ledger">
+                            <a href="${BASE_URL}/suppliers/view?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" title="Statement Ledger">
                                 <i class="fa-solid fa-list-ul"></i> <span class="d-none d-md-inline">Statement</span>
                             </a>
                             <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-success btn-pay" data-id="${row.id}" data-name="${row.supplier_name}" data-bal="${row.outstanding_balance}" title="Record Payment Paid" ${parseFloat(row.outstanding_balance) <= 0 ? 'disabled' : ''}>
                                 <i class="fa-solid fa-hand-holding-dollar"></i> <span class="d-none d-md-inline">Pay</span>
                             </button>
-                            <a href="${BASE_URL}/suppliers/form.php?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald" title="Edit supplier">
+                            <a href="${BASE_URL}/suppliers/form?id=${row.id}" class="btn btn-sm btn-outline-secondary py-1 px-2 text-emerald" title="Edit supplier">
                                 <i class="fa-solid fa-pencil"></i>
                             </a>
                         </div>
