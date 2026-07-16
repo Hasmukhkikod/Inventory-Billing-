@@ -260,7 +260,6 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
                     </h4>
                 <?php endif; ?>
             </div>
-            <?php if ($isDashboard): ?>
             <div class="global-search-container global-search-container-polished mx-2 flex-grow-1 flex-sm-grow-0">
                 <div class="input-group global-search-input-group">
                     <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
@@ -269,7 +268,6 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
                 <span class="global-search-kbd d-none d-xl-inline-flex">/</span>
                 <div class="global-search-results d-none" id="global-search-results-box"></div>
             </div>
-            <?php endif; ?>
             <div class="d-flex align-items-center gap-3">
                 <?php if ($isDashboard): ?>
                 <div class="dash-datetime-card align-items-center">
@@ -303,7 +301,10 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
                         <span class="notification-badge d-none" id="notification-badge-count">0</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow border notification-dropdown p-2" aria-labelledby="notificationDropdownBtn" id="notification-dropdown-box">
-                        <li class="dropdown-header text-uppercase text-secondary fw-semibold border-bottom pb-2 mb-2" style="font-size: 0.75rem;">System Alerts</li>
+                        <li class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                            <span class="text-uppercase text-secondary fw-semibold" style="font-size: 0.75rem;">System Alerts</span>
+                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none d-none" id="btn-clear-all-notifications" style="font-size: 0.72rem;">Clear All</button>
+                        </li>
                         <div id="notification-list-content" style="max-height: 250px; overflow-y: auto;">
                             <li class="text-center py-3 text-secondary small">No pending alerts</li>
                         </div>
@@ -442,6 +443,25 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             });
 
             // 2. Fetch Notifications Bell Updates
+            // Most alerts here (low stock, payment due, backup failed, GST
+            // due, today's reminder) are recomputed fresh from live data on
+            // every list() call - they aren't rows with a persisted "read"
+            // flag, so marking them read server-side doesn't stop them
+            // reappearing on the next refresh as long as the underlying
+            // condition is still true. Dismissal is tracked client-side
+            // (per browser) instead, and filtered out of what's rendered -
+            // real, DB-backed notifications still also get marked read
+            // server-side so other sessions/devices see them as read too.
+            const DISMISSED_KEY = 'grovixo_dismissed_notifications';
+            function getDismissedIds() {
+                try { return JSON.parse(localStorage.getItem(DISMISSED_KEY) || '[]'); } catch (e) { return []; }
+            }
+            function dismissIds(ids) {
+                const current = new Set(getDismissedIds());
+                ids.forEach(id => current.add(String(id)));
+                localStorage.setItem(DISMISSED_KEY, JSON.stringify(Array.from(current)));
+            }
+
             function loadNotifications() {
                 $.ajax({
                     url: BASE_URL + '/api/notifications.php?action=list',
@@ -449,34 +469,43 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
                     dataType: 'json',
                     success: function(res) {
                         if (res.status) {
+                            const dismissed = new Set(getDismissedIds());
+                            const alerts = res.data.alerts.filter(item => !dismissed.has(String(item.id)));
+
                             const badge = $("#notification-badge-count");
-                            const count = res.data.count;
-                            
-                            if (count > 0) {
-                                badge.text(count).removeClass('d-none');
+                            if (alerts.length > 0) {
+                                badge.text(alerts.length).removeClass('d-none');
                             } else {
                                 badge.addClass('d-none');
                             }
+                            $("#btn-clear-all-notifications").toggleClass('d-none', alerts.length === 0);
 
                             const container = $("#notification-list-content");
                             container.empty();
-                            
-                            if (res.data.alerts.length === 0) {
+
+                            if (alerts.length === 0) {
                                 container.append('<li class="text-center py-3 text-secondary small">No pending alerts</li>');
                             } else {
-                                res.data.alerts.forEach(function(item) {
-                                    let icon = '<i class="fa-solid fa-circle-info text-primary me-2"></i>';
-                                    if (item.type === 'STOCK') {
-                                        icon = '<i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>';
-                                    }
+                                const iconByType = {
+                                    STOCK: 'fa-solid fa-triangle-exclamation text-warning',
+                                    PAYMENT: 'fa-solid fa-indian-rupee-sign text-rose',
+                                    SYSTEM: 'fa-solid fa-database text-rose',
+                                    TAX: 'fa-solid fa-file-invoice text-indigo',
+                                    INFO: 'fa-solid fa-circle-info text-primary'
+                                };
+                                alerts.forEach(function(item) {
+                                    const iconClass = iconByType[item.type] || iconByType.INFO;
                                     container.append(`
-                                        <li class="px-3 py-2 border-bottom notification-item" data-id="${item.id}" style="cursor: pointer; list-style: none;">
+                                        <li class="px-3 py-2 border-bottom notification-item" data-id="${item.id}" style="list-style: none;">
                                             <div class="d-flex align-items-start">
-                                                ${icon}
-                                                <div>
-                                                    <div class="fw-semibold text-white small" style="font-size:0.8rem;">${item.title}</div>
+                                                <i class="${iconClass} me-2 mt-1"></i>
+                                                <div class="flex-grow-1" style="cursor: pointer;">
+                                                    <div class="fw-semibold small" style="font-size:0.8rem; color: var(--text-primary);">${item.title}</div>
                                                     <div class="text-secondary" style="font-size:0.75rem;">${item.message}</div>
                                                 </div>
+                                                <button type="button" class="btn btn-sm btn-link p-0 ms-2 text-secondary notification-dismiss-btn" data-id="${item.id}" title="Dismiss">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </button>
                                             </div>
                                         </li>
                                     `);
@@ -487,27 +516,41 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
                 });
             }
 
+            function dismissNotification(id, $li) {
+                dismissIds([id]);
+                $.post(BASE_URL + '/api/notifications.php?action=mark_read', {
+                    id: id, csrf_token: $('meta[name="csrf-token"]').attr('content')
+                }, null, 'json');
+                if ($li && $li.length) {
+                    $li.slideUp(function () { $li.remove(); loadNotifications(); });
+                } else {
+                    loadNotifications();
+                }
+            }
+
             loadNotifications();
             setInterval(loadNotifications, 30000); // Polling count alerts every 30s
 
-            // Mark notifications read
-            $("#notification-list-content").on('click', '.notification-item', function() {
-                const id = $(this).data('id');
-                const self = $(this);
-                $.ajax({
-                    url: BASE_URL + '/api/notifications.php?action=mark_read',
-                    type: 'POST',
-                    data: { id: id },
-                    dataType: 'json',
-                    success: function(res) {
-                        if (res.status) {
-                            self.slideUp(function() { 
-                                self.remove();
-                                loadNotifications();
-                            });
-                        }
-                    }
-                });
+            // Dismiss a single alert (click the row, or its X button)
+            $("#notification-list-content").on('click', '.notification-item', function (e) {
+                if ($(e.target).closest('.notification-dismiss-btn').length) return; // handled below
+                dismissNotification($(this).data('id'), $(this));
+            });
+            $("#notification-list-content").on('click', '.notification-dismiss-btn', function (e) {
+                e.stopPropagation();
+                dismissNotification($(this).data('id'), $(this).closest('.notification-item'));
+            });
+
+            // Clear all currently-shown alerts
+            $("#btn-clear-all-notifications").on('click', function (e) {
+                e.stopPropagation();
+                const ids = $("#notification-list-content .notification-item").map(function () { return $(this).data('id'); }).get();
+                if (!ids.length) return;
+                dismissIds(ids);
+                $.post(BASE_URL + '/api/notifications.php?action=mark_all_read', {
+                    csrf_token: $('meta[name="csrf-token"]').attr('content')
+                }, null, 'json');
+                loadNotifications();
             });
         });
         </script>

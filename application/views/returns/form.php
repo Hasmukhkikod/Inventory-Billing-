@@ -13,7 +13,7 @@ $type = $_GET['type'] ?? 'SALES'; // SALES or PURCHASE
             <div class="panel-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark">
                     <i class="fa-solid fa-rotate-left me-2 text-indigo"></i>
-                    Log <?php echo $type === 'SALES' ? 'Sales Return (Credit Note)' : 'Purchase Return (Debit Note)'; ?>
+                    New <?php echo $type === 'SALES' ? 'Sales Return (Credit Note)' : 'Purchase Return (Debit Note)'; ?>
                 </h5>
                 <a href="<?php echo BASE_URL; ?>/returns/index" class="btn btn-sm btn-outline-secondary">
                     <i class="fa-solid fa-arrow-left me-1"></i> Back to List
@@ -282,22 +282,22 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(res) {
                 if (res.status) {
-                    Swal.fire({ 
-                        icon: 'success', 
-                        title: 'Return Logged successfully', 
-                        text: res.message, 
-                        background: '#ffffff', 
-                        color: '#0f172a' 
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Return Saved Successfully',
+                        text: res.message,
+                        background: '#ffffff',
+                        color: '#0f172a'
                     }).then(() => {
                         window.location.href = BASE_URL + '/returns/index';
                     });
                 } else {
-                    Swal.fire({ 
-                        icon: 'error', 
-                        title: 'Error Logging Return', 
-                        text: res.message, 
-                        background: '#ffffff', 
-                        color: '#0f172a' 
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed to Save Return',
+                        text: res.message,
+                        background: '#ffffff',
+                        color: '#0f172a'
                     });
                 }
             }

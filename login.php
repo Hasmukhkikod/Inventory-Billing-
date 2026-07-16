@@ -187,6 +187,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
                     <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword" style="border-color: #dee2e6; background-color: #fff; color: #6c757d;">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
                 </div>
             </div>
 
@@ -213,6 +216,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 content.style.opacity = '1';
                 content.style.transform = 'translateY(0)';
             }, 400);
+        }
+
+        // Password visibility toggle
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        if (togglePassword && password) {
+            togglePassword.addEventListener('click', function () {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
         }
     });
 </script>

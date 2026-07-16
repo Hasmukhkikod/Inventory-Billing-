@@ -21,10 +21,10 @@
         </ul>
         <div class="d-flex gap-2">
             <a href="<?php echo BASE_URL; ?>/returns/form?type=SALES" class="btn btn-outline-primary btn-sm">
-                <i class="fa-solid fa-plus me-1"></i> Log Sales Return
+                <i class="fa-solid fa-plus me-1"></i> New Sales Return
             </a>
             <a href="<?php echo BASE_URL; ?>/returns/form?type=PURCHASE" class="btn btn-outline-secondary btn-sm">
-                <i class="fa-solid fa-plus me-1"></i> Log Purchase Return
+                <i class="fa-solid fa-plus me-1"></i> New Purchase Return
             </a>
         </div>
     </div>

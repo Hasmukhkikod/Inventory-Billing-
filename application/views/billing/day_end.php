@@ -4,9 +4,9 @@
  */
 ?>
 <div class="panel-card mb-4">
-    <div class="panel-header">
-        <h5 class="mb-0 text-dark"><i class="fa-solid fa-cash-register me-2 text-indigo"></i>Day-End Cash Register Report</h5>
-        <div class="d-flex flex-wrap gap-2 align-items-center row-gap-2">
+    <div class="panel-header day-end-header">
+        <h5 class="mb-0 text-dark"><i class="fa-solid fa-cash-register me-2 text-indigo"></i><span class="d-none d-sm-inline">Day-End Cash Register Report</span><span class="d-inline d-sm-none">Day-End Report</span></h5>
+        <div class="d-flex gap-2 align-items-center row-gap-2 day-end-header-controls">
             <input type="date" class="form-control form-control-sm" id="day-end-date" value="<?php echo date('Y-m-d'); ?>" style="max-width:160px;">
             <button class="btn btn-primary btn-sm" id="btn-load-day-end"><i class="fa-solid fa-sync me-1"></i>Load</button>
             <button class="btn btn-outline-secondary btn-sm" onclick="window.print();"><i class="fa-solid fa-print me-1"></i>Print</button>

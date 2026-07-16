@@ -19,6 +19,9 @@
                 <a href="<?php echo BASE_URL; ?>/billing/day_end" class="btn btn-outline-light">
                     <i class="fa-solid fa-chart-column me-2"></i>Day-End
                 </a>
+                <button type="button" class="btn btn-outline-light" onclick="openInventoryAlerts()">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Inventory Alerts
+                </button>
             </div>
         </div>
 
@@ -291,5 +294,161 @@
         </div>
     </div>
 </section>
+
+<!-- Inventory Alerts Modal -->
+<div class="modal fade" id="inventoryAlertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header border-0 bg-light-warning">
+                <h5 class="modal-title text-dark">
+                    <i class="fa-solid fa-bell-concierge text-warning me-2"></i>Inventory Intelligence
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <ul class="nav nav-tabs nav-justified px-3 pt-3 mb-0 border-bottom-0" id="invAlertTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-semibold" id="low-stock-tab" data-bs-toggle="tab" data-bs-target="#low-stock-pane" type="button" role="tab">Low Stock</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="out-stock-tab" data-bs-toggle="tab" data-bs-target="#out-stock-pane" type="button" role="tab">Out of Stock</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="expiry-tab" data-bs-toggle="tab" data-bs-target="#expiry-pane" type="button" role="tab">Expiry Soon</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="fast-tab" data-bs-toggle="tab" data-bs-target="#fast-pane" type="button" role="tab">Fast Moving</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="dead-tab" data-bs-toggle="tab" data-bs-target="#dead-pane" type="button" role="tab">Dead Stock</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-3" id="invAlertTabContent" style="background-color: #f8fafc; min-height: 300px;">
+                    
+                    <!-- Low Stock Pane -->
+                    <div class="tab-pane fade show active" id="low-stock-pane" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover bg-white rounded shadow-sm">
+                                <thead><tr><th>Product</th><th>Current Stock</th><th>Min Stock</th></tr></thead>
+                                <tbody id="low-stock-list"><tr><td colspan="3" class="text-center">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Out of Stock Pane -->
+                    <div class="tab-pane fade" id="out-stock-pane" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover bg-white rounded shadow-sm">
+                                <thead><tr><th>Product</th><th>Status</th></tr></thead>
+                                <tbody id="out-stock-list"><tr><td colspan="2" class="text-center">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Expiry Soon Pane -->
+                    <div class="tab-pane fade" id="expiry-pane" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover bg-white rounded shadow-sm">
+                                <thead><tr><th>Product</th><th>Batch</th><th>Expiry Date</th><th>Qty</th></tr></thead>
+                                <tbody id="expiry-list"><tr><td colspan="4" class="text-center">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Fast Moving Pane -->
+                    <div class="tab-pane fade" id="fast-pane" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover bg-white rounded shadow-sm">
+                                <thead><tr><th>Product</th><th>Total Sold (30 Days)</th></tr></thead>
+                                <tbody id="fast-list"><tr><td colspan="2" class="text-center">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Dead Stock Pane -->
+                    <div class="tab-pane fade" id="dead-pane" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover bg-white rounded shadow-sm">
+                                <thead><tr><th>Product</th><th>Current Stock</th><th>Last Sold</th></tr></thead>
+                                <tbody id="dead-list"><tr><td colspan="3" class="text-center">Loading...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openInventoryAlerts() {
+    var myModal = new bootstrap.Modal(document.getElementById('inventoryAlertModal'));
+    myModal.show();
+    
+    // Fetch data
+    $.ajax({
+        url: BASE_URL + '/api/inventory_alerts.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function(res) {
+            if (res.status) {
+                const data = res.data;
+                
+                // Low Stock
+                let lsHtml = '';
+                if (data.low_stock.length > 0) {
+                    data.low_stock.forEach(item => {
+                        lsHtml += `<tr><td>${item.product_name}</td><td class="text-warning fw-bold">${parseFloat(item.current_stock)}</td><td>${parseFloat(item.minimum_stock)}</td></tr>`;
+                    });
+                } else { lsHtml = '<tr><td colspan="3" class="text-center text-muted">No low stock items</td></tr>'; }
+                $('#low-stock-list').html(lsHtml);
+
+                // Out of Stock
+                let osHtml = '';
+                if (data.out_of_stock.length > 0) {
+                    data.out_of_stock.forEach(item => {
+                        osHtml += `<tr><td>${item.product_name}</td><td class="text-danger fw-bold">Out of Stock</td></tr>`;
+                    });
+                } else { osHtml = '<tr><td colspan="2" class="text-center text-muted">No out of stock items</td></tr>'; }
+                $('#out-stock-list').html(osHtml);
+
+                // Expiry Soon
+                let expHtml = '';
+                if (data.expiry_soon.length > 0) {
+                    data.expiry_soon.forEach(item => {
+                        expHtml += `<tr><td>${item.product_name}</td><td>${item.batch_no}</td><td class="text-danger fw-bold">${item.expiry_date}</td><td>${parseFloat(item.quantity)}</td></tr>`;
+                    });
+                } else { expHtml = '<tr><td colspan="4" class="text-center text-muted">No items expiring soon</td></tr>'; }
+                $('#expiry-list').html(expHtml);
+
+                // Fast Moving
+                let fmHtml = '';
+                if (data.fast_moving.length > 0) {
+                    data.fast_moving.forEach(item => {
+                        fmHtml += `<tr><td>${item.product_name}</td><td class="text-success fw-bold">${parseFloat(item.total_sold)}</td></tr>`;
+                    });
+                } else { fmHtml = '<tr><td colspan="2" class="text-center text-muted">Not enough data</td></tr>'; }
+                $('#fast-list').html(fmHtml);
+
+                // Dead Stock
+                let dsHtml = '';
+                if (data.dead_stock.length > 0) {
+                    data.dead_stock.forEach(item => {
+                        dsHtml += `<tr><td>${item.product_name}</td><td>${parseFloat(item.current_stock)}</td><td class="text-muted">> 90 days ago</td></tr>`;
+                    });
+                } else { dsHtml = '<tr><td colspan="3" class="text-center text-muted">No dead stock found</td></tr>'; }
+                $('#dead-list').html(dsHtml);
+            }
+        },
+        error: function() {
+            $('#low-stock-list, #out-stock-list, #expiry-list, #fast-list, #dead-list').html('<tr><td colspan="4" class="text-center text-danger">Failed to load data</td></tr>');
+        }
+    });
+}
+</script>
 
 <script src="<?php echo BASE_URL; ?>/assets/js/dashboard.js?v=<?php echo \App\Models\Helpers::assetVersion('/assets/js/dashboard.js'); ?>" defer></script>

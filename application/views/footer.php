@@ -56,6 +56,97 @@
     </div>
 </div>
 
+<!-- Floating Help Widget -->
+<div class="floating-help-widget">
+    <div class="floating-help-menu d-none" id="floating-help-menu">
+        <a href="#" class="floating-help-menu-item" data-bs-toggle="modal" data-bs-target="#helpCenterModal">
+            <span class="floating-help-menu-icon bg-light-primary text-indigo"><i class="fa-solid fa-circle-question"></i></span>
+            <span>Help Center</span>
+        </a>
+        <a href="https://wa.me/919978740360" target="_blank" rel="noopener" class="floating-help-menu-item">
+            <span class="floating-help-menu-icon bg-light-success text-emerald"><i class="fa-brands fa-whatsapp"></i></span>
+            <span>WhatsApp</span>
+        </a>
+        <a href="#" class="floating-help-menu-item" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+            <span class="floating-help-menu-icon bg-light-warning text-warning"><i class="fa-solid fa-comment-dots"></i></span>
+            <span>Feedback</span>
+        </a>
+    </div>
+    <button class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center floating-help-btn" id="floating-help-btn" type="button" title="Help">
+        <i class="fa-solid fa-headset fs-4" id="floating-help-icon"></i>
+    </button>
+</div>
+
+<!-- Help Center Modal -->
+<div class="modal fade" id="helpCenterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-question text-indigo me-2"></i>Help Center</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="help-topic-card">
+                            <i class="fa-solid fa-file-invoice text-indigo"></i>
+                            <h6>Billing &amp; Invoices</h6>
+                            <p class="text-secondary small mb-0">Search or scan a product to add it to the cart, apply a discount or coupon, then Generate Invoice. Print via A4 or Thermal from the confirmation screen.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="help-topic-card">
+                            <i class="fa-solid fa-box-open text-indigo"></i>
+                            <h6>Inventory</h6>
+                            <p class="text-secondary small mb-0">Add products under Inventory, set a minimum stock level to get low-stock alerts, and adjust stock manually if you need to correct a count.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="help-topic-card">
+                            <i class="fa-solid fa-print text-indigo"></i>
+                            <h6>Receipt Printer Setup</h6>
+                            <p class="text-secondary small mb-0">Connect a USB, Bluetooth, or WiFi/LAN receipt printer under Settings &rarr; Printer Settings, then set it as your default for one-tap printing.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="help-topic-card">
+                            <i class="fa-solid fa-chart-line text-indigo"></i>
+                            <h6>Reports</h6>
+                            <p class="text-secondary small mb-0">Sales, purchases, stock, GST, and overdue balances are all under Reports, filterable by date range.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="text-secondary small mb-2">Still need a hand?</p>
+                    <a href="https://wa.me/919978740360" target="_blank" rel="noopener" class="btn btn-success btn-sm"><i class="fa-brands fa-whatsapp me-1"></i>Chat with us on WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-comment-dots text-indigo me-2"></i>Send Feedback</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="feedbackForm">
+                <?php echo \App\Models\Helpers::csrfField(); ?>
+                <div class="modal-body pt-2">
+                    <p class="text-secondary small">Found a bug, or have an idea to make this better? Let us know.</p>
+                    <textarea class="form-control" name="message" id="feedback-message" rows="4" placeholder="What's on your mind?" required></textarea>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-paper-plane me-1"></i>Send Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Floating Language Selector Button -->
 <button class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center" style="position: fixed; bottom: calc(80px + env(safe-area-inset-bottom)); right: 20px; width: 50px; height: 50px; z-index: 1050;" data-bs-toggle="modal" data-bs-target="#languageModal" title="Select Language">
     <i class="fa-solid fa-language fs-4"></i>
@@ -208,6 +299,46 @@ $(document).ready(function() {
                 color: '#0f172a'
             });
         }
+    });
+
+    // Floating Help speed-dial menu
+    $('#floating-help-btn').on('click', function (e) {
+        e.stopPropagation();
+        const $menu = $('#floating-help-menu');
+        const opening = $menu.hasClass('d-none');
+        $menu.toggleClass('d-none', !opening);
+        $('#floating-help-icon').toggleClass('fa-headset', !opening).toggleClass('fa-xmark', opening);
+    });
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.floating-help-widget').length) {
+            $('#floating-help-menu').addClass('d-none');
+            $('#floating-help-icon').removeClass('fa-xmark').addClass('fa-headset');
+        }
+    });
+    $('.floating-help-menu-item').on('click', function () {
+        $('#floating-help-menu').addClass('d-none');
+        $('#floating-help-icon').removeClass('fa-xmark').addClass('fa-headset');
+    });
+
+    // Feedback form
+    $('#feedbackForm').on('submit', function (e) {
+        e.preventDefault();
+        const $form = $(this);
+        const $btn = $form.find('button[type="submit"]');
+        $btn.prop('disabled', true);
+        $.post(BASE_URL + '/api/feedback.php?action=save', $form.serialize() + '&page_url=' + encodeURIComponent(window.location.href), function (res) {
+            if (res.status) {
+                $('#feedbackModal').modal('hide');
+                $form[0].reset();
+                Swal.fire({ icon: 'success', title: 'Thank you!', text: 'Your feedback has been sent.', timer: 1800, showConfirmButton: false, background: '#ffffff', color: '#0f172a' });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Failed', text: res.message, background: '#ffffff', color: '#0f172a' });
+            }
+        }, 'json').fail(function () {
+            Swal.fire({ icon: 'error', title: 'Failed', text: 'Could not reach the server.', background: '#ffffff', color: '#0f172a' });
+        }).always(function () {
+            $btn.prop('disabled', false);
+        });
     });
 
     // Auto-apply Select2 to all searchable dropdowns

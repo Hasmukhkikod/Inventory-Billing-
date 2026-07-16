@@ -2106,15 +2106,30 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     margin-top: 2px !important;
 }
 
-/* Select2 inside input-group fix */
+/* Select2 inside input-group fix: Select2 sets its own wrapper to an inline
+   width:100%, but that's computed against its own (frequently wrong, larger
+   than available) intrinsic content size before the input-group's flex
+   layout gets a say - it was overflowing into whatever sits next to it
+   (e.g. a Purchase Date field beside a Supplier searchable-select) at
+   certain widths. flex-basis:0 + min-width:0 makes the browser size it
+   purely from available flex space instead of Select2's own guess. */
 .input-group .select2-container {
-    flex: 1 1 auto !important;
-    width: auto !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    width: 1% !important;
 }
 
 .input-group .select2-container .select2-selection {
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
+}
+
+/* Compact action buttons in list-page tables: icon+text combos (Convert,
+   Statement, Receive) push the Actions column too wide and crowd against
+   the table edge on laptop-width screens (~1000-1400px, sidebar visible). */
+.table .btn-group .btn {
+    font-size: 0.72rem;
+    padding: 0.25rem 0.45rem;
 }
 
 /* Nav Tab Active Styling (global fix for all tabbed panels) */
@@ -2182,12 +2197,46 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     }
 }
 
+/* Day-End Report header controls (date + Load/Print/PDF): a flex-wrap
+   container with auto width sitting inside a justify-content:space-between
+   parent doesn't reliably compute "sum of children" as its intrinsic width
+   in Chromium - it was wrapping the PDF button onto its own line even on
+   very wide screens with room to spare. Force one line by default; wrapping
+   is only meaningful once the header itself stacks to full width below. */
+.day-end-header-controls {
+    flex-wrap: nowrap;
+}
+
+/* Title + date + 3 buttons is too much content for one row once the
+   sidebar starts taking space (~768-991px) - the global .panel-header
+   stacking rule doesn't kick in until 767px, leaving this range to wrap
+   unevenly (title mid-phrase, buttons splitting 2+1). Stack cleanly
+   earlier, just for this header. */
+@media (max-width: 991.98px) {
+    .day-end-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.85rem;
+    }
+    .day-end-header-controls {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .day-end-header-controls .btn {
+        flex: 1 1 0;
+    }
+    .day-end-header-controls input[type="date"] {
+        flex: 1 1 100%;
+        max-width: none !important;
+    }
+}
+
 @media (max-width: 767px) {
     /* Floating Buttons and layout adjustments */
     .btn-mobile-full {
         width: 100% !important;
     }
-    
+
     .panel-header {
         flex-direction: column !important;
         align-items: stretch !important;
@@ -2533,5 +2582,176 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
 
     .dashboard-status-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ==================== Reports Date Filter Bar ==================== */
+.reports-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.reports-filter-field {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 0.9rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.reports-filter-field:focus-within {
+    border-color: var(--accent-indigo);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.reports-filter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.reports-filter-label i {
+    color: var(--accent-indigo);
+}
+
+.reports-filter-field input[type="date"] {
+    border: none;
+    background: transparent;
+    padding: 0;
+    min-width: 118px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.reports-filter-field input[type="date"]:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.reports-filter-arrow {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.reports-filter-btn {
+    margin-left: auto;
+    padding: 0.55rem 1.4rem;
+}
+
+@media (max-width: 767px) {
+    .reports-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .reports-filter-field {
+        justify-content: space-between;
+    }
+    .reports-filter-arrow {
+        display: none;
+    }
+    .reports-filter-btn {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* ==================== Floating Help Widget ==================== */
+.floating-help-widget {
+    position: fixed;
+    bottom: calc(140px + env(safe-area-inset-bottom));
+    right: 20px;
+    z-index: 1050;
+}
+
+.floating-help-btn {
+    width: 50px;
+    height: 50px;
+}
+
+.floating-help-menu {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    right: 0;
+    min-width: 210px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--card-shadow-hover, 0 12px 30px rgba(15, 23, 42, 0.18));
+    padding: 0.5rem;
+    animation: floatingHelpMenuIn 0.16s ease-out;
+}
+
+@keyframes floatingHelpMenuIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.floating-help-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 0.6rem;
+    border-radius: 10px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: background-color var(--transition-fast);
+}
+
+.floating-help-menu-item:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.floating-help-menu-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+
+.help-topic-card {
+    height: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-secondary);
+}
+
+.help-topic-card i {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.help-topic-card h6 {
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+@media (max-width: 420px) {
+    .floating-help-widget {
+        right: 14px;
+    }
+    .floating-help-menu {
+        min-width: 180px;
     }
 }

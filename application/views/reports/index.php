@@ -8,23 +8,19 @@
 <!-- Date Filter Ribbon -->
 <div class="panel-card mb-4">
     <div class="panel-body py-3">
-        <form id="report-filter-form" class="row g-3 align-items-center justify-content-between">
-            <div class="col-md-5 d-flex flex-wrap align-items-center gap-2 row-gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0 text-nowrap">From Date</label>
-                    <input type="date" class="form-control form-control-sm" name="start_date" id="rep-start-date" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <label class="form-label mb-0 text-nowrap">To Date</label>
-                    <input type="date" class="form-control form-control-sm" name="end_date" id="rep-end-date" value="<?php echo date('Y-m-d'); ?>">
-                </div>
+        <form id="report-filter-form" class="reports-filter-bar">
+            <div class="reports-filter-field">
+                <label class="reports-filter-label" for="rep-start-date"><i class="fa-solid fa-calendar-day"></i>From</label>
+                <input type="date" class="form-control" name="start_date" id="rep-start-date" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
             </div>
-            
-            <div class="col-md-4 text-end">
-                <button type="submit" class="btn btn-primary btn-sm px-4">
-                    <i class="fa-solid fa-filter me-1"></i> Apply Filters
-                </button>
+            <i class="fa-solid fa-arrow-right-long reports-filter-arrow"></i>
+            <div class="reports-filter-field">
+                <label class="reports-filter-label" for="rep-end-date"><i class="fa-solid fa-calendar-day"></i>To</label>
+                <input type="date" class="form-control" name="end_date" id="rep-end-date" value="<?php echo date('Y-m-d'); ?>">
             </div>
+            <button type="submit" class="btn btn-primary reports-filter-btn">
+                <i class="fa-solid fa-filter me-1"></i> Apply Filters
+            </button>
         </form>
     </div>
 </div>

@@ -51,6 +51,12 @@
                             <i class="fa-solid fa-print me-2"></i>Printer Settings
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback-pane" type="button" role="tab" aria-controls="feedback-pane" aria-selected="false">
+                            <i class="fa-solid fa-comment-dots me-2"></i>Feedback
+                            <span class="badge bg-danger rounded-pill ms-1 d-none" id="feedback-unread-badge">0</span>
+                        </button>
+                    </li>
                 </ul>
             </div>
             
@@ -875,6 +881,31 @@
                         <div class="alert alert-light border small text-secondary mt-2 mb-0">
                             <i class="fa-solid fa-circle-info text-indigo me-1"></i>
                             USB and Bluetooth printers must be paired once from <strong>this browser</strong> (those permissions aren't shared across computers) - use "Pair Now" next to a printer below, or pair directly from a receipt's print screen. WiFi/LAN printers work from any computer on the same network as this server.
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="feedback-pane" role="tabpanel" aria-labelledby="feedback-tab" tabindex="0">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                            <div>
+                                <h6 class="text-indigo mb-1"><i class="fa-solid fa-comment-dots me-2"></i>Feedback</h6>
+                                <p class="text-muted small mb-0">Messages sent by users through the floating Help button.</p>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="feedbackTable">
+                                <thead>
+                                    <tr>
+                                        <th>From</th>
+                                        <th>Message</th>
+                                        <th>Page</th>
+                                        <th>Date</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="feedback-tbody">
+                                    <tr><td colspan="5" class="text-center py-4 text-secondary">Loading...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -1744,6 +1775,62 @@ $(document).ready(function () {
             if (r.isConfirmed) {
                 $.post(BASE_URL + '/api/printers.php?action=delete', { csrf_token: printerCsrf, id: id }, function (res) {
                     if (res.status) loadPrinters();
+                }, 'json');
+            }
+        });
+    });
+
+    // ==================== Feedback ====================
+    function loadFeedback() {
+        $.get(BASE_URL + '/api/feedback.php?action=list', function (res) {
+            const $tbody = $('#feedback-tbody');
+            $tbody.empty();
+            const rows = (res.status && res.data.feedback) ? res.data.feedback : [];
+            const unread = rows.filter(function (r) { return r.is_read == 0; }).length;
+            $('#feedback-unread-badge').text(unread).toggleClass('d-none', unread === 0);
+
+            if (rows.length === 0) {
+                $tbody.append('<tr><td colspan="5" class="text-center py-4 text-secondary">No feedback yet.</td></tr>');
+                return;
+            }
+            rows.forEach(function (f) {
+                const when = new Date(f.created_at.replace(' ', 'T')).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+                const unreadDot = f.is_read == 0 ? '<span class="badge bg-light-primary text-indigo me-1">New</span>' : '';
+                $tbody.append(
+                    '<tr' + (f.is_read == 0 ? ' class="fw-semibold"' : '') + '>' +
+                    '<td>' + unreadDot + Helpers_escape(f.user_name || 'Unknown') + '</td>' +
+                    '<td class="small" style="max-width:420px; white-space:normal;">' + Helpers_escape(f.message) + '</td>' +
+                    '<td class="small text-muted">' + Helpers_escape(f.page_url ? f.page_url.replace(/^https?:\/\/[^/]+/, '') : '-') + '</td>' +
+                    '<td class="small text-muted">' + when + '</td>' +
+                    '<td class="text-end">' +
+                    (f.is_read == 0 ? '<button class="btn btn-sm btn-outline-secondary py-1 px-2 btn-mark-read" data-id="' + f.id + '" title="Mark as read"><i class="fa-solid fa-check"></i></button> ' : '') +
+                    '<button class="btn btn-sm btn-outline-danger py-1 px-2 btn-delete-feedback" data-id="' + f.id + '" title="Delete"><i class="fa-solid fa-trash"></i></button>' +
+                    '</td>' +
+                    '</tr>'
+                );
+            });
+        }, 'json');
+    }
+
+    $('button[data-bs-target="#feedback-pane"]').on('shown.bs.tab', function () { loadFeedback(); });
+    loadFeedback();
+
+    $(document).on('click', '.btn-mark-read', function () {
+        $.post(BASE_URL + '/api/feedback.php?action=mark_read', { csrf_token: printerCsrf, id: $(this).data('id') }, function (res) {
+            if (res.status) loadFeedback();
+        }, 'json');
+    });
+
+    $(document).on('click', '.btn-delete-feedback', function () {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Delete Feedback?', text: 'This cannot be undone.',
+            icon: 'warning', showCancelButton: true, confirmButtonText: 'Delete', confirmButtonColor: '#dc2626',
+            background: '#ffffff', color: '#0f172a'
+        }).then(function (r) {
+            if (r.isConfirmed) {
+                $.post(BASE_URL + '/api/feedback.php?action=delete', { csrf_token: printerCsrf, id: id }, function (res) {
+                    if (res.status) loadFeedback();
                 }, 'json');
             }
         });
