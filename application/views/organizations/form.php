@@ -1,7 +1,7 @@
 <div class="content-body">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="h4 mb-0"><?php echo $org ? 'Edit Organization' : 'New Organization'; ?></h2>
-        <a href="<?php echo BASE_URL; ?>/organizations/index" class="btn btn-outline-secondary shadow-sm">
+        <a href="<?php echo BASE_URL; ?><?php echo isset($_GET['demo']) && $_GET['demo'] == '1' ? '/demos/index' : '/organizations/index'; ?>" class="btn btn-outline-secondary shadow-sm">
             <i class="fa-solid fa-arrow-left me-2"></i>Back
         </a>
     </div>
@@ -10,6 +10,7 @@
         <div class="card-body p-4">
             <form id="orgForm" onsubmit="saveOrg(event)">
                 <input type="hidden" name="id" value="<?php echo $org['id'] ?? ''; ?>">
+                <input type="hidden" name="demo" value="<?php echo isset($_GET['demo']) && $_GET['demo'] == '1' ? '1' : '0'; ?>">
                 <?php echo \App\Models\Helpers::csrfField(); ?>
 
                 <div class="row g-3">
@@ -93,7 +94,7 @@ async function saveOrg(e) {
                 timer: 1500,
                 showConfirmButton: false
             }).then(() => {
-                window.location.href = BASE_URL + '/organizations/index';
+                window.location.href = BASE_URL + '<?php echo isset($_GET['demo']) && $_GET['demo'] == '1' ? '/demos/index' : '/organizations/index'; ?>';
             });
         } else {
             Swal.fire('Error', data.message || 'Failed to save', 'error');

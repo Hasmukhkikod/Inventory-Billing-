@@ -28,8 +28,11 @@ class VerificationController {
         if (empty($token)) {
             $message = "Invalid or missing verification token.";
         } else {
+            $isDemo = isset($_GET['demo']) && $_GET['demo'] == '1' || isset($_POST['demo']) && $_POST['demo'] == '1';
+            $db = $isDemo ? new Database('demo') : $this->db;
+
             // Find organization with this token
-            $org = $this->db->query("SELECT * FROM organizations WHERE verification_token = ? LIMIT 1", [$token])->fetch();
+            $org = $db->query("SELECT * FROM organizations WHERE verification_token = ? LIMIT 1", [$token])->fetch();
 
             if ($org) {
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -48,10 +51,10 @@ class VerificationController {
                     } else {
                         // Update user password
                         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-                        $this->db->query("UPDATE users SET password = ? WHERE org_id = ? AND email = ?", [$hashedPassword, $org['id'], $org['email']]);
+                        $db->query("UPDATE users SET password = ? WHERE org_id = ? AND email = ?", [$hashedPassword, $org['id'], $org['email']]);
 
                         // Update to verified
-                        $this->db->query("UPDATE organizations SET is_verified = 1, verification_token = NULL WHERE id = ?", [$org['id']]);
+                        $db->query("UPDATE organizations SET is_verified = 1, verification_token = NULL WHERE id = ?", [$org['id']]);
                         $message = "Your password has been set and email verified successfully. You can now log in.";
                         $success = true;
 

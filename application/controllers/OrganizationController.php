@@ -42,16 +42,18 @@ class OrganizationController {
         }
         
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $isDemo = isset($_GET['demo']) && $_GET['demo'] == '1';
+        $db = $isDemo ? new Database('demo') : $this->db;
         $org = null;
 
         if ($id > 0) {
-            $org = $this->db->query("SELECT * FROM organizations WHERE id = ?", [$id])->fetch();
+            $org = $db->query("SELECT * FROM organizations WHERE id = ?", [$id])->fetch();
             if (!$org) {
                 die("Organization not found.");
             }
         }
         
-        $plans = $this->db->query("SELECT * FROM plans WHERE status = 'ACTIVE'")->fetchAll();
+        $plans = $db->query("SELECT * FROM plans")->fetchAll();
 
         require_once __DIR__ . '/../views/header.php';
         require_once __DIR__ . '/../views/organizations/form.php';

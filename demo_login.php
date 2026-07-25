@@ -226,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         btn.disabled = true;
-        btn.textContent = "Creating account...";
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display:inline-block;width:1rem;height:1rem;border:0.15em solid currentColor;border-right-color:transparent;border-radius:50%;animation:spinner-border .75s linear infinite;"></span> Creating account...';
 
         const formData = new FormData(registerForm);
         try {
@@ -237,23 +237,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const data = await res.json();
             
             if (data.status) {
-                success.textContent = data.message;
-                success.style.display = 'block';
-                btn.textContent = "Account created ✓";
+                // Remove the inline message
+                success.style.display = 'none';
+                
+                // Show modal
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Account Created!',
+                        text: data.message,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#3b5bff'
+                    });
+                } else {
+                    alert(data.message);
+                }
+                
+                btn.innerHTML = "Account created ✓";
             } else {
                 err.textContent = data.message || "An error occurred.";
                 err.style.display = 'block';
                 btn.disabled = false;
-                btn.textContent = "Create my free account →";
+                btn.innerHTML = "Create my free account →";
             }
         } catch (error) {
             err.textContent = "A network error occurred. Please try again.";
             err.style.display = 'block';
             btn.disabled = false;
-            btn.textContent = "Create my free account →";
+            btn.innerHTML = "Create my free account →";
         }
     });
 
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    @keyframes spinner-border {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </body>
 </html>

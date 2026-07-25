@@ -57,7 +57,7 @@
                                 <?php endif; ?>
                             </td>
                             <td class="text-end">
-                                <a href="<?php echo BASE_URL; ?>/organizations/form?id=<?php echo $o['id']; ?>" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <a href="<?php echo BASE_URL; ?>/organizations/form?id=<?php echo $o['id']; ?>&demo=1" class="btn btn-sm btn-outline-primary" title="Edit">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
                             </td>

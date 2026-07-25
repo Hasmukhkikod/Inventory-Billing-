@@ -19,11 +19,19 @@ function createTablesForDb($dbName) {
           `monthly_price` decimal(10,2) NOT NULL DEFAULT '0.00',
           `annual_price` decimal(10,2) NOT NULL DEFAULT '0.00',
           `features` text,
+          `status` enum('ACTIVE','INACTIVE') DEFAULT 'ACTIVE',
           `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
           PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ");
         echo "- Created 'plans' table.\n";
+        
+        try {
+            $pdo->exec("ALTER TABLE `plans` ADD COLUMN `status` enum('ACTIVE','INACTIVE') DEFAULT 'ACTIVE'");
+            echo "- Added 'status' column to plans table.\n";
+        } catch (Exception $e) {
+            // Ignore if column already exists
+        }
         
         $pdo->exec("
         CREATE TABLE IF NOT EXISTS `organizations` (

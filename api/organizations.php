@@ -17,7 +17,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$db = new Database();
+$isDemo = isset($_POST['demo']) && $_POST['demo'] == '1';
+$db = $isDemo ? new Database('demo') : new Database();
 $auth = new Auth($db);
 
 // Only Super Admin can access
@@ -85,12 +86,13 @@ if ($action === 'save') {
                     $mail->setFrom($_ENV['SMTP_USER'] ?? 'infogrovixo@gmail.com', 'IIMS System');
                     $mail->addAddress($email, $name);
 
-                    $verifyLink = BASE_URL . "/verify?token=" . $verification_token;
+                    $demoParam = (isset($_POST['demo']) && $_POST['demo'] == '1') ? '&demo=1' : '';
+                    $verifyLink = BASE_URL . "/verify?token=" . $verification_token . $demoParam;
 
                     $mail->isHTML(true);
-                    $mail->Subject = 'Verify your Organization Registration';
-                    $mail->Body    = "Hello {$name},<br><br>Your organization has been registered successfully. Please click the link below to verify your email address before logging in:<br><br><a href='{$verifyLink}'>{$verifyLink}</a><br><br>Thank you!";
-                    $mail->AltBody = "Hello {$name},\n\Your organization has been registered successfully. Please visit the link below to verify your email address:\n\n{$verifyLink}\n\nThank you!";
+                    $mail->Subject = 'Verify your Organization Registration & Set Password';
+                    $mail->Body    = "Hello {$name},<br><br>Your organization has been registered successfully. Please click the button below to verify your email address and set your password before logging in:<br><br><a href='{$verifyLink}' style='display:inline-block;padding:12px 24px;color:#fff;background-color:#3b5bff;text-decoration:none;border-radius:8px;font-weight:bold;'>Verify Email & Set Password</a><br><br>Or copy and paste this link in your browser:<br>{$verifyLink}<br><br>Thank you!";
+                    $mail->AltBody = "Hello {$name},\n\Your organization has been registered successfully. Please visit the link below to verify your email address and set your password:\n\n{$verifyLink}\n\nThank you!";
 
                     $mail->send();
                 } catch (\Exception $e) {

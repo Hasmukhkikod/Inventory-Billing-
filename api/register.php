@@ -40,6 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $existingUser = $db->query("SELECT id FROM users WHERE email = ? LIMIT 1", [$email])->fetch();
     $existingOrg = $db->query("SELECT id FROM organizations WHERE email = ? LIMIT 1", [$email])->fetch();
     
+    // If org exists but user doesn't, it's an orphaned record from a previous crash. Clean it up!
+    if ($existingOrg && !$existingUser) {
+        $db->query("DELETE FROM organizations WHERE id = ?", [$existingOrg['id']]);
+        $existingOrg = false;
+    }
+
     if ($existingUser || $existingOrg) {
         Helpers::jsonResponse(false, "This email is already registered.");
     }
@@ -53,6 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $verification_token = bin2hex(random_bytes(32));
 
     try {
+        $db->getConnection()->beginTransaction();
+
         // Create Organization
         $newOrgId = $db->insert(
             "INSERT INTO organizations (name, email, phone, plan_id, start_date, valid_until, status, is_verified, verification_token, is_approved) VALUES (?, ?, '', ?, ?, ?, 'ACTIVE', 0, ?, 1)", 
@@ -65,6 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "INSERT INTO users (name, email, mobile, password, role_id, org_id, status) VALUES (?, ?, '', ?, 2, ?, 'ACTIVE')",
             [$firstName . " " . $lastName, $email, $hashedPassword, $newOrgId]
         );
+
+        $db->getConnection()->commit();
 
         // Send verification email
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
@@ -80,11 +90,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->setFrom($_ENV['SMTP_USER'] ?? 'infogrovixo@gmail.com', 'Grovixo');
             $mail->addAddress($email, $firstName . " " . $lastName);
 
-            $verifyLink = BASE_URL . "/verify?token=" . $verification_token;
+            $demoParam = (isset($_GET['demo']) && $_GET['demo'] == 1) ? '&demo=1' : '';
+            $verifyLink = BASE_URL . "/verify?token=" . $verification_token . $demoParam;
 
             $mail->isHTML(true);
             $mail->Subject = 'Verify your Grovixo Registration & Set Password';
-            $mail->Body    = "Hello {$firstName},<br><br>Welcome to Grovixo! Your 15-day free trial has been created.<br><br>Please click the link below to verify your email address and set your password before logging in:<br><br><a href='{$verifyLink}'>{$verifyLink}</a><br><br>Thank you!";
+            $mail->Body    = "Hello {$firstName},<br><br>Welcome to Grovixo! Your 15-day free trial has been created.<br><br>Please click the button below to verify your email address and set your password before logging in:<br><br><a href='{$verifyLink}' style='display:inline-block;padding:12px 24px;color:#fff;background-color:#3b5bff;text-decoration:none;border-radius:8px;font-weight:bold;'>Verify Email & Set Password</a><br><br>Or copy and paste this link in your browser:<br>{$verifyLink}<br><br>Thank you!";
             
             $mail->send();
         } catch (\Exception $e) {
