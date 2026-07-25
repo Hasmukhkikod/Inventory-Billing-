@@ -38,6 +38,7 @@ if ($action === 'save') {
     $start_date = $_POST['start_date'] ?? null;
     $valid_until = $_POST['valid_until'] ?? null;
     $status = $_POST['status'] ?? 'ACTIVE';
+    $is_approved = isset($_POST['is_approved']) ? 1 : 0;
 
     if (empty($name)) {
         Helpers::jsonResponse(false, "Organization name is required.");
@@ -53,15 +54,15 @@ if ($action === 'save') {
 
     try {
         if ($id > 0) {
-            $db->query("UPDATE organizations SET name = ?, email = ?, phone = ?, plan_id = ?, start_date = ?, valid_until = ?, status = ? WHERE id = ?", 
-                       [$name, $email, $phone, $plan_id, $start_date, $valid_until, $status, $id]);
+            $db->query("UPDATE organizations SET name = ?, email = ?, phone = ?, plan_id = ?, start_date = ?, valid_until = ?, status = ?, is_approved = ? WHERE id = ?", 
+                       [$name, $email, $phone, $plan_id, $start_date, $valid_until, $status, $is_approved, $id]);
             Helpers::logActivity($db, "organizations", "Updated organization #$id", $id);
             Helpers::jsonResponse(true, "Organization updated successfully.");
         } else {
             $verification_token = bin2hex(random_bytes(32));
             
-            $newId = $db->insert("INSERT INTO organizations (name, email, phone, plan_id, start_date, valid_until, status, is_verified, verification_token) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)", 
-                                 [$name, $email, $phone, $plan_id, $start_date, $valid_until, $status, $verification_token]);
+            $newId = $db->insert("INSERT INTO organizations (name, email, phone, plan_id, start_date, valid_until, status, is_verified, verification_token, is_approved) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)", 
+                                 [$name, $email, $phone, $plan_id, $start_date, $valid_until, $status, $verification_token, $is_approved]);
             Helpers::logActivity($db, "organizations", "Created new organization #$newId", $newId);
             
             // Auto create an admin user for this org

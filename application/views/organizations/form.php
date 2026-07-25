@@ -52,6 +52,13 @@
                             <option value="INACTIVE" <?php echo (($org['status'] ?? '') === 'INACTIVE') ? 'selected' : ''; ?>>Inactive</option>
                         </select>
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">System Admin Approval</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" name="is_approved" value="1" id="isApprovedCheck" <?php echo (!isset($org['is_approved']) || $org['is_approved'] == 1) ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="isApprovedCheck">Approved to access system</label>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="mt-4">

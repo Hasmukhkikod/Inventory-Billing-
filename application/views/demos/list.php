@@ -1,9 +1,7 @@
 <div class="content-body">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 mb-0">Organizations (Clients)</h2>
-        <a href="<?php echo BASE_URL; ?>/organizations/form" class="btn btn-primary shadow-sm">
-            <i class="fa-solid fa-plus me-2"></i>New Organization
-        </a>
+        <h2 class="h4 mb-0">Demo Accounts</h2>
+        <span class="text-muted small">View all active and expired free trials</span>
     </div>
 
     <div class="card shadow-sm border-0">

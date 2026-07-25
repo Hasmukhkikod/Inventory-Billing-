@@ -54,7 +54,9 @@ switch ($action) {
                     'bank_account_no' => '',
                     'bank_ifsc' => '',
                     'bank_branch' => '',
-                    'upi_id' => ''
+                    'upi_id' => '',
+                    'demo_popup_days_before' => 2,
+                    'demo_popup_timer_minutes' => 30
                 ];
             }
             // Get document usage counts for range status
@@ -123,6 +125,8 @@ switch ($action) {
         $bank_ifsc = trim($_POST['bank_ifsc'] ?? '');
         $bank_branch = trim($_POST['bank_branch'] ?? '');
         $upi_id = trim($_POST['upi_id'] ?? '');
+        $demo_popup_days_before = (int)($_POST['demo_popup_days_before'] ?? 2);
+        $demo_popup_timer_minutes = (int)($_POST['demo_popup_timer_minutes'] ?? 30);
 
         if (empty($company_name)) {
             Helpers::jsonResponse(false, "Business name is required.");
@@ -182,7 +186,8 @@ switch ($action) {
                     invoice_template = ?, pos_template = ?, pos_mode = ?, system_language = ?,
                     pos_show_logo = ?, pos_show_cashier = ?, pos_show_customer_mobile = ?, pos_show_hsn = ?,
                     pos_show_gst_breakdown = ?, pos_header_text = ?, pos_footer_text = ?,
-                    bank_name = ?, bank_account_no = ?, bank_ifsc = ?, bank_branch = ?, upi_id = ?";
+                    bank_name = ?, bank_account_no = ?, bank_ifsc = ?, bank_branch = ?, upi_id = ?,
+                    demo_popup_days_before = ?, demo_popup_timer_minutes = ?";
             $params = [
                 $company_name, $gst_number, $email, $phone, $address,
                 $invoice_prefix, $quotation_prefix, $purchase_prefix, $challan_prefix,
@@ -193,7 +198,8 @@ switch ($action) {
                 $invoice_template, $pos_template, $pos_mode, $system_language,
                 $pos_show_logo, $pos_show_cashier, $pos_show_customer_mobile, $pos_show_hsn,
                 $pos_show_gst_breakdown, $pos_header_text, $pos_footer_text,
-                $bank_name, $bank_account_no, $bank_ifsc, $bank_branch, $upi_id
+                $bank_name, $bank_account_no, $bank_ifsc, $bank_branch, $upi_id,
+                $demo_popup_days_before, $demo_popup_timer_minutes
             ];
 
             if ($update_logo) {

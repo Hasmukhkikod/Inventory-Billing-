@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page Not Found — Grovixo</title>
+  <link rel="icon" type="image/png" href="assets/img/Asset%2015%4072x.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--blue:#3b5bff;--navy:#12214f;--ink:#111111;--body:#60646f;--wash:#f6faff}
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "DM Sans", sans-serif;
+      background: var(--wash);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .container { max-width: 500px; padding: 20px; }
+    h1 {
+      font-family: "Playfair Display", serif;
+      font-size: 80px;
+      margin: 0;
+      color: var(--blue);
+      letter-spacing: -2px;
+    }
+    h2 { font-size: 24px; margin: 10px 0 20px; }
+    p { color: var(--body); font-size: 16px; margin-bottom: 30px; line-height: 1.6; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 12px;
+      padding: 14px 24px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg,#4e6bff,#2d4cf1);
+      box-shadow: 0 12px 20px #3b5bff36;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .button:hover { transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>404</h1>
+    <h2>Page not found</h2>
+    <p>The page you're looking for doesn't exist or has been moved. Let's get you back home.</p>
+    <a href="/" class="button">Back to home <span>→</span></a>
+  </div>
+</body>
+</html>

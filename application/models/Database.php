@@ -14,8 +14,21 @@ class Database {
     private ?PDO $pdo = null;
     private string $driver;
 
-    public function __construct() {
+    public function __construct(string $connection = 'core') {
         $this->driver = DB_DRIVER;
+        
+        // Auto-switch to demo if session is flagged
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (isset($_SESSION['is_demo']) && $_SESSION['is_demo'] === true) {
+            $connection = 'demo';
+        }
+        
+        $dbHost = ($connection === 'demo') ? ($_ENV['DEMO_DB_HOST'] ?? DB_HOST) : DB_HOST;
+        $dbName = ($connection === 'demo') ? ($_ENV['DEMO_DB_NAME'] ?? 'demo_billing') : DB_NAME;
+        $dbUser = ($connection === 'demo') ? ($_ENV['DEMO_DB_USER'] ?? DB_USER) : DB_USER;
+        $dbPass = ($connection === 'demo') ? ($_ENV['DEMO_DB_PASS'] ?? DB_PASS) : DB_PASS;
         
         try {
             if ($this->driver === 'sqlite') {
@@ -34,23 +47,23 @@ class Database {
             } else {
                 // MySQL PDO Connection
                 try {
-                    $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";port=" . DB_PORT . ";charset=utf8mb4";
-                    $this->pdo = new PDO($dsn, DB_USER, DB_PASS);
+                    $dsn = "mysql:host=" . $dbHost . ";dbname=" . $dbName . ";port=" . DB_PORT . ";charset=utf8mb4";
+                    $this->pdo = new PDO($dsn, $dbUser, $dbPass);
                 } catch (PDOException $e) {
                     if ($e->getCode() == 1049 || strpos($e->getMessage(), 'Unknown database') !== false) {
                         // Try to create DB (works on local dev, not on shared hosting)
                         try {
-                            $dsnNoDb = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";charset=utf8mb4";
-                            $tempPdo = new PDO($dsnNoDb, DB_USER, DB_PASS);
+                            $dsnNoDb = "mysql:host=" . $dbHost . ";port=" . DB_PORT . ";charset=utf8mb4";
+                            $tempPdo = new PDO($dsnNoDb, $dbUser, $dbPass);
                             $tempPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                            $tempPdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;");
+                            $tempPdo->exec("CREATE DATABASE IF NOT EXISTS `" . $dbName . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;");
                             $tempPdo = null;
 
-                            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";port=" . DB_PORT . ";charset=utf8mb4";
-                            $this->pdo = new PDO($dsn, DB_USER, DB_PASS);
+                            $dsn = "mysql:host=" . $dbHost . ";dbname=" . $dbName . ";port=" . DB_PORT . ";charset=utf8mb4";
+                            $this->pdo = new PDO($dsn, $dbUser, $dbPass);
                         } catch (PDOException $createErr) {
                             throw new PDOException(
-                                "Database '" . DB_NAME . "' does not exist and could not be auto-created. " .
+                                "Database '" . $dbName . "' does not exist and could not be auto-created. " .
                                 "Please create the database manually via your hosting panel and import full_install.sql. " .
                                 "Original error: " . $e->getMessage()
                             );

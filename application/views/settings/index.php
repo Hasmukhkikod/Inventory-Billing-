@@ -57,6 +57,13 @@
                             <span class="badge bg-danger rounded-pill ms-1 d-none" id="feedback-unread-badge">0</span>
                         </button>
                     </li>
+                    <?php if ($_SESSION['org_id'] == 0): ?>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab text-primary" id="demo-tab" data-bs-toggle="tab" data-bs-target="#demo-pane" type="button" role="tab" aria-controls="demo-pane" aria-selected="false">
+                            <i class="fa-solid fa-stopwatch me-2"></i>Demo Settings
+                        </button>
+                    </li>
+                    <?php endif; ?>
                 </ul>
             </div>
             
@@ -909,6 +916,42 @@
                         </div>
                     </div>
 
+                    <?php if ($_SESSION['org_id'] == 0): ?>
+                    <div class="tab-pane fade" id="demo-pane" role="tabpanel" aria-labelledby="demo-tab" tabindex="0">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+                            <div>
+                                <h6 class="text-indigo mb-1"><i class="fa-solid fa-stopwatch me-2"></i>Demo Settings</h6>
+                                <p class="text-muted small mb-0">Configure the expiry warnings for organizations on a free trial.</p>
+                            </div>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="mb-3 text-secondary">Warning Popup Settings</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Days before expiry to show warning</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" name="demo_popup_days_before" id="set-demo-days" min="1" max="15">
+                                                <span class="input-group-text">Days</span>
+                                            </div>
+                                            <small class="text-muted">How many days before the `valid_until` date should the warning start showing?</small>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Popup Timer Frequency</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" name="demo_popup_timer_minutes" id="set-demo-timer" min="1" max="1440">
+                                                <span class="input-group-text">Minutes</span>
+                                            </div>
+                                            <small class="text-muted">How often should the popup reappear while they are logged in?</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                 </div>
             </div>
         </div>
@@ -1098,6 +1141,9 @@ $(document).ready(function() {
                 $("#set-bank-ifsc").val(s.bank_ifsc || '');
                 $("#set-bank-branch").val(s.bank_branch || '');
                 $("#set-upi-id").val(s.upi_id || '');
+                // Demo Popup Settings
+                $("#set-demo-days").val(s.demo_popup_days_before || 2);
+                $("#set-demo-timer").val(s.demo_popup_timer_minutes || 30);
                 // Company Logo
                 if (s.company_logo) {
                     $('#logo-img').attr('src', BASE_URL + '/uploads/' + s.company_logo).show();

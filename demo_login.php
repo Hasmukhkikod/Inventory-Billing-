@@ -10,6 +10,11 @@ use App\Models\Auth;
 use App\Models\Helpers;
 use App\Models\Database;
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$_SESSION['is_demo'] = true;
+
 $db = new Database();
 $auth = new Auth($db);
 
@@ -101,11 +106,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <section class="auth">
           <div class="auth-inner">
               <a class="back" href="<?php echo BASE_URL; ?>/index">← Back to Grovixo</a>
-              <div class="form-pane active" id="login">
-                  <h2>Welcome <em>back.</em></h2>
-                  <p class="lead">Log in to continue where you left off.</p>
+              <div class="tabs" role="tablist" aria-label="Account access">
+                  <button class="tab <?php echo (empty($errorMessage) && !$loginSuccess) ? 'active' : ''; ?>" data-tab="register" role="tab" aria-selected="true">Start free trial</button>
+                  <button class="tab <?php echo (!empty($errorMessage) || $loginSuccess) ? 'active' : ''; ?>" data-tab="login" role="tab" aria-selected="false">Log in</button>
+              </div>
+              
+              <div class="form-pane <?php echo (empty($errorMessage) && !$loginSuccess) ? 'active' : ''; ?>" id="register">
+                  <h2>Your 15-day trial starts <em>here.</em></h2>
+                  <p class="lead">Create your account and start setting up Grovixo today.</p>
+                  <p class="notice"><span>✦</span><span><strong>15 days, completely free.</strong><br>No credit card. No commitment. Just your business, organised.</span></p>
                   
-                  <form id="login-form" method="POST" action="<?php echo BASE_URL; ?>/login" novalidate>
+                  <form id="register-form" novalidate>
+                      <div class="two">
+                          <div class="field">
+                              <label for="first-name">First name</label>
+                              <input id="first-name" name="firstName" autocomplete="given-name" required placeholder="First name" />
+                          </div>
+                          <div class="field">
+                              <label for="last-name">Last name</label>
+                              <input id="last-name" name="lastName" autocomplete="family-name" required placeholder="Last name" />
+                          </div>
+                      </div>
+                      <div class="field">
+                          <label for="register-email">Work email</label>
+                          <input id="register-email" name="email" type="email" autocomplete="email" required placeholder="Your Mail id" />
+                      </div>
+                      <div class="field password">
+                          <label for="register-password">Create a password</label>
+                          <input id="register-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters" />
+                          <button class="reveal" type="button" data-reveal="register-password">Show</button>
+                      </div>
+                      <p class="error" id="register-error" style="display:none;"></p>
+                      <button class="submit" type="submit" id="register-submit-btn">Create my free account →</button>
+                      <p class="terms">By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+                      <div class="message" role="status" id="register-success"></div>
+                  </form>
+              </div>
+
+              <div class="form-pane <?php echo (!empty($errorMessage) || $loginSuccess) ? 'active' : ''; ?>" id="login">
+                  <h2>Welcome to <em>Demo.</em></h2>
+                  <p class="lead">Log in to your free trial workspace.</p>
+                  
+                  <form id="login-form" method="POST" action="<?php echo BASE_URL; ?>/demo/login" novalidate>
                       <?php echo Helpers::csrfField(); ?>
                       <div class="field">
                           <label for="login-email">Email address</label>
@@ -128,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                       <p class="error" id="login-error">Enter a valid email address and your password to continue.</p>
                       
                       <button class="submit" type="submit">Log in to Grovixo →</button>
-                      <p class="terms">New to Grovixo? <a href="<?php echo BASE_URL; ?>/demo/login">Start your free 15-day trial.</a></p>
+                      <p class="terms">New to Grovixo? <a href="#" data-show-register>Start your free 15-day trial.</a></p>
                       
                       <?php if ($loginSuccess): ?>
                           <div class="message" role="status" style="display:block;">You’re signed in. Taking you to your workspace…</div>
@@ -141,7 +183,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   
   <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
-
+    const tabs=document.querySelectorAll('.tab'),panes=document.querySelectorAll('.form-pane');
+    
+    function showTab(name){
+        tabs.forEach(t=>{const on=t.dataset.tab===name;t.classList.toggle('active',on);t.setAttribute('aria-selected',on)});
+        panes.forEach(p=>p.classList.toggle('active',p.id===name));
+        history.replaceState(null,'',name==='login'?'#login':'#register');
+    }
+    
+    tabs.forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.tab)));
+    document.querySelector('[data-show-register]').addEventListener('click',e=>{e.preventDefault();showTab('register')});
+    if(location.hash==='#login')showTab('login');
     
     document.querySelectorAll('[data-reveal]').forEach(b=>b.addEventListener('click',()=>{
         const input=document.getElementById(b.dataset.reveal),show=input.type==='password';
@@ -159,6 +211,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if(!valid) e.preventDefault();
     });
 
+    // Registration Fetch Logic
+    const registerForm = document.getElementById('register-form');
+    registerForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        const err = document.getElementById('register-error');
+        const success = document.getElementById('register-success');
+        const btn = document.getElementById('register-submit-btn');
+        
+        err.style.display = 'none';
+        
+        const valid = registerForm.checkValidity() && registerForm.password.value.length >= 8;
+        registerForm.querySelectorAll('input[required]').forEach(i=>i.classList.toggle('input-error',!i.checkValidity()));
+        
+        if (!valid) {
+            err.textContent = "Please enter your name, a valid email, and a password of at least 8 characters.";
+            err.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Creating account...";
+
+        const formData = new FormData(registerForm);
+        try {
+            const res = await fetch(BASE_URL + '/api/register.php?demo=1', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                success.textContent = data.message;
+                success.style.display = 'block';
+                btn.textContent = "Account created ✓";
+            } else {
+                err.textContent = data.message || "An error occurred.";
+                err.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = "Create my free account →";
+            }
+        } catch (error) {
+            err.textContent = "A network error occurred. Please try again.";
+            err.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = "Create my free account →";
+        }
+    });
 
   </script>
 </body>

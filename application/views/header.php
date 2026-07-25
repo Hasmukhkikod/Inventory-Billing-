@@ -205,6 +205,12 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
                     <span>Organizations</span>
                 </a>
             </li>
+            <li class="sidebar-item <?php echo $currentModule === 'demos' ? 'active' : ''; ?>">
+                <a href="<?php echo BASE_URL; ?>/demos/index" class="sidebar-link">
+                    <i class="fa-solid fa-stopwatch text-warning"></i>
+                    <span>Demo Accounts</span>
+                </a>
+            </li>
             <li class="sidebar-item <?php echo $currentModule === 'plans' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/plans/index" class="sidebar-link">
                     <i class="fa-solid fa-list"></i>
@@ -584,4 +590,42 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
                 <strong>Access Denied:</strong> You do not possess the required user roles/permissions to view that module.
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+        <?php endif; ?>
+
+        <!-- Demo Expiry Warning Modal -->
+        <?php if (!empty($_SESSION['show_demo_warning'])): ?>
+        <div class="modal fade" id="demoWarningModal" tabindex="-1" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-light-warning border-0 text-dark">
+                        <h5 class="modal-title fw-bold"><i class="fa-solid fa-stopwatch me-2 text-warning"></i>Trial Ending Soon!</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <div class="mb-3 text-warning">
+                            <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem;"></i>
+                        </div>
+                        <h4 class="mb-3">Your free trial is ending in <span class="text-danger fw-bold"><?php echo $_SESSION['demo_days_left']; ?> days</span></h4>
+                        <p class="text-muted">Please contact support to upgrade your plan and ensure uninterrupted access to your business data.</p>
+                        <button type="button" class="btn btn-warning w-100 fw-bold mt-2" data-bs-dismiss="modal">I Understand</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var demoModal = new bootstrap.Modal(document.getElementById('demoWarningModal'));
+                var timerMinutes = <?php echo $_SESSION['demo_popup_timer_minutes'] ?? 30; ?>;
+                
+                // Show immediately on load
+                demoModal.show();
+                
+                // Set interval to show again
+                if (timerMinutes > 0) {
+                    setInterval(function() {
+                        demoModal.show();
+                    }, timerMinutes * 60 * 1000);
+                }
+            });
+        </script>
         <?php endif; ?>

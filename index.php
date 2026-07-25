@@ -40,6 +40,7 @@ use App\Controllers\QuotationController;
 use App\Controllers\ChallanController;
 use App\Controllers\PlanController;
 use App\Controllers\OrganizationController;
+use App\Controllers\DemoController;
 use App\Controllers\VerificationController;
 use App\Models\Database;
 use App\Models\Auth;
@@ -68,6 +69,7 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/challans/index', [ChallanController::class, 'index']);
     $r->addRoute('GET', '/plans/index', [PlanController::class, 'index']);
     $r->addRoute('GET', '/organizations/index', [OrganizationController::class, 'index']);
+    $r->addRoute('GET', '/demos/index', [DemoController::class, 'index']);
 
     // Modules (Form)
     $r->addRoute('GET', '/products/form', [ProductController::class, 'form']);
@@ -110,13 +112,33 @@ if (false !== $pos = strpos($uri, '?')) {
 }
 $uri = rawurldecode($uri);
 
+if ($uri === '/') {
+    // If logged in, redirect to dashboard
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (isset($_SESSION['user_id'])) {
+        header("Location: " . BASE_URL . "/index");
+        exit;
+    }
+    require __DIR__ . '/landing.php';
+    exit;
+}
+
+if ($uri === '/features') {
+    require __DIR__ . '/features.php';
+    exit;
+}
+
 // Handle routing
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
         http_response_code(404);
         // Fallback for not-yet-refactored endpoints (temporary during migration)
-        if ($uri !== '/' && file_exists(__DIR__ . $uri)) {
+        if ($uri === '/demo/login') {
+            require __DIR__ . '/demo_login.php';
+        } else if ($uri !== '/' && file_exists(__DIR__ . $uri)) {
             require __DIR__ . $uri;
         } else if ($uri !== '/' && file_exists(__DIR__ . $uri . '.php')) {
             // Clean URL (extension hidden) for a standalone file, e.g. /login -> login.php

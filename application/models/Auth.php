@@ -42,15 +42,40 @@ class Auth {
                     exit;
                 }
                 
+                if ($org && isset($org['is_approved']) && $org['is_approved'] == 0) {
+                    Helpers::logActivity($this->db, "auth", "Failed login: Organization not approved by System Admin: " . $email);
+                    echo "<script>alert('Your organization is awaiting System Admin approval. Please contact support.'); window.location.href='" . BASE_URL . "/login';</script>";
+                    exit;
+                }
+                
                 if (!$org || $org['status'] !== 'ACTIVE') {
                     Helpers::logActivity($this->db, "auth", "Failed login: Organization inactive for email: " . $email);
                     return false;
                 }
                 
-                if (strtotime($org['valid_until']) < strtotime(date('Y-m-d'))) {
-                    $_SESSION['plan_expired'] = true;
+                // Check expiry and warning limits
+                $companySettings = $this->db->query("SELECT demo_popup_days_before, demo_popup_timer_minutes FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+                $popupDays = (int)($companySettings['demo_popup_days_before'] ?? 2);
+                $popupTimer = (int)($companySettings['demo_popup_timer_minutes'] ?? 30);
+                
+                $today = strtotime(date('Y-m-d'));
+                $validUntil = strtotime($org['valid_until']);
+                $diffDays = round(($validUntil - $today) / (60 * 60 * 24));
+                
+                if ($validUntil < $today) {
+                    Helpers::logActivity($this->db, "auth", "Failed login: Organization expired: " . $email);
+                    echo "<script>alert('Your demo has expired. Please contact support.'); window.location.href='" . BASE_URL . "/login';</script>";
+                    exit;
                 } else {
                     $_SESSION['plan_expired'] = false;
+                    
+                    if ($diffDays <= $popupDays) {
+                        $_SESSION['show_demo_warning'] = true;
+                        $_SESSION['demo_days_left'] = $diffDays;
+                        $_SESSION['demo_popup_timer_minutes'] = $popupTimer;
+                    } else {
+                        $_SESSION['show_demo_warning'] = false;
+                    }
                 }
             } else {
                 $_SESSION['plan_expired'] = false;
