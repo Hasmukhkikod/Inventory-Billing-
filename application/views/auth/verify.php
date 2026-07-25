@@ -49,16 +49,35 @@
             <div class="icon-circle success-icon">
                 <i class="fa-solid fa-check"></i>
             </div>
-            <h3 class="mb-3">Verified!</h3>
+            <h3 class="mb-3">Setup Complete!</h3>
             <p class="text-muted mb-4"><?php echo htmlspecialchars($message); ?></p>
-            <a href="<?php echo BASE_URL; ?>/login" class="btn btn-primary w-100">Proceed to Login</a>
+            <a href="<?php echo BASE_URL; ?>/demo/login" class="btn btn-primary w-100">Proceed to Login</a>
+        <?php elseif (!empty($showForm) && $showForm): ?>
+            <h3 class="mb-3">Set Your Password</h3>
+            <p class="text-muted mb-4">Please set a password for your account to complete the setup.</p>
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
+            <form method="POST" action="">
+                <input type="hidden" name="token" value="<?php echo htmlspecialchars($token ?? ''); ?>">
+                <div class="mb-3 text-start">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" required minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" title="Must contain at least one number, one uppercase, one lowercase letter, and one special character.">
+                    <div class="form-text">Must be at least 8 characters and include uppercase, lowercase, number, and special character.</div>
+                </div>
+                <div class="mb-4 text-start">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" name="confirm_password" class="form-control" required minlength="8">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Save Password & Verify</button>
+            </form>
         <?php else: ?>
             <div class="icon-circle error-icon">
                 <i class="fa-solid fa-xmark"></i>
             </div>
             <h3 class="mb-3">Verification Failed</h3>
             <p class="text-muted mb-4"><?php echo htmlspecialchars($message); ?></p>
-            <a href="<?php echo BASE_URL; ?>/login" class="btn btn-outline-secondary w-100">Back to Login</a>
+            <a href="<?php echo BASE_URL; ?>/demo/login" class="btn btn-outline-secondary w-100">Back to Login</a>
         <?php endif; ?>
     </div>
 </body>

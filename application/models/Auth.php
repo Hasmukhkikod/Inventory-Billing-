@@ -25,26 +25,22 @@ class Auth {
         ", [$email]);
         $user = $stmt->fetch();
 
-        if ($user && $user['status'] === 'ACTIVE' && password_verify($password, $user['password'])) {
-            // Subscription / Tenant Check
+        if ($user && $user['status'] === 'ACTIVE') {
             $isSuperAdmin = ($user['id'] == 1);
-            $_SESSION['org_id'] = $isSuperAdmin ? 0 : $user['org_id'];
             
             if (!$isSuperAdmin) {
-                // Fetch organization
-                // Bypassing tenant scope because we manually set it, or since we haven't set session yet, it will bypass
                 $orgStmt = $this->db->query("SELECT * FROM organizations WHERE id = ? LIMIT 1", [$user['org_id']]);
                 $org = $orgStmt->fetch();
                 
                 if ($org && isset($org['is_verified']) && $org['is_verified'] == 0) {
                     Helpers::logActivity($this->db, "auth", "Failed login: Organization email not verified: " . $email);
-                    echo "<script>alert('Please Verified Your Mail Id'); window.location.href='" . BASE_URL . "/login';</script>";
+                    echo "<script>alert('Your account is not verified or password is not set. Please check your email.'); window.location.href='" . BASE_URL . "/demo/login';</script>";
                     exit;
                 }
                 
                 if ($org && isset($org['is_approved']) && $org['is_approved'] == 0) {
                     Helpers::logActivity($this->db, "auth", "Failed login: Organization not approved by System Admin: " . $email);
-                    echo "<script>alert('Your organization is awaiting System Admin approval. Please contact support.'); window.location.href='" . BASE_URL . "/login';</script>";
+                    echo "<script>alert('Your organization is awaiting System Admin approval. Please contact support.'); window.location.href='" . BASE_URL . "/demo/login';</script>";
                     exit;
                 }
                 
@@ -52,15 +48,20 @@ class Auth {
                     Helpers::logActivity($this->db, "auth", "Failed login: Organization inactive for email: " . $email);
                     return false;
                 }
+            }
+
+            if (password_verify($password, $user['password'])) {
+                $_SESSION['org_id'] = $isSuperAdmin ? 0 : $user['org_id'];
                 
-                // Check expiry and warning limits
-                $companySettings = $this->db->query("SELECT demo_popup_days_before, demo_popup_timer_minutes FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
-                $popupDays = (int)($companySettings['demo_popup_days_before'] ?? 2);
-                $popupTimer = (int)($companySettings['demo_popup_timer_minutes'] ?? 30);
-                
-                $today = strtotime(date('Y-m-d'));
-                $validUntil = strtotime($org['valid_until']);
-                $diffDays = round(($validUntil - $today) / (60 * 60 * 24));
+                if (!$isSuperAdmin) {
+                    // Check expiry and warning limits
+                    $companySettings = $this->db->query("SELECT demo_popup_days_before, demo_popup_timer_minutes FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+                    $popupDays = (int)($companySettings['demo_popup_days_before'] ?? 2);
+                    $popupTimer = (int)($companySettings['demo_popup_timer_minutes'] ?? 30);
+                    
+                    $today = strtotime(date('Y-m-d'));
+                    $validUntil = strtotime($org['valid_until']);
+                    $diffDays = round(($validUntil - $today) / (60 * 60 * 24));
                 
                 if ($validUntil < $today) {
                     Helpers::logActivity($this->db, "auth", "Failed login: Organization expired: " . $email);
@@ -123,6 +124,7 @@ class Auth {
             Helpers::logActivity($this->db, "auth", "User login successful", $user['id']);
             return true;
         }
+        } // End of user status active check
 
         Helpers::logActivity($this->db, "auth", "Failed login attempt for email: " . $email);
         return false;

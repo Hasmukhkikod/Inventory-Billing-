@@ -26,14 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstName = trim($_POST['firstName'] ?? '');
     $lastName = trim($_POST['lastName'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $password = bin2hex(random_bytes(8)); // Generate a temporary random password
 
-    if (empty($firstName) || empty($lastName) || empty($email) || empty($password)) {
+    if (empty($firstName) || empty($lastName) || empty($email)) {
         Helpers::jsonResponse(false, "All fields are required.");
-    }
-
-    if (strlen($password) < 8) {
-        Helpers::jsonResponse(false, "Password must be at least 8 characters long.");
     }
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -87,17 +83,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $verifyLink = BASE_URL . "/verify?token=" . $verification_token;
 
             $mail->isHTML(true);
-            $mail->Subject = 'Verify your Grovixo Registration';
-            $mail->Body    = "Hello {$firstName},<br><br>Welcome to Grovixo! Your 15-day free trial has been created.<br><br>Please click the link below to verify your email address before logging in:<br><br><a href='{$verifyLink}'>{$verifyLink}</a><br><br>Thank you!";
+            $mail->Subject = 'Verify your Grovixo Registration & Set Password';
+            $mail->Body    = "Hello {$firstName},<br><br>Welcome to Grovixo! Your 15-day free trial has been created.<br><br>Please click the link below to verify your email address and set your password before logging in:<br><br><a href='{$verifyLink}'>{$verifyLink}</a><br><br>Thank you!";
             
             $mail->send();
         } catch (\Exception $e) {
             error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+            // Delete the created user and org since email failed and they can't verify
+            $db->query("DELETE FROM users WHERE org_id = ?", [$newOrgId]);
+            $db->query("DELETE FROM organizations WHERE id = ?", [$newOrgId]);
+            Helpers::jsonResponse(false, "Failed to send verification email. Please try again later or contact support.");
         }
 
         Helpers::jsonResponse(true, "Your 15-day trial is ready. Please check your email to verify your account!");
 
     } catch (Exception $e) {
+        if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+            Helpers::jsonResponse(false, "This email is already registered.");
+        }
         Helpers::jsonResponse(false, "Error: " . $e->getMessage());
     }
 } else {
