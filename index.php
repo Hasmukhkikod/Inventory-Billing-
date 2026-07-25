@@ -38,10 +38,16 @@ use App\Controllers\SettingsController;
 use App\Controllers\RoleController;
 use App\Controllers\QuotationController;
 use App\Controllers\ChallanController;
+use App\Controllers\PlanController;
+use App\Controllers\OrganizationController;
+use App\Controllers\VerificationController;
 use App\Models\Database;
 use App\Models\Auth;
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
+    // Verification
+    $r->addRoute('GET', '/verify', [VerificationController::class, 'verify']);
+
     // Dashboard
     $r->addRoute('GET', '/', [DashboardController::class, 'index']);
     $r->addRoute('GET', '/index', [DashboardController::class, 'index']);
@@ -60,6 +66,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/settings/index', [SettingsController::class, 'index']);
     $r->addRoute('GET', '/quotations/index', [QuotationController::class, 'index']);
     $r->addRoute('GET', '/challans/index', [ChallanController::class, 'index']);
+    $r->addRoute('GET', '/plans/index', [PlanController::class, 'index']);
+    $r->addRoute('GET', '/organizations/index', [OrganizationController::class, 'index']);
 
     // Modules (Form)
     $r->addRoute('GET', '/products/form', [ProductController::class, 'form']);
@@ -73,6 +81,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/roles/form', [RoleController::class, 'form']);
     $r->addRoute('GET', '/quotations/form', [QuotationController::class, 'form']);
     $r->addRoute('GET', '/challans/form', [ChallanController::class, 'form']);
+    $r->addRoute('GET', '/plans/form', [PlanController::class, 'form']);
+    $r->addRoute('GET', '/organizations/form', [OrganizationController::class, 'form']);
 
     // Modules (View)
     $r->addRoute('GET', '/products/view', [ProductController::class, 'view']);

@@ -43,6 +43,33 @@
 
     <div id="doc-range-warnings" class="dashboard-alerts"></div>
 
+    <?php 
+    if ($_SESSION['user_id'] != 1) {
+        $orgId = $_SESSION['org_id'];
+        $db = $this->db;
+        $org = $db->query("SELECT o.*, p.plan_name FROM organizations o LEFT JOIN plans p ON o.plan_id = p.id WHERE o.id = ?", [$orgId])->fetch();
+        if ($org) {
+            $planName = $org['plan_name'] ?: 'No Plan';
+            $startDate = $org['start_date'] ? date('d M Y', strtotime($org['start_date'])) : 'N/A';
+            $validUntil = $org['valid_until'] ? date('d M Y', strtotime($org['valid_until'])) : 'Lifetime';
+            $daysLeft = '';
+            if ($org['valid_until']) {
+                $diff = strtotime($org['valid_until']) - time();
+                $days = floor($diff / (60 * 60 * 24));
+                if ($days > 0 && $days <= 15) {
+                    $daysLeft = "<span class='text-warning fw-bold ms-2'><i class='fa-solid fa-clock'></i> Expires in $days days</span>";
+                } elseif ($days <= 0) {
+                    $daysLeft = "<span class='text-danger fw-bold ms-2'><i class='fa-solid fa-triangle-exclamation'></i> Expired</span>";
+                }
+            }
+            echo '<div class="alert alert-info shadow-sm d-flex justify-content-between align-items-center mb-4">';
+            echo '<div><strong>Current Plan:</strong> ' . htmlspecialchars($planName) . ' | <strong>Start Date:</strong> ' . $startDate . ' | <strong>Valid Until:</strong> ' . $validUntil . $daysLeft . '</div>';
+            echo '<button class="btn btn-sm btn-primary" onclick="alert(\'Please contact Super Admin to renew your plan.\')">Renew Plan</button>';
+            echo '</div>';
+        }
+    }
+    ?>
+
     <div class="dashboard-kpi-grid mb-4">
         <div class="dashboard-kpi-card accent-indigo">
             <div class="dashboard-kpi-icon"><i class="fa-solid fa-cart-shopping"></i></div>

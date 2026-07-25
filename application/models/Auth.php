@@ -26,6 +26,36 @@ class Auth {
         $user = $stmt->fetch();
 
         if ($user && $user['status'] === 'ACTIVE' && password_verify($password, $user['password'])) {
+            // Subscription / Tenant Check
+            $isSuperAdmin = ($user['id'] == 1);
+            $_SESSION['org_id'] = $isSuperAdmin ? 0 : $user['org_id'];
+            
+            if (!$isSuperAdmin) {
+                // Fetch organization
+                // Bypassing tenant scope because we manually set it, or since we haven't set session yet, it will bypass
+                $orgStmt = $this->db->query("SELECT * FROM organizations WHERE id = ? LIMIT 1", [$user['org_id']]);
+                $org = $orgStmt->fetch();
+                
+                if ($org && isset($org['is_verified']) && $org['is_verified'] == 0) {
+                    Helpers::logActivity($this->db, "auth", "Failed login: Organization email not verified: " . $email);
+                    echo "<script>alert('Please Verified Your Mail Id'); window.location.href='" . BASE_URL . "/login';</script>";
+                    exit;
+                }
+                
+                if (!$org || $org['status'] !== 'ACTIVE') {
+                    Helpers::logActivity($this->db, "auth", "Failed login: Organization inactive for email: " . $email);
+                    return false;
+                }
+                
+                if (strtotime($org['valid_until']) < strtotime(date('Y-m-d'))) {
+                    $_SESSION['plan_expired'] = true;
+                } else {
+                    $_SESSION['plan_expired'] = false;
+                }
+            } else {
+                $_SESSION['plan_expired'] = false;
+            }
+
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['email'] = $user['email'];
             $_SESSION['full_name'] = $user['name'];

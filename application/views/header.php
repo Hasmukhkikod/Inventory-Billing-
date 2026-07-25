@@ -70,6 +70,13 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
 <body>
 <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
+<?php if(isset($_SESSION['plan_expired']) && $_SESSION['plan_expired']): ?>
+<div class="alert alert-danger text-center m-0 rounded-0 shadow-sm" style="position: sticky; top: 0; z-index: 9999;">
+    <strong><i class="fa-solid fa-triangle-exclamation me-2"></i> Subscription Expired!</strong> 
+    Your organization's subscription plan has expired. Please contact the system administrator to renew.
+</div>
+<?php endif; ?>
+
 <div class="app-wrapper">
     <!-- Sidebar -->
     <aside class="sidebar d-flex" id="app-sidebar">
@@ -187,6 +194,21 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
                 <a href="<?php echo BASE_URL; ?>/users/index" class="sidebar-link">
                     <i class="fa-solid fa-users-gear"></i>
                     <span>Users</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
+            <?php if ($_SESSION['user_id'] == 1): ?>
+            <li class="sidebar-item <?php echo $currentModule === 'organizations' ? 'active' : ''; ?>">
+                <a href="<?php echo BASE_URL; ?>/organizations/index" class="sidebar-link">
+                    <i class="fa-solid fa-building"></i>
+                    <span>Organizations</span>
+                </a>
+            </li>
+            <li class="sidebar-item <?php echo $currentModule === 'plans' ? 'active' : ''; ?>">
+                <a href="<?php echo BASE_URL; ?>/plans/index" class="sidebar-link">
+                    <i class="fa-solid fa-list"></i>
+                    <span>Plans</span>
                 </a>
             </li>
             <?php endif; ?>

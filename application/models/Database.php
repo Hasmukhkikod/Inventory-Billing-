@@ -154,10 +154,82 @@ class Database {
         }
     }
 
+    private function applyTenantScope(string $sql): string {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        if (!isset($_SESSION['org_id']) || $_SESSION['org_id'] == 0) {
+            return $sql;
+        }
+
+        $orgId = (int)$_SESSION['org_id'];
+        $globalTables = ['plans', 'organizations', 'permissions'];
+        
+        $type = strtoupper(strtok(trim($sql), " \n\t\r"));
+        
+        if ($type === 'SELECT') {
+            if (preg_match('/FROM\s+([a-zA-Z0-9_]+)(?:\s+(AS\s+)?([a-zA-Z0-9_]+))?/i', $sql, $matches)) {
+                $tableName = $matches[1];
+                $alias = (isset($matches[3]) && !in_array(strtoupper($matches[3]), ['ON', 'WHERE', 'JOIN', 'ORDER', 'GROUP', 'LIMIT', 'LEFT', 'RIGHT', 'INNER'])) ? $matches[3] : $tableName;
+                
+                if (!in_array(strtolower($tableName), $globalTables)) {
+                    if (stripos($sql, 'WHERE') !== false) {
+                        $sql = preg_replace('/WHERE/i', "WHERE $alias.org_id = $orgId AND", $sql, 1);
+                    } else {
+                        if (preg_match('/(GROUP BY|ORDER BY|LIMIT)/i', $sql, $m, PREG_OFFSET_CAPTURE)) {
+                            $pos = $m[0][1];
+                            $sql = substr_replace($sql, " WHERE $alias.org_id = $orgId ", $pos, 0);
+                        } else {
+                            $sql .= " WHERE $alias.org_id = $orgId";
+                        }
+                    }
+                }
+            }
+        } elseif ($type === 'UPDATE') {
+             if (preg_match('/UPDATE\s+([a-zA-Z0-9_]+)/i', $sql, $matches)) {
+                 $tableName = $matches[1];
+                 if (!in_array(strtolower($tableName), $globalTables)) {
+                     if (stripos($sql, 'WHERE') !== false) {
+                        $sql = preg_replace('/WHERE/i', "WHERE org_id = $orgId AND", $sql, 1);
+                     } else {
+                        $sql .= " WHERE org_id = $orgId";
+                     }
+                 }
+             }
+        } elseif ($type === 'DELETE') {
+             if (preg_match('/FROM\s+([a-zA-Z0-9_]+)/i', $sql, $matches)) {
+                 $tableName = $matches[1];
+                 if (!in_array(strtolower($tableName), $globalTables)) {
+                     if (stripos($sql, 'WHERE') !== false) {
+                        $sql = preg_replace('/WHERE/i', "WHERE org_id = $orgId AND", $sql, 1);
+                     } else {
+                        $sql .= " WHERE org_id = $orgId";
+                     }
+                 }
+             }
+        } elseif ($type === 'INSERT') {
+            if (preg_match('/INSERT\s+(?:IGNORE\s+)?INTO\s+([a-zA-Z0-9_]+)\s*\((.*?)\)\s*VALUES\s*\((.*?)\)/is', $sql, $matches)) {
+                $tableName = $matches[1];
+                if (!in_array(strtolower($tableName), $globalTables)) {
+                    $cols = $matches[2];
+                    if (stripos($cols, 'org_id') === false) {
+                        $newCols = $cols . ', org_id';
+                        $sql = preg_replace("/\(".preg_quote($cols, '/')."\)/", "($newCols)", $sql, 1);
+                        $sql = preg_replace("/VALUES\s*\((.*?)\)/is", "VALUES ($1, $orgId)", $sql, 1);
+                    }
+                }
+            }
+        }
+        
+        return $sql;
+    }
+
     /**
      * Helper for prepared statement execution
      */
     public function query(string $sql, array $params = []): PDOStatement {
+        $sql = $this->applyTenantScope($sql);
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute($params);
