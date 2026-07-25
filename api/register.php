@@ -42,7 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Check if email already exists
     $existingUser = $db->query("SELECT id FROM users WHERE email = ? LIMIT 1", [$email])->fetch();
-    if ($existingUser) {
+    $existingOrg = $db->query("SELECT id FROM organizations WHERE email = ? LIMIT 1", [$email])->fetch();
+    
+    if ($existingUser || $existingOrg) {
         Helpers::jsonResponse(false, "This email is already registered.");
     }
 
