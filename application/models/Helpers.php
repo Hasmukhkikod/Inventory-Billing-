@@ -110,4 +110,52 @@ class Helpers {
             return false;
         }
     }
+
+    /**
+     * Generate a beautiful responsive HTML email template
+     */
+    public static function getEmailTemplate(string $title, string $content): string {
+        return '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f7fa; color: #333333; margin: 0; padding: 0; }
+                .wrapper { width: 100%; table-layout: fixed; background-color: #f4f7fa; padding-bottom: 60px; }
+                .main { background-color: #ffffff; margin: 0 auto; width: 100%; max-width: 600px; border-spacing: 0; color: #333333; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 40px; }
+                .header { padding: 30px; text-align: center; background-color: #ffffff; border-bottom: 1px solid #eeeeee; }
+                .header h1 { margin: 0; color: #12214f; font-size: 24px; letter-spacing: -0.5px; }
+                .content { padding: 40px 40px 30px; font-size: 16px; line-height: 1.6; }
+                .footer { padding: 20px; text-align: center; font-size: 13px; color: #999999; background-color: #fbfbfb; border-top: 1px solid #eeeeee; }
+                .btn { display: inline-block; padding: 14px 28px; background-color: #3b5bff; color: #ffffff !important; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; text-align: center; margin-top: 10px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(59,91,255,0.3); }
+                .btn-container { text-align: center; margin: 30px 0; }
+                .small-link { font-size: 12px; color: #999999; word-break: break-all; }
+                h2 { color: #12214f; margin-top: 0; }
+            </style>
+        </head>
+        <body>
+            <center class="wrapper">
+                <table class="main" width="100%">
+                    <tr>
+                        <td class="header">
+                            <h1>Grovixo</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="content">
+                            ' . $content . '
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer">
+                            &copy; ' . date("Y") . ' Grovixo. All rights reserved.<br>
+                            If you did not request this, please ignore this email.
+                        </td>
+                    </tr>
+                </table>
+            </center>
+        </body>
+        </html>';
+    }
 }

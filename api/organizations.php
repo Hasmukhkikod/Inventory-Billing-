@@ -84,6 +84,7 @@ if ($action === 'save') {
                     $mail->Port       = $_ENV['SMTP_PORT'] ?? 587;
 
                     $mail->setFrom($_ENV['SMTP_USER'] ?? 'infogrovixo@gmail.com', 'IIMS System');
+                    $mail->addReplyTo($_ENV['SMTP_USER'] ?? 'infogrovixo@gmail.com', 'IIMS Support');
                     $mail->addAddress($email, $name);
 
                     $demoParam = (isset($_POST['demo']) && $_POST['demo'] == '1') ? '&demo=1' : '';
@@ -91,9 +92,20 @@ if ($action === 'save') {
 
                     $mail->isHTML(true);
                     $mail->Subject = 'Verify your Organization Registration & Set Password';
-                    $mail->Body    = "Hello {$name},<br><br>Your organization has been registered successfully. Please click the button below to verify your email address and set your password before logging in:<br><br><a href='{$verifyLink}' style='display:inline-block;padding:12px 24px;color:#fff;background-color:#3b5bff;text-decoration:none;border-radius:8px;font-weight:bold;'>Verify Email & Set Password</a><br><br>Or copy and paste this link in your browser:<br>{$verifyLink}<br><br>Thank you!";
-                    $mail->AltBody = "Hello {$name},\n\Your organization has been registered successfully. Please visit the link below to verify your email address and set your password:\n\n{$verifyLink}\n\nThank you!";
-
+                    
+                    $content = "<h2>Organization Registered</h2>
+                    <p>Hello {$name},</p>
+                    <p>Your organization has been registered successfully.</p>
+                    <p>Please click the button below to verify your email address and set your password before logging in:</p>
+                    <div class='btn-container'>
+                        <a href='{$verifyLink}' class='btn'>Verify Email & Set Password</a>
+                    </div>
+                    <p>Or copy and paste this link in your browser:</p>
+                    <p class='small-link'>{$verifyLink}</p>";
+                    
+                    $mail->Body = \App\Models\Helpers::getEmailTemplate('Verify your Organization Registration & Set Password', $content);
+                    $mail->AltBody = "Hello {$name},\n\nYour organization has been registered successfully. Please visit the link below to verify your email address and set your password:\n\n{$verifyLink}\n\nThank you!";
+                    
                     $mail->send();
                 } catch (\Exception $e) {
                     error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");

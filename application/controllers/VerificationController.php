@@ -70,12 +70,26 @@ class VerificationController {
                             $mail->Port       = $_ENV['SMTP_PORT'] ?? 587;
 
                             $mail->setFrom($_ENV['SMTP_USER'] ?? 'infogrovixo@gmail.com', 'Grovixo');
+                            $mail->addReplyTo($_ENV['SMTP_USER'] ?? 'infogrovixo@gmail.com', 'Grovixo Support');
                             $mail->addAddress($org['email'], $org['name']);
 
+                            $loginLink = BASE_URL . "/login" . ($isDemo ? "?demo=1" : "");
+
                             $mail->isHTML(true);
-                            $mail->Subject = 'Welcome to Grovixo - Verification Successful';
-                            $loginUrl = BASE_URL . '/demo/login';
-                            $mail->Body    = "Hello,<br><br>Thank you for verifying your account. Your setup is now complete.<br><br>Please use this ID: <b>{$org['email']}</b><br>And your chosen password to log in to your account.<br><br><a href='{$loginUrl}'>Click here to Login</a><br><br>Thank you!";
+                            $mail->Subject = 'Welcome to Grovixo - Registration Successful';
+                            
+                            $content = "<h2>Registration Successful!</h2>
+                            <p>Hello {$org['name']},</p>
+                            <p>Your email has been verified and your password has been set successfully.</p>
+                            <p>You can now log in to your account using the following link:</p>
+                            <div class='btn-container'>
+                                <a href='{$loginLink}' class='btn'>Login to Grovixo</a>
+                            </div>
+                            <p>Or copy and paste this link in your browser:</p>
+                            <p class='small-link'>{$loginLink}</p>";
+                            
+                            $mail->Body = Helpers::getEmailTemplate('Welcome to Grovixo - Registration Successful', $content);
+                            $mail->AltBody = "Hello {$org['name']},\n\nYour email has been verified and your password has been set successfully.\n\nYou can now log in to your account using the following link:\n\n{$loginLink}\n\nThank you!";
                             
                             $mail->send();
                         } catch (\Exception $e) {

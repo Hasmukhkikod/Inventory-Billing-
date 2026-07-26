@@ -47,7 +47,7 @@ use App\Models\Auth;
 
 $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     // Verification
-    $r->addRoute('GET', '/verify', [VerificationController::class, 'verify']);
+    $r->addRoute(['GET', 'POST'], '/verify', [VerificationController::class, 'verify']);
 
     // Dashboard
     $r->addRoute('GET', '/', [DashboardController::class, 'index']);

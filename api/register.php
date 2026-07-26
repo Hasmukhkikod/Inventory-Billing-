@@ -88,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Port       = $_ENV['SMTP_PORT'] ?? 587;
 
             $mail->setFrom($_ENV['SMTP_USER'] ?? 'infogrovixo@gmail.com', 'Grovixo');
+            $mail->addReplyTo($_ENV['SMTP_USER'] ?? 'infogrovixo@gmail.com', 'Grovixo Support');
             $mail->addAddress($email, $firstName . " " . $lastName);
 
             $demoParam = (isset($_GET['demo']) && $_GET['demo'] == 1) ? '&demo=1' : '';
@@ -95,7 +96,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $mail->isHTML(true);
             $mail->Subject = 'Verify your Grovixo Registration & Set Password';
-            $mail->Body    = "Hello {$firstName},<br><br>Welcome to Grovixo! Your 15-day free trial has been created.<br><br>Please click the button below to verify your email address and set your password before logging in:<br><br><a href='{$verifyLink}' style='display:inline-block;padding:12px 24px;color:#fff;background-color:#3b5bff;text-decoration:none;border-radius:8px;font-weight:bold;'>Verify Email & Set Password</a><br><br>Or copy and paste this link in your browser:<br>{$verifyLink}<br><br>Thank you!";
+            
+            $content = "<h2>Welcome to Grovixo!</h2>
+            <p>Hello {$firstName},</p>
+            <p>Your 15-day free trial has been created successfully.</p>
+            <p>Please click the button below to verify your email address and set your password before logging in:</p>
+            <div class='btn-container'>
+                <a href='{$verifyLink}' class='btn'>Verify Email & Set Password</a>
+            </div>
+            <p>Or copy and paste this link in your browser:</p>
+            <p class='small-link'>{$verifyLink}</p>";
+            
+            $mail->Body = Helpers::getEmailTemplate('Verify your Grovixo Registration & Set Password', $content);
+            $mail->AltBody = "Hello {$firstName},\n\nWelcome to Grovixo! Your 15-day free trial has been created.\n\nPlease copy and paste the link below in your browser to verify your email address and set your password before logging in:\n\n{$verifyLink}\n\nThank you!";
             
             $mail->send();
         } catch (\Exception $e) {

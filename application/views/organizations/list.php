@@ -46,17 +46,25 @@
                                 ?>
                             </td>
                             <td>
-                                <?php if($o['is_approved'] == 1): ?>
-                                    <span class="badge bg-success bg-opacity-10 text-success me-1"><i class="fa-solid fa-check me-1"></i>Approved</span>
-                                <?php else: ?>
-                                    <span class="badge bg-warning bg-opacity-10 text-warning me-1"><i class="fa-solid fa-clock me-1"></i>Pending</span>
-                                <?php endif; ?>
+                                <?php
+                                $isVerified = isset($o['is_verified']) ? (int)$o['is_verified'] : 0;
+                                $isApproved = isset($o['is_approved']) ? (int)$o['is_approved'] : 0;
                                 
-                                <?php if($o['status'] === 'ACTIVE'): ?>
-                                    <span class="badge bg-success bg-opacity-10 text-success">Active</span>
-                                <?php else: ?>
-                                    <span class="badge bg-danger bg-opacity-10 text-danger">Inactive</span>
-                                <?php endif; ?>
+                                if ($isVerified === 0) {
+                                    echo '<span class="badge bg-warning text-dark border"><i class="fa-solid fa-envelope-circle-check me-1"></i>Awaiting Verification</span>';
+                                    echo '<div class="text-muted mt-1" style="font-size:11px;">Link sent. Waiting for password set.</div>';
+                                } elseif ($isVerified === 1 && $isApproved === 0) {
+                                    echo '<span class="badge bg-info text-dark border"><i class="fa-solid fa-user-clock me-1"></i>Awaiting Approval</span>';
+                                    echo '<div class="text-muted mt-1" style="font-size:11px;">Password set. Needs admin approval.</div>';
+                                } else {
+                                    if ($o['status'] === 'ACTIVE') {
+                                        echo '<span class="badge bg-success border"><i class="fa-solid fa-check-double me-1"></i>Verified & Active</span>';
+                                    } else {
+                                        echo '<span class="badge bg-danger border"><i class="fa-solid fa-ban me-1"></i>Account Disabled</span>';
+                                    }
+                                    echo '<div class="text-muted mt-1" style="font-size:11px;">Full system access</div>';
+                                }
+                                ?>
                             </td>
                             <td class="text-end">
                                 <a href="<?php echo BASE_URL; ?>/organizations/form?id=<?php echo $o['id']; ?>" class="btn btn-sm btn-outline-primary" title="Edit">
