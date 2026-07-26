@@ -6,72 +6,77 @@
 ?>
 
 <div class="row g-4">
-    <!-- Top forms panel (Full Width) -->
     <div class="col-md-12">
-        <div class="panel-card" style="overflow: visible;">
-            <div class="panel-header">
-                <ul class="nav nav-tabs border-0" id="settingsTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active border-0 bg-transparent fw-semibold settings-tab" id="company-tab" data-bs-toggle="tab" data-bs-target="#company-pane" type="button" role="tab" aria-controls="company-pane" aria-selected="true">
+        <div class="panel-card p-0" style="overflow: hidden;">
+            <div class="row g-0">
+                <!-- Sidebar Tabs -->
+                <div class="col-md-3 border-end bg-light" style="min-height: 500px;">
+                    <div class="p-3">
+                        <ul class="nav nav-pills flex-row flex-md-column gap-2 overflow-auto text-nowrap" id="settingsTabs" role="tablist" style="padding-bottom: 10px;">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active text-start fw-semibold settings-tab w-100" id="company-tab" data-bs-toggle="tab" data-bs-target="#company-pane" type="button" role="tab" aria-controls="company-pane" aria-selected="true">
                             <i class="fa-solid fa-building me-2"></i>Company Details
                         </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing-pane" type="button" role="tab" aria-controls="billing-pane" aria-selected="false">
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing-pane" type="button" role="tab" aria-controls="billing-pane" aria-selected="false">
                             <i class="fa-solid fa-receipt me-2"></i>Invoice & Tax
                         </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="loyalty-tab" data-bs-toggle="tab" data-bs-target="#loyalty-pane" type="button" role="tab" aria-controls="loyalty-pane" aria-selected="false">
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="loyalty-tab" data-bs-toggle="tab" data-bs-target="#loyalty-pane" type="button" role="tab" aria-controls="loyalty-pane" aria-selected="false">
                             <i class="fa-solid fa-gift me-2"></i>Loyalty & Templates
                         </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank-pane" type="button" role="tab" aria-controls="bank-pane" aria-selected="false">
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="bank-tab" data-bs-toggle="tab" data-bs-target="#bank-pane" type="button" role="tab" aria-controls="bank-pane" aria-selected="false">
                             <i class="fa-solid fa-university me-2"></i>Bank Details
                         </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="coupons-tab" data-bs-toggle="tab" data-bs-target="#coupons-pane" type="button" role="tab" aria-controls="coupons-pane" aria-selected="false">
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="coupons-tab" data-bs-toggle="tab" data-bs-target="#coupons-pane" type="button" role="tab" aria-controls="coupons-pane" aria-selected="false">
                             <i class="fa-solid fa-tags me-2"></i>Coupons
                         </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme-pane" type="button" role="tab" aria-controls="theme-pane" aria-selected="false">
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme-pane" type="button" role="tab" aria-controls="theme-pane" aria-selected="false">
                             <i class="fa-solid fa-paint-roller me-2"></i>Theme & Display
                         </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false">
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false">
                             <i class="fa-solid fa-database me-2"></i>Data & Backups
                         </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="printer-tab" data-bs-toggle="tab" data-bs-target="#printer-pane" type="button" role="tab" aria-controls="printer-pane" aria-selected="false">
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="printer-tab" data-bs-toggle="tab" data-bs-target="#printer-pane" type="button" role="tab" aria-controls="printer-pane" aria-selected="false">
                             <i class="fa-solid fa-print me-2"></i>Printer Settings
                         </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback-pane" type="button" role="tab" aria-controls="feedback-pane" aria-selected="false">
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback-pane" type="button" role="tab" aria-controls="feedback-pane" aria-selected="false">
                             <i class="fa-solid fa-comment-dots me-2"></i>Feedback
                             <span class="badge bg-danger rounded-pill ms-1 d-none" id="feedback-unread-badge">0</span>
                         </button>
-                    </li>
-                    <?php if ($_SESSION['org_id'] == 0): ?>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link border-0 bg-transparent fw-semibold settings-tab text-primary" id="demo-tab" data-bs-toggle="tab" data-bs-target="#demo-pane" type="button" role="tab" aria-controls="demo-pane" aria-selected="false">
+                            </li>
+                            <?php if ($_SESSION['org_id'] == 0): ?>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="demo-tab" data-bs-toggle="tab" data-bs-target="#demo-pane" type="button" role="tab" aria-controls="demo-pane" aria-selected="false">
                             <i class="fa-solid fa-stopwatch me-2"></i>Demo Settings
-                        </button>
-                    </li>
-                    <?php endif; ?>
-                </ul>
-            </div>
-            
-            <div class="panel-body">
-                <form id="settingsForm" novalidate>
-                    <?php echo \App\Models\Helpers::csrfField(); ?>
-                    
-                    <div class="tab-content text-dark" id="settingsTabsContent">
+                                </button>
+                            </li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Tab Content Panel -->
+                <div class="col-md-9">
+                    <div class="panel-body p-4">
+                        <form id="settingsForm" novalidate>
+                            <?php echo \App\Models\Helpers::csrfField(); ?>
+                            
+                            <div class="tab-content text-dark" id="settingsTabsContent">
                         
                         <!-- COMPANY DETAILS PANE -->
                         <div class="tab-pane fade show active" id="company-pane" role="tabpanel" aria-labelledby="company-tab" tabindex="0">
@@ -953,6 +958,8 @@
                     <?php endif; ?>
 
                 </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1087,6 +1094,18 @@
 <script src="<?php echo BASE_URL; ?>/assets/js/thermal-printer.js?v=<?php echo \App\Models\Helpers::assetVersion('/assets/js/thermal-printer.js'); ?>"></script>
 <script>
 $(document).ready(function() {
+    // Fix for tabs split across multiple tab-content containers
+    $('.settings-tab').on('show.bs.tab', function (e) {
+        $('.tab-pane').removeClass('show active');
+        const target = $(e.target).attr('data-bs-target');
+        const formTabs = ['#company-pane', '#billing-pane', '#loyalty-pane', '#bank-pane', '#theme-pane', '#demo-pane'];
+        if (formTabs.includes(target)) {
+            $('#settings-save-row').show();
+        } else {
+            $('#settings-save-row').hide();
+        }
+    });
+
     // 1. Fetch current settings details
     $.ajax({
         url: BASE_URL + '/api/settings.php?action=list',
@@ -1203,6 +1222,13 @@ $(document).ready(function() {
         if (logoFile) {
             formData.append('company_logo_file', logoFile);
         }
+        
+        // Append Demo Settings manually since they are outside the form tag
+        if ($('#set-demo-days').length) {
+            formData.append('demo_popup_days_before', $('#set-demo-days').val());
+            formData.append('demo_popup_timer_minutes', $('#set-demo-timer').val());
+        }
+        
         $.ajax({
             url: BASE_URL + '/api/settings.php?action=save',
             type: 'POST',

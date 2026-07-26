@@ -41,8 +41,10 @@ class DashboardController {
         $data = [];
         
         $data['total_orgs'] = $db->query("SELECT COUNT(*) as count FROM organizations")->fetch()['count'] ?? 0;
-        $data['active_orgs'] = $db->query("SELECT COUNT(*) as count FROM organizations WHERE status = 'ACTIVE'")->fetch()['count'] ?? 0;
+        $data['active_orgs'] = $db->query("SELECT COUNT(*) as count FROM organizations WHERE status = 'ACTIVE' AND is_verified = 1 AND is_approved = 1")->fetch()['count'] ?? 0;
         $data['expired_orgs'] = $db->query("SELECT COUNT(*) as count FROM organizations WHERE valid_until < CURDATE() AND valid_until IS NOT NULL")->fetch()['count'] ?? 0;
+        $data['awaiting_verification'] = $db->query("SELECT COUNT(*) as count FROM organizations WHERE is_verified = 0")->fetch()['count'] ?? 0;
+        $data['awaiting_approval'] = $db->query("SELECT COUNT(*) as count FROM organizations WHERE is_verified = 1 AND is_approved = 0")->fetch()['count'] ?? 0;
         $data['recent_orgs'] = $db->query("SELECT o.*, p.plan_name FROM organizations o LEFT JOIN plans p ON o.plan_id = p.id ORDER BY o.id DESC LIMIT 20")->fetchAll();
         
         $storageQuery = "

@@ -23,9 +23,46 @@ switch ($action) {
     case 'list':
         try {
             $alerts = [];
+            $role = $_SESSION['role'] ?? 'user';
             
-            // 1. Fetch Dynamic Low Stock Alerts
-            $lowStockProducts = $db->query("
+            if ($role === 'super_admin') {
+                // Fetch unapproved organizations
+                $pendingOrgs = $db->query("SELECT id, name FROM organizations WHERE is_approved = 0 ORDER BY created_at DESC LIMIT 5")->fetchAll();
+                foreach ($pendingOrgs as $org) {
+                    $alerts[] = [
+                        'id' => 'org_approval_' . $org['id'],
+                        'title' => 'Pending Approval',
+                        'message' => 'Organization "' . $org['name'] . '" is waiting for approval.',
+                        'type' => 'INFO',
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'is_read' => 0
+                    ];
+                }
+                
+                // Fetch organizations expiring soon
+                $expiringOrgs = $db->query("SELECT id, name, valid_until FROM organizations WHERE valid_until BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND status = 'ACTIVE' LIMIT 5")->fetchAll();
+                foreach ($expiringOrgs as $org) {
+                    $alerts[] = [
+                        'id' => 'org_expiry_' . $org['id'],
+                        'title' => 'Subscription Expiring',
+                        'message' => 'Organization "' . $org['name'] . '" subscription expires on ' . $org['valid_until'],
+                        'type' => 'PAYMENT',
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'is_read' => 0
+                    ];
+                }
+                
+                $alerts[] = [
+                    'id' => 'admin_reminder_' . date('Ymd'),
+                    'title' => 'System Check',
+                    'message' => 'Please review pending organizations and monitor system health.',
+                    'type' => 'SYSTEM',
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'is_read' => 0
+                ];
+            } else {
+                // 1. Fetch Dynamic Low Stock Alerts
+                $lowStockProducts = $db->query("
                 SELECT id, product_name, current_stock, minimum_stock 
                 FROM products 
                 WHERE current_stock <= minimum_stock AND status = 'ACTIVE' AND deleted_at IS NULL
@@ -102,6 +139,7 @@ switch ($action) {
                 'created_at' => date('Y-m-d H:i:s'),
                 'is_read' => 0
             ];
+            }
 
             // 2. Fetch notifications from DB table
             $dbAlerts = $db->query("

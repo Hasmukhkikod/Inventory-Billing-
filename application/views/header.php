@@ -32,7 +32,7 @@ $requestPath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $uriSegments = $requestPath === '' ? [] : explode('/', $requestPath);
 $currentDir = $uriSegments[0] ?? 'index';
 $currentPage = end($uriSegments) ?: 'index';
-$validModules = ['products', 'customers', 'suppliers', 'expenses', 'billing', 'reports', 'users', 'settings', 'purchases', 'returns', 'quotations', 'challans'];
+$validModules = ['products', 'customers', 'suppliers', 'expenses', 'billing', 'reports', 'users', 'settings', 'purchases', 'returns', 'quotations', 'challans', 'organizations', 'demos', 'plans', 'announcements'];
 $currentModule = in_array($currentDir, $validModules) ? $currentDir : $currentPage;
 
 // Fetch Company Settings
@@ -77,6 +77,73 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
 </div>
 <?php endif; ?>
 
+<?php
+// Fetch Active Announcements
+$currentSqlTime = date('Y-m-d H:i:s');
+$activeAds = $db->query("SELECT * FROM system_announcements WHERE status = 'ACTIVE' AND (start_time IS NULL OR start_time <= ?) AND (end_time IS NULL OR end_time >= ?)", [$currentSqlTime, $currentSqlTime])->fetchAll();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+foreach ($activeAds as $ad) {
+    if ($ad['location'] === 'all_pages' || $ad['location'] === $currentModule) {
+        
+        $adId = $ad['id'];
+        $freq = $ad['show_frequency'] ?? 'always';
+        $shouldShow = true;
+        
+        if ($freq === 'once_per_login') {
+            if (isset($_SESSION['shown_ads'][$adId])) {
+                $shouldShow = false;
+            } else {
+                $_SESSION['shown_ads'][$adId] = true;
+            }
+        } elseif ($freq === 'every_x_minutes') {
+            $cooldown = ($ad['frequency_minutes'] ?? 0) * 60;
+            if (isset($_SESSION['ad_last_shown'][$adId])) {
+                $lastShown = $_SESSION['ad_last_shown'][$adId];
+                if ((time() - $lastShown) < $cooldown) {
+                    $shouldShow = false;
+                } else {
+                    $_SESSION['ad_last_shown'][$adId] = time();
+                }
+            } else {
+                $_SESSION['ad_last_shown'][$adId] = time();
+            }
+        }
+        
+        if (!$shouldShow) {
+            continue;
+        }
+
+        if ($ad['display_type'] === 'banner') {
+            echo '<div class="alert alert-info border-0 rounded-0 m-0 shadow-sm d-flex justify-content-between align-items-center alert-dismissible fade show" style="background: linear-gradient(90deg, #4f46e5 0%, #3730a3 100%); color: white; position: sticky; top: 0; z-index: 9998;">';
+            echo '<div class="d-flex align-items-center"><i class="fa-solid fa-bullhorn fs-4 me-3"></i><div><strong>' . htmlspecialchars($ad['title']) . '</strong><br><span style="font-size: 0.9rem;">' . $ad['message'] . '</span></div></div>';
+            echo '<button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>';
+            echo '</div>';
+        } else {
+            $modalId = 'adModal_' . $adId;
+            $timeoutStr = $ad['duration_seconds'] > 0 ? "setTimeout(function(){ $('#$modalId').modal('hide'); }, " . ($ad['duration_seconds'] * 1000) . ");" : "";
+            
+            $sizeClass = '';
+            $mSize = $ad['modal_size'] ?? 'md';
+            if ($mSize === 'lg') $sizeClass = 'modal-lg';
+            if ($mSize === 'fullscreen') $sizeClass = 'modal-fullscreen';
+            
+            echo '<div class="modal fade" id="' . $modalId . '" tabindex="-1" style="z-index: 1055;">';
+            echo '<div class="modal-dialog modal-dialog-centered ' . $sizeClass . '">';
+            echo '<div class="modal-content shadow">';
+            echo '<div class="modal-header border-bottom-0 pb-0"><h5 class="modal-title">' . htmlspecialchars($ad['title']) . '</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>';
+            echo '<div class="modal-body py-4 text-center">' . $ad['message'] . '</div>';
+            echo '<div class="modal-footer border-top-0 pt-0 justify-content-center"><button type="button" class="btn btn-primary px-4 rounded-pill" data-bs-dismiss="modal">Got it!</button></div>';
+            echo '</div></div></div>';
+            echo "<script>document.addEventListener('DOMContentLoaded', function() { var m = new bootstrap.Modal(document.getElementById('$modalId')); m.show(); $timeoutStr });</script>";
+        }
+    }
+}
+?>
+
 <div class="app-wrapper">
     <!-- Sidebar -->
     <aside class="sidebar d-flex" id="app-sidebar">
@@ -102,7 +169,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Inventory')): ?>
+            <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'products' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/products/index" class="sidebar-link">
                     <i class="fa-solid fa-box-open"></i>
@@ -117,7 +184,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Create Invoice')): ?>
+            <?php if ($auth->hasPermission('Create Invoice') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'billing' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/billing/index" class="sidebar-link">
                     <i class="fa-solid fa-file-invoice-dollar"></i>
@@ -126,7 +193,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Inventory')): ?>
+            <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'returns' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/returns/index" class="sidebar-link">
                     <i class="fa-solid fa-rotate-left"></i>
@@ -135,7 +202,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Quotations')): ?>
+            <?php if ($auth->hasPermission('Manage Quotations') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'quotations' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/quotations/index" class="sidebar-link">
                     <i class="fa-solid fa-file-signature"></i>
@@ -144,7 +211,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Challans')): ?>
+            <?php if ($auth->hasPermission('Manage Challans') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'challans' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/challans/index" class="sidebar-link">
                     <i class="fa-solid fa-truck-fast"></i>
@@ -153,7 +220,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Customers')): ?>
+            <?php if ($auth->hasPermission('Manage Customers') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'customers' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/customers/index" class="sidebar-link">
                     <i class="fa-solid fa-users"></i>
@@ -162,7 +229,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Suppliers')): ?>
+            <?php if ($auth->hasPermission('Manage Suppliers') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'suppliers' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/suppliers/index" class="sidebar-link">
                     <i class="fa-solid fa-truck-field"></i>
@@ -171,7 +238,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Expenses')): ?>
+            <?php if ($auth->hasPermission('Manage Expenses') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'expenses' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/expenses/index" class="sidebar-link">
                     <i class="fa-solid fa-wallet"></i>
@@ -180,7 +247,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('View Reports')): ?>
+            <?php if ($auth->hasPermission('View Reports') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'reports' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/reports/index" class="sidebar-link">
                     <i class="fa-solid fa-file-waveform"></i>
@@ -215,6 +282,12 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
                 <a href="<?php echo BASE_URL; ?>/plans/index" class="sidebar-link">
                     <i class="fa-solid fa-list"></i>
                     <span>Plans</span>
+                </a>
+            </li>
+            <li class="sidebar-item <?php echo $currentModule === 'announcements' ? 'active' : ''; ?>">
+                <a href="<?php echo BASE_URL; ?>/announcements/index" class="sidebar-link">
+                    <i class="fa-solid fa-bullhorn text-danger"></i>
+                    <span>Broadcasts</span>
                 </a>
             </li>
             <?php endif; ?>
