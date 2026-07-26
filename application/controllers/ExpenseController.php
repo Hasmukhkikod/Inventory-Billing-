@@ -22,7 +22,7 @@ class ExpenseController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Manage Expenses');
+        $this->auth->requirePermission('Manage Expenses', 'expenses');
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class ExpenseController {
     }
 
     public function form($id = null) {
-        $this->auth->requirePermission('Manage Expenses');
+        $this->auth->requirePermission('Manage Expenses', 'expenses');
         
         $expense = null;
         if ($id > 0) {
@@ -46,7 +46,7 @@ class ExpenseController {
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Manage Expenses');
+        $this->auth->requirePermission('Manage Expenses', 'expenses');
         
         $db = $this->db;
         $expense = $db->query("

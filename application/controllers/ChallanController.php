@@ -22,7 +22,7 @@ class ChallanController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Manage Challans');
+        $this->auth->requirePermission('Manage Challans', 'challans');
 
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class ChallanController {
     }
 
     public function form($id = null) {
-        $this->auth->requirePermission('Manage Challans');
+        $this->auth->requirePermission('Manage Challans', 'challans');
 
         $challan = null;
         $items = [];
@@ -51,7 +51,7 @@ class ChallanController {
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Manage Challans');
+        $this->auth->requirePermission('Manage Challans', 'challans');
 
         $db = $this->db;
         $challan = $db->query("

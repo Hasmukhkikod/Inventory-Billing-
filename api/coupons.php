@@ -16,6 +16,7 @@ $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 switch ($action) {
     case 'list':
+        if (!$auth->hasPlanFeature('coupons')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         $auth->requirePermission('Manage Coupons');
         try {
             $stmt = $db->query("SELECT * FROM coupons WHERE status != 'INACTIVE' AND deleted_at IS NULL ORDER BY created_at DESC");
@@ -26,6 +27,7 @@ switch ($action) {
         break;
 
     case 'get':
+        if (!$auth->hasPlanFeature('coupons')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         $auth->requirePermission('Manage Coupons');
         $id = (int)($_GET['id'] ?? 0);
         try {
@@ -38,6 +40,7 @@ switch ($action) {
         break;
 
     case 'save':
+        if (!$auth->hasPlanFeature('coupons')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         $auth->requirePermission('Manage Coupons');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, 'Method not allowed');
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, 'CSRF verification failed');
@@ -77,6 +80,7 @@ switch ($action) {
         break;
 
     case 'delete':
+        if (!$auth->hasPlanFeature('coupons')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         $auth->requirePermission('Manage Coupons');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, 'Method not allowed');
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, 'CSRF verification failed');
@@ -91,6 +95,7 @@ switch ($action) {
         break;
 
     case 'validate':
+        if (!$auth->hasPlanFeature('coupons')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         $auth->requirePermission('Create Invoice');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, 'Method not allowed');
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, 'CSRF verification failed');

@@ -22,6 +22,7 @@ $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 switch ($action) {
     case 'save':
+        if (!$auth->hasPlanFeature('roles')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Method not allowed.");
         
         $id = (int)($_POST['id'] ?? 0);
@@ -78,6 +79,7 @@ switch ($action) {
         break;
 
     case 'delete':
+        if (!$auth->hasPlanFeature('roles')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Method not allowed.");
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) Helpers::jsonResponse(false, "Invalid Role ID.");

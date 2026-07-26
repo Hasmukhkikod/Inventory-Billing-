@@ -226,6 +226,7 @@ switch ($action) {
 
     // CATEGORIES CRUD
     case 'categories_list':
+        if (!$auth->hasPlanFeature('categories')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         try {
             $stmt = $db->query("SELECT * FROM categories WHERE deleted_at IS NULL ORDER BY category_name ASC");
             Helpers::jsonResponse(true, "Categories loaded", $stmt->fetchAll());
@@ -235,6 +236,7 @@ switch ($action) {
         break;
 
     case 'category_save':
+        if (!$auth->hasPlanFeature('categories')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
         $id = (int)($_POST['id'] ?? 0);
@@ -256,6 +258,7 @@ switch ($action) {
         break;
 
     case 'category_delete':
+        if (!$auth->hasPlanFeature('categories')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) Helpers::jsonResponse(false, "Invalid ID.");
@@ -269,6 +272,7 @@ switch ($action) {
 
     // BRANDS CRUD
     case 'brands_list':
+        if (!$auth->hasPlanFeature('brands')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         try {
             $stmt = $db->query("SELECT * FROM brands WHERE deleted_at IS NULL ORDER BY brand_name ASC");
             Helpers::jsonResponse(true, "Brands loaded", $stmt->fetchAll());
@@ -278,6 +282,7 @@ switch ($action) {
         break;
 
     case 'brand_save':
+        if (!$auth->hasPlanFeature('brands')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
         $id = (int)($_POST['id'] ?? 0);
@@ -298,6 +303,7 @@ switch ($action) {
         break;
 
     case 'brand_delete':
+        if (!$auth->hasPlanFeature('brands')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) Helpers::jsonResponse(false, "Invalid ID.");
@@ -311,6 +317,7 @@ switch ($action) {
 
     // UNITS CRUD
     case 'units_list':
+        if (!$auth->hasPlanFeature('units')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         try {
             $stmt = $db->query("SELECT * FROM units WHERE deleted_at IS NULL ORDER BY unit_name ASC");
             Helpers::jsonResponse(true, "Units loaded", $stmt->fetchAll());
@@ -320,6 +327,7 @@ switch ($action) {
         break;
 
     case 'unit_save':
+        if (!$auth->hasPlanFeature('units')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
         $id = (int)($_POST['id'] ?? 0);
@@ -341,6 +349,7 @@ switch ($action) {
         break;
 
     case 'unit_delete':
+        if (!$auth->hasPlanFeature('units')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) Helpers::jsonResponse(false, "Invalid ID.");
@@ -354,6 +363,7 @@ switch ($action) {
 
     // UNIT CONVERSIONS CRUD
     case 'unit_conversions_list':
+        if (!$auth->hasPlanFeature('conversions')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         try {
             $stmt = $db->query("
                 SELECT uc.*, pu.unit_name as primary_unit_name, pu.short_name as primary_short_name,
@@ -371,6 +381,7 @@ switch ($action) {
         break;
 
     case 'unit_conversion_save':
+        if (!$auth->hasPlanFeature('conversions')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
 
@@ -407,6 +418,7 @@ switch ($action) {
         break;
 
     case 'unit_conversion_delete':
+        if (!$auth->hasPlanFeature('conversions')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) Helpers::jsonResponse(false, "Invalid ID.");
@@ -419,6 +431,7 @@ switch ($action) {
         break;
 
     case 'get_conversion':
+        if (!$auth->hasPlanFeature('conversions')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         $primary_uid = (int)($_GET['primary_unit_id'] ?? 0);
         $secondary_uid = (int)($_GET['secondary_unit_id'] ?? 0);
         try {

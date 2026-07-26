@@ -27,9 +27,11 @@
                     </li>
                 </ul>
                 <div class="d-flex gap-2">
+                    <?php if ($auth->hasPlanFeature('roles')): ?>
                     <a href="<?php echo BASE_URL; ?>/roles/index" class="btn btn-outline-secondary btn-sm">
                         <i class="fa-solid fa-user-shield me-1"></i> Manage Roles
                     </a>
+                    <?php endif; ?>
                     <a href="<?php echo BASE_URL; ?>/users/form" class="btn btn-primary btn-sm btn-action-add" id="btn-add-user">
                         <i class="fa-solid fa-user-plus me-1"></i> Add User
                     </a>

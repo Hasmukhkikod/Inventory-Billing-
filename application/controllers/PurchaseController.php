@@ -22,7 +22,7 @@ class PurchaseController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Manage Inventory');
+        $this->auth->requirePermission('Manage Inventory', 'purchases');
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class PurchaseController {
     }
 
     public function form($id = null) {
-        $this->auth->requirePermission('Manage Inventory');
+        $this->auth->requirePermission('Manage Inventory', 'purchases');
         
         $purchase = null;
         if ($id > 0) {
@@ -46,7 +46,7 @@ class PurchaseController {
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Manage Inventory');
+        $this->auth->requirePermission('Manage Inventory', 'purchases');
         
         $db = $this->db;
         $purchase = $db->query("

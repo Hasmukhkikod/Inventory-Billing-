@@ -11,6 +11,13 @@
             <form id="planForm" onsubmit="savePlan(event)">
                 <input type="hidden" name="id" value="<?php echo $plan['id'] ?? ''; ?>">
                 <?php echo \App\Models\Helpers::csrfField(); ?>
+                
+                <?php
+                $planFeatures = [];
+                if (!empty($plan['features'])) {
+                    $planFeatures = json_decode($plan['features'], true) ?: [];
+                }
+                ?>
 
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -34,7 +41,75 @@
                     </div>
                 </div>
                 
-                <div class="mt-4">
+                <div class="col-12 mt-4 pt-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0"><i class="fa-solid fa-list-check me-2 text-indigo"></i>Plan Features</h5>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" id="btn-select-all">Select All</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-deselect-all">Deselect All</button>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <?php
+                        $availableFeatures = [
+                            'Inventory' => [
+                                'inventory' => 'Products List',
+                                'categories' => 'Categories',
+                                'brands' => 'Brands',
+                                'units' => 'Units',
+                                'conversions' => 'Unit Conversions',
+                            ],
+                            'Purchases & Suppliers' => [
+                                'purchases' => 'Purchases',
+                                'suppliers' => 'Suppliers',
+                            ],
+                            'Billing & Sales' => [
+                                'billing' => 'Billing & Invoicing',
+                                'returns' => 'Returns Log',
+                                'quotations' => 'Quotations',
+                                'challans' => 'Delivery Challans',
+                            ],
+                            'CRM & Customers' => [
+                                'customers' => 'CRM (Customers)',
+                            ],
+                            'Finance & Reports' => [
+                                'expenses' => 'Expenses',
+                                'reports' => 'Reporting',
+                            ],
+                            'Users & Access' => [
+                                'users' => 'Users',
+                                'roles' => 'Roles & Permissions',
+                            ],
+                            'Settings & Add-ons' => [
+                                'coupons' => 'Discount Coupons',
+                                'theme' => 'Theme & Display',
+                                'backups' => 'Data & Backups',
+                                'printer' => 'Printer Settings',
+                                'feedback' => 'Feedback System',
+                            ]
+                        ];
+                        foreach ($availableFeatures as $groupName => $features):
+                        ?>
+                        <div class="col-12 mt-4">
+                            <h6 class="text-secondary border-bottom pb-2 mb-3"><?php echo $groupName; ?></h6>
+                            <div class="row g-3">
+                                <?php foreach ($features as $key => $label): 
+                                    $isChecked = in_array($key, $planFeatures) ? 'checked' : '';
+                                ?>
+                                <div class="col-md-3 col-sm-4 col-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="features[]" value="<?php echo $key; ?>" id="feat_<?php echo $key; ?>" <?php echo $isChecked; ?>>
+                                        <label class="form-check-label" for="feat_<?php echo $key; ?>"><?php echo $label; ?></label>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-3 border-top">
                     <button type="submit" class="btn btn-primary" id="saveBtn">
                         <i class="fa-solid fa-save me-2"></i>Save Plan
                     </button>
@@ -45,6 +120,23 @@
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const btnSelectAll = document.getElementById('btn-select-all');
+    const btnDeselectAll = document.getElementById('btn-deselect-all');
+    
+    if (btnSelectAll) {
+        btnSelectAll.addEventListener('click', () => {
+            document.querySelectorAll('input[name="features[]"]').forEach(cb => cb.checked = true);
+        });
+    }
+    
+    if (btnDeselectAll) {
+        btnDeselectAll.addEventListener('click', () => {
+            document.querySelectorAll('input[name="features[]"]').forEach(cb => cb.checked = false);
+        });
+    }
+});
+
 async function savePlan(e) {
     e.preventDefault();
     const btn = document.getElementById('saveBtn');

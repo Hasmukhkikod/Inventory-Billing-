@@ -22,7 +22,7 @@ class ProductController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Manage Inventory');
+        $this->auth->requirePermission('Manage Inventory', 'inventory');
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class ProductController {
     }
 
     public function form($id = null) {
-        $this->auth->requirePermission('Manage Inventory');
+        $this->auth->requirePermission('Manage Inventory', 'inventory');
         
         $product = null;
         if ($id > 0) {
@@ -46,7 +46,7 @@ class ProductController {
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Manage Inventory');
+        $this->auth->requirePermission('Manage Inventory', 'inventory');
         
         $db = $this->db;
         $product = $db->query("

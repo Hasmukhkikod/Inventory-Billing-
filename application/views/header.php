@@ -169,13 +169,16 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1): ?>
+            <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('inventory')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'products' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/products/index" class="sidebar-link">
                     <i class="fa-solid fa-box-open"></i>
                     <span>Inventory</span>
                 </a>
             </li>
+            <?php endif; ?>
+
+            <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('purchases')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'purchases' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/purchases/index" class="sidebar-link">
                     <i class="fa-solid fa-cart-flatbed"></i>
@@ -184,7 +187,7 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Create Invoice') && $_SESSION['user_id'] != 1): ?>
+            <?php if ($auth->hasPermission('Create Invoice') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('billing')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'billing' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/billing/index" class="sidebar-link">
                     <i class="fa-solid fa-file-invoice-dollar"></i>
@@ -193,7 +196,7 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1): ?>
+            <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('returns')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'returns' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/returns/index" class="sidebar-link">
                     <i class="fa-solid fa-rotate-left"></i>
@@ -202,7 +205,7 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Quotations') && $_SESSION['user_id'] != 1): ?>
+            <?php if ($auth->hasPermission('Manage Quotations') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('quotations')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'quotations' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/quotations/index" class="sidebar-link">
                     <i class="fa-solid fa-file-signature"></i>
@@ -211,7 +214,7 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Challans') && $_SESSION['user_id'] != 1): ?>
+            <?php if ($auth->hasPermission('Manage Challans') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('challans')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'challans' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/challans/index" class="sidebar-link">
                     <i class="fa-solid fa-truck-fast"></i>
@@ -220,7 +223,7 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Customers') && $_SESSION['user_id'] != 1): ?>
+            <?php if ($auth->hasPermission('Manage Customers') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('customers')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'customers' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/customers/index" class="sidebar-link">
                     <i class="fa-solid fa-users"></i>
@@ -229,7 +232,7 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Suppliers') && $_SESSION['user_id'] != 1): ?>
+            <?php if ($auth->hasPermission('Manage Suppliers') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('purchases')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'suppliers' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/suppliers/index" class="sidebar-link">
                     <i class="fa-solid fa-truck-field"></i>
@@ -238,7 +241,7 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Expenses') && $_SESSION['user_id'] != 1): ?>
+            <?php if ($auth->hasPermission('Manage Expenses') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('expenses')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'expenses' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/expenses/index" class="sidebar-link">
                     <i class="fa-solid fa-wallet"></i>
@@ -247,7 +250,7 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('View Reports') && $_SESSION['user_id'] != 1): ?>
+            <?php if ($auth->hasPermission('View Reports') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('reports')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'reports' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/reports/index" class="sidebar-link">
                     <i class="fa-solid fa-file-waveform"></i>
@@ -256,7 +259,7 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Users')): ?>
+            <?php if ($auth->hasPermission('Manage Users') && $auth->hasPlanFeature('users')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'users' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/users/index" class="sidebar-link">
                     <i class="fa-solid fa-users-gear"></i>

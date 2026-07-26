@@ -33,32 +33,42 @@
                             <i class="fa-solid fa-university me-2"></i>Bank Details
                         </button>
                             </li>
+                            <?php if ($auth->hasPlanFeature('coupons')): ?>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link text-start fw-semibold settings-tab w-100" id="coupons-tab" data-bs-toggle="tab" data-bs-target="#coupons-pane" type="button" role="tab" aria-controls="coupons-pane" aria-selected="false">
                             <i class="fa-solid fa-tags me-2"></i>Coupons
                         </button>
                             </li>
+                            <?php endif; ?>
+                            <?php if ($auth->hasPlanFeature('theme')): ?>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link text-start fw-semibold settings-tab w-100" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme-pane" type="button" role="tab" aria-controls="theme-pane" aria-selected="false">
                             <i class="fa-solid fa-paint-roller me-2"></i>Theme & Display
                         </button>
                             </li>
+                            <?php endif; ?>
+                            <?php if ($auth->hasPlanFeature('backups')): ?>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link text-start fw-semibold settings-tab w-100" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button" role="tab" aria-controls="data-pane" aria-selected="false">
                             <i class="fa-solid fa-database me-2"></i>Data & Backups
                         </button>
                             </li>
+                            <?php endif; ?>
+                            <?php if ($auth->hasPlanFeature('printer')): ?>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link text-start fw-semibold settings-tab w-100" id="printer-tab" data-bs-toggle="tab" data-bs-target="#printer-pane" type="button" role="tab" aria-controls="printer-pane" aria-selected="false">
                             <i class="fa-solid fa-print me-2"></i>Printer Settings
                         </button>
                             </li>
+                            <?php endif; ?>
+                            <?php if ($auth->hasPlanFeature('feedback')): ?>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link text-start fw-semibold settings-tab w-100" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback-pane" type="button" role="tab" aria-controls="feedback-pane" aria-selected="false">
                             <i class="fa-solid fa-comment-dots me-2"></i>Feedback
                             <span class="badge bg-danger rounded-pill ms-1 d-none" id="feedback-unread-badge">0</span>
                         </button>
                             </li>
+                            <?php endif; ?>
                             <?php if ($_SESSION['org_id'] == 0): ?>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link text-start fw-semibold settings-tab w-100" id="demo-tab" data-bs-toggle="tab" data-bs-target="#demo-pane" type="button" role="tab" aria-controls="demo-pane" aria-selected="false">
@@ -323,6 +333,7 @@
                             </div>
                         </div>
 
+<?php if ($auth->hasPlanFeature("theme")): ?>
                         <!-- THEME & DISPLAY PANE -->
                         <div class="tab-pane fade" id="theme-pane" role="tabpanel" aria-labelledby="theme-tab" tabindex="0">
                             <div class="row g-4">
@@ -714,6 +725,7 @@
                             </div>
                         </div>
 
+<?php endif; ?>
                         <!-- BANK DETAILS PANE -->
                         <div class="tab-pane fade" id="bank-pane" role="tabpanel" aria-labelledby="bank-tab" tabindex="0">
                             <div class="row g-3">
@@ -752,6 +764,7 @@
 
                 <!-- COUPONS PANE (outside the settings form since it has its own CRUD) -->
                 <div class="tab-content">
+<?php if ($auth->hasPlanFeature("coupons")): ?>
                     <div class="tab-pane fade" id="coupons-pane" role="tabpanel" aria-labelledby="coupons-tab" tabindex="0">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h6 class="text-indigo mb-0"><i class="fa-solid fa-tags me-2"></i>Discount Coupons & Promo Codes</h6>
@@ -780,6 +793,8 @@
                         </div>
                     </div>
 
+<?php endif; ?>
+<?php if ($auth->hasPlanFeature("backups")): ?>
                     <!-- DATA & BACKUPS PANE -->
                     <div class="tab-pane fade" id="data-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
                         <div class="row g-4">
@@ -831,6 +846,8 @@
                         </div>
                     </div>
 
+<?php endif; ?>
+<?php if ($auth->hasPlanFeature("printer")): ?>
                     <!-- PRINTER SETTINGS PANE -->
                     <div class="tab-pane fade" id="printer-pane" role="tabpanel" aria-labelledby="printer-tab" tabindex="0">
 
@@ -896,6 +913,8 @@
                         </div>
                     </div>
 
+<?php endif; ?>
+<?php if ($auth->hasPlanFeature("feedback")): ?>
                     <div class="tab-pane fade" id="feedback-pane" role="tabpanel" aria-labelledby="feedback-tab" tabindex="0">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                             <div>
@@ -922,6 +941,7 @@
                     </div>
 
                     <?php if ($_SESSION['org_id'] == 0): ?>
+<?php endif; ?>
                     <div class="tab-pane fade" id="demo-pane" role="tabpanel" aria-labelledby="demo-tab" tabindex="0">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
                             <div>

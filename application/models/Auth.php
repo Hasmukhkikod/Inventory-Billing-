@@ -8,6 +8,7 @@ namespace App\Models;
 class Auth {
     private Database $db;
     private ?array $currentUser = null;
+    private ?array $planFeatures = null;
 
     public function __construct(Database $db) {
         $this->db = $db;
@@ -148,6 +149,7 @@ class Auth {
         }
         
         $_SESSION = [];
+
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(session_name(), '', time() - 42000,
@@ -156,6 +158,39 @@ class Auth {
             );
         }
         session_destroy();
+    }
+
+    /**
+     * Check if the organization's plan includes a specific feature
+     */
+    public function hasPlanFeature(string $featureKey): bool {
+        // Super admin doesn't need plan restrictions
+        if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == 1) {
+            return true;
+        }
+        
+        // Cache for the current request
+        if ($this->planFeatures === null) {
+            $orgId = $_SESSION['org_id'] ?? 0;
+            if ($orgId > 0) {
+                $stmt = $this->db->query("
+                    SELECT p.features 
+                    FROM organizations o 
+                    JOIN plans p ON o.plan_id = p.id 
+                    WHERE o.id = ? LIMIT 1
+                ", [$orgId]);
+                $row = $stmt->fetch();
+                if ($row && !empty($row['features'])) {
+                    $this->planFeatures = json_decode($row['features'], true) ?: [];
+                } else {
+                    $this->planFeatures = [];
+                }
+            } else {
+                $this->planFeatures = [];
+            }
+        }
+        
+        return in_array($featureKey, $this->planFeatures);
     }
 
     /**
@@ -223,9 +258,9 @@ class Auth {
     }
 
     /**
-     * Restrict page to verified permission
+     * Restrict page to verified permission and optionally check plan feature
      */
-    public function requirePermission(string $permissionName): void {
+    public function requirePermission(string $permissionName, string $planFeatureKey = null): void {
         if (!$this->check()) {
             if ($this->isAjaxRequest()) {
                 Helpers::jsonResponse(false, "Session expired. Please log in again.");
@@ -241,6 +276,16 @@ class Auth {
                 Helpers::jsonResponse(false, "Unauthorized: You do not have permissions.");
             } else {
                 header("Location: " . BASE_URL . "/index?error=unauthorized");
+                exit;
+            }
+        }
+
+        if ($planFeatureKey !== null && !$this->hasPlanFeature($planFeatureKey)) {
+            if ($this->isAjaxRequest()) {
+                header('HTTP/1.1 403 Forbidden');
+                Helpers::jsonResponse(false, "Feature not included in your current plan.");
+            } else {
+                header("Location: " . BASE_URL . "/index?error=plan_feature");
                 exit;
             }
         }

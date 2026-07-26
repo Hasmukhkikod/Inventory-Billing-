@@ -12,26 +12,34 @@
                     <i class="fa-solid fa-boxes-stacked me-2"></i>Products List
                 </button>
             </li>
+            <?php if ($auth->hasPlanFeature('categories')): ?>
             <li class="nav-item" role="presentation">
                 <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-pane" type="button" role="tab" aria-controls="categories-pane" aria-selected="false">
                     <i class="fa-solid fa-tags me-2"></i>Categories
                 </button>
             </li>
+            <?php endif; ?>
+            <?php if ($auth->hasPlanFeature('brands')): ?>
             <li class="nav-item" role="presentation">
                 <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="brands-tab" data-bs-toggle="tab" data-bs-target="#brands-pane" type="button" role="tab" aria-controls="brands-pane" aria-selected="false">
                     <i class="fa-solid fa-bookmark me-2"></i>Brands
                 </button>
             </li>
+            <?php endif; ?>
+            <?php if ($auth->hasPlanFeature('units')): ?>
             <li class="nav-item" role="presentation">
                 <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="units-tab" data-bs-toggle="tab" data-bs-target="#units-pane" type="button" role="tab" aria-controls="units-pane" aria-selected="false">
                     <i class="fa-solid fa-scale-balanced me-2"></i>Units
                 </button>
             </li>
+            <?php endif; ?>
+            <?php if ($auth->hasPlanFeature('conversions')): ?>
             <li class="nav-item" role="presentation">
                 <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="conversions-tab" data-bs-toggle="tab" data-bs-target="#conversions-pane" type="button" role="tab" aria-controls="conversions-pane" aria-selected="false">
                     <i class="fa-solid fa-right-left me-2"></i>Unit Conversions
                 </button>
             </li>
+            <?php endif; ?>
         </ul>
         <div>
             <a href="<?php echo BASE_URL; ?>/products/form" class="btn btn-primary btn-sm">
@@ -82,6 +90,7 @@
             </div>
             
             <!-- CATEGORIES TAB PANE -->
+            <?php if ($auth->hasPlanFeature('categories')): ?>
             <div class="tab-pane fade" id="categories-pane" role="tabpanel" aria-labelledby="categories-tab" tabindex="0">
                 <div class="row">
                     <div class="col-md-4 mb-4 mb-md-0">
@@ -118,8 +127,10 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- BRANDS TAB PANE -->
+            <?php if ($auth->hasPlanFeature('brands')): ?>
             <div class="tab-pane fade" id="brands-pane" role="tabpanel" aria-labelledby="brands-tab" tabindex="0">
                 <div class="row">
                     <div class="col-md-4 mb-4 mb-md-0">
@@ -152,8 +163,10 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- UNITS TAB PANE -->
+            <?php if ($auth->hasPlanFeature('units')): ?>
             <div class="tab-pane fade" id="units-pane" role="tabpanel" aria-labelledby="units-tab" tabindex="0">
                 <div class="row">
                     <div class="col-md-4 mb-4 mb-md-0">
@@ -190,8 +203,10 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- UNIT CONVERSIONS TAB PANE -->
+            <?php if ($auth->hasPlanFeature('conversions')): ?>
             <div class="tab-pane fade" id="conversions-pane" role="tabpanel" aria-labelledby="conversions-tab" tabindex="0">
                 <div class="row">
                     <div class="col-md-4 mb-4 mb-md-0">
@@ -242,6 +257,7 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
         </div>
     </div>

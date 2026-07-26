@@ -218,6 +218,7 @@ switch ($action) {
         break;
 
     case 'save_thermal_width':
+        if (!$auth->hasPlanFeature('printer')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         // Default/fallback thermal receipt paper size (dots @ 203dpi), managed
         // from Settings > Printer Settings. Independent of the main 'save'
         // action so switching other setting tabs never resets it.
@@ -239,6 +240,7 @@ switch ($action) {
         break;
 
     case 'backup':
+        if (!$auth->hasPlanFeature('backups')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         // Backup implementation
         $auth->requirePermission('Run Backups');
         $driver = $db->getConnection()->getAttribute(PDO::ATTR_DRIVER_NAME);
@@ -299,6 +301,7 @@ switch ($action) {
         break;
 
     case 'backup_list':
+        if (!$auth->hasPlanFeature('backups')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         $auth->requirePermission('Run Backups');
         try {
             $stmt = $db->query("
@@ -314,6 +317,7 @@ switch ($action) {
         break;
 
     case 'download_backup':
+        if (!$auth->hasPlanFeature('backups')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         $auth->requirePermission('Run Backups');
         $fileName = basename($_GET['file'] ?? '');
         if (empty($fileName)) {
@@ -337,6 +341,7 @@ switch ($action) {
         exit;
 
     case 'delete_backup':
+        if (!$auth->hasPlanFeature('backups')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         $auth->requirePermission('Run Backups');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed.");
@@ -362,6 +367,7 @@ switch ($action) {
         break;
 
     case 'purge_all':
+        if (!$auth->hasPlanFeature('backups')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed.");
 

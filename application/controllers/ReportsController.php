@@ -22,7 +22,7 @@ class ReportsController {
     }
 
     public function index() {
-        $this->auth->requirePermission('View Reports');
+        $this->auth->requirePermission('View Reports', 'reports');
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';

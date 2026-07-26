@@ -22,7 +22,7 @@ class SupplierController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Manage Suppliers');
+        $this->auth->requirePermission('Manage Suppliers', 'purchases');
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class SupplierController {
     }
 
     public function form($id = null) {
-        $this->auth->requirePermission('Manage Suppliers');
+        $this->auth->requirePermission('Manage Suppliers', 'purchases');
         
         $supplier = null;
         if ($id > 0) {
@@ -46,7 +46,7 @@ class SupplierController {
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Manage Suppliers');
+        $this->auth->requirePermission('Manage Suppliers', 'purchases');
         
         $db = $this->db;
         $supplier = $db->query("SELECT * FROM suppliers WHERE id = ? LIMIT 1", [(int)$id])->fetch();

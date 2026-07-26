@@ -22,7 +22,7 @@ class UserController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Manage Users');
+        $this->auth->requirePermission('Manage Users', 'users');
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class UserController {
     }
 
     public function form() {
-        $this->auth->requirePermission('Manage Users');
+        $this->auth->requirePermission('Manage Users', 'users');
         
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         $user = null;
@@ -49,7 +49,7 @@ class UserController {
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Manage Users');
+        $this->auth->requirePermission('Manage Users', 'users');
         
         $db = $this->db;
         $user = $db->query("

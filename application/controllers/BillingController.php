@@ -22,7 +22,7 @@ class BillingController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Create Invoice');
+        $this->auth->requirePermission('Create Invoice', 'billing');
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class BillingController {
     }
 
     public function form($id = null) {
-        $this->auth->requirePermission('Create Invoice');
+        $this->auth->requirePermission('Create Invoice', 'billing');
         
         // POS Terminal form is the form.php
         require_once __DIR__ . '/../views/header.php';
@@ -40,14 +40,14 @@ class BillingController {
     }
 
     public function dayEnd() {
-        $this->auth->requirePermission('Create Invoice');
+        $this->auth->requirePermission('Create Invoice', 'billing');
         require_once __DIR__ . '/../views/header.php';
         require_once __DIR__ . '/../views/billing/day_end.php';
         require_once __DIR__ . '/../views/footer.php';
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Create Invoice');
+        $this->auth->requirePermission('Create Invoice', 'billing');
         
         $db = $this->db;
         $invoice = $db->query("

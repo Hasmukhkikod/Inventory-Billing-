@@ -22,7 +22,7 @@ class CustomerController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Manage Customers');
+        $this->auth->requirePermission('Manage Customers', 'customers');
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class CustomerController {
     }
 
     public function form($id = null) {
-        $this->auth->requirePermission('Manage Customers');
+        $this->auth->requirePermission('Manage Customers', 'customers');
         
         $customer = null;
         if ($id > 0) {
@@ -46,7 +46,7 @@ class CustomerController {
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Manage Customers');
+        $this->auth->requirePermission('Manage Customers', 'customers');
         
         $db = $this->db;
         $customer = $db->query("SELECT * FROM customers WHERE id = ? LIMIT 1", [(int)$id])->fetch();

@@ -35,6 +35,7 @@ if ($action === 'save') {
     $price = (float)($_POST['price'] ?? 0);
     $duration_days = (int)($_POST['duration_days'] ?? 30);
     $status = $_POST['status'] ?? 'ACTIVE';
+    $features = isset($_POST['features']) && is_array($_POST['features']) ? json_encode($_POST['features']) : json_encode([]);
 
     if (empty($plan_name)) {
         Helpers::jsonResponse(false, "Plan name is required.");
@@ -42,13 +43,13 @@ if ($action === 'save') {
 
     try {
         if ($id > 0) {
-            $db->query("UPDATE plans SET plan_name = ?, price = ?, duration_days = ?, status = ? WHERE id = ?", 
-                       [$plan_name, $price, $duration_days, $status, $id]);
+            $db->query("UPDATE plans SET plan_name = ?, price = ?, duration_days = ?, status = ?, features = ? WHERE id = ?", 
+                       [$plan_name, $price, $duration_days, $status, $features, $id]);
             Helpers::logActivity($db, "plans", "Updated plan #$id", $id);
             Helpers::jsonResponse(true, "Plan updated successfully.");
         } else {
-            $newId = $db->insert("INSERT INTO plans (plan_name, price, duration_days, status) VALUES (?, ?, ?, ?)", 
-                                 [$plan_name, $price, $duration_days, $status]);
+            $newId = $db->insert("INSERT INTO plans (plan_name, price, duration_days, status, features) VALUES (?, ?, ?, ?, ?)", 
+                                 [$plan_name, $price, $duration_days, $status, $features]);
             Helpers::logActivity($db, "plans", "Created new plan #$newId", $newId);
             Helpers::jsonResponse(true, "Plan created successfully.");
         }

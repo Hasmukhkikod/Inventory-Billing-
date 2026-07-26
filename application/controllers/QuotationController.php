@@ -22,7 +22,7 @@ class QuotationController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Manage Quotations');
+        $this->auth->requirePermission('Manage Quotations', 'quotations');
 
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class QuotationController {
     }
 
     public function form($id = null) {
-        $this->auth->requirePermission('Manage Quotations');
+        $this->auth->requirePermission('Manage Quotations', 'quotations');
 
         $quotation = null;
         $items = [];
@@ -54,7 +54,7 @@ class QuotationController {
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Manage Quotations');
+        $this->auth->requirePermission('Manage Quotations', 'quotations');
 
         $db = $this->db;
         $quotation = $db->query("

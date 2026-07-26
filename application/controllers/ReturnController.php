@@ -22,7 +22,7 @@ class ReturnController {
     }
 
     public function index() {
-        $this->auth->requirePermission('Manage Inventory');
+        $this->auth->requirePermission('Manage Inventory', 'returns');
         
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
@@ -31,7 +31,7 @@ class ReturnController {
     }
 
     public function form($id = null) {
-        $this->auth->requirePermission('Manage Inventory');
+        $this->auth->requirePermission('Manage Inventory', 'returns');
         
         $return = null;
         $type = $_GET['type'] ?? 'SALES'; // SALES or PURCHASE
@@ -43,7 +43,7 @@ class ReturnController {
     }
 
     public function view($id) {
-        $this->auth->requirePermission('Manage Inventory');
+        $this->auth->requirePermission('Manage Inventory', 'returns');
         
         $type = $_GET['type'] ?? 'SALES'; // SALES or PURCHASE
         $db = $this->db;
