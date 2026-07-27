@@ -19,20 +19,35 @@ session_write_close(); // Release session lock to allow concurrent AJAX requests
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 switch ($action) {
-    case 'list':
+        case 'list':
         try {
-            $stmt = $db->query("
-                SELECT p.*, c.category_name, b.brand_name, u.short_name as unit_name,
-                       su.short_name as secondary_unit_name
-                FROM products p
-                LEFT JOIN categories c ON p.category_id = c.id
-                LEFT JOIN brands b ON p.brand_id = b.id
-                LEFT JOIN units u ON p.unit_id = u.id
-                LEFT JOIN units su ON p.secondary_unit_id = su.id
-                WHERE p.status = 'ACTIVE' AND (p.deleted_at IS NULL)
-                ORDER BY p.product_name ASC
-            ");
-            Helpers::jsonResponse(true, "Products list loaded", $stmt->fetchAll());
+            $request = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
+            if (isset($request['draw'])) {
+                // Server-side processing
+                $select = "p.*, c.category_name, b.brand_name, u.short_name as unit_name, su.short_name as secondary_unit_name";
+                $from = "products p LEFT JOIN categories c ON p.category_id = c.id LEFT JOIN brands b ON p.brand_id = b.id LEFT JOIN units u ON p.unit_id = u.id LEFT JOIN units su ON p.secondary_unit_id = su.id";
+                $baseWhere = "p.status = 'ACTIVE' AND (p.deleted_at IS NULL)";
+                $searchColumns = ['p.product_name', 'p.sku', 'p.barcode', 'c.category_name', 'b.brand_name'];
+                $orderColumns = [1 => 'p.product_name', 2 => 'p.sku', 4 => 'c.category_name', 5 => 'p.selling_price', 6 => 'p.initial_stock'];
+                
+                $response = \App\Models\DataTableHelper::process($db, $request, $select, $from, $baseWhere, [], $searchColumns, $orderColumns, 'p.id DESC');
+                echo json_encode($response);
+                exit;
+            } else {
+                // Fallback for non-datatable requests
+                $stmt = $db->query("
+                    SELECT p.*, c.category_name, b.brand_name, u.short_name as unit_name,
+                           su.short_name as secondary_unit_name
+                    FROM products p
+                    LEFT JOIN categories c ON p.category_id = c.id
+                    LEFT JOIN brands b ON p.brand_id = b.id
+                    LEFT JOIN units u ON p.unit_id = u.id
+                    LEFT JOIN units su ON p.secondary_unit_id = su.id
+                    WHERE p.status = 'ACTIVE' AND (p.deleted_at IS NULL)
+                    ORDER BY p.product_name ASC
+                ");
+                Helpers::jsonResponse(true, "Products list loaded", $stmt->fetchAll());
+            }
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed: " . $e->getMessage());
         }

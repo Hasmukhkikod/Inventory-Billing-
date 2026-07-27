@@ -18,16 +18,29 @@ $auth->requirePermission('Manage Expenses');
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 switch ($action) {
-    case 'list':
+        case 'list':
         try {
-            $stmt = $db->query("
-                SELECT e.*, ec.category_name 
-                FROM expenses e 
-                JOIN expense_categories ec ON e.category_id = ec.id 
-                WHERE e.deleted_at IS NULL
-                ORDER BY e.expense_date DESC
-            ");
-            Helpers::jsonResponse(true, "Expenses list", $stmt->fetchAll());
+            $request = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
+            if (isset($request['draw'])) {
+                $select = "e.*, ec.category_name";
+                $from = "expenses e JOIN expense_categories ec ON e.category_id = ec.id";
+                $baseWhere = "e.deleted_at IS NULL";
+                $searchColumns = ['ec.category_name', 'e.description', 'e.payment_method'];
+                $orderColumns = [0 => 'e.expense_date', 1 => 'ec.category_name', 2 => 'e.amount', 3 => 'e.payment_method', 4 => 'e.description'];
+                
+                $response = \App\Models\DataTableHelper::process($db, $request, $select, $from, $baseWhere, [], $searchColumns, $orderColumns, 'e.expense_date DESC');
+                echo json_encode($response);
+                exit;
+            } else {
+                $stmt = $db->query("
+                    SELECT e.*, ec.category_name 
+                    FROM expenses e 
+                    JOIN expense_categories ec ON e.category_id = ec.id 
+                    WHERE e.deleted_at IS NULL
+                    ORDER BY e.expense_date DESC
+                ");
+                Helpers::jsonResponse(true, "Expenses list", $stmt->fetchAll());
+            }
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed to load expenses: " . $e->getMessage());
         }

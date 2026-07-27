@@ -58,8 +58,11 @@
 <script>
 $(document).ready(function() {
     const invoicesTable = $('#invoicesTable').DataTable({
+        serverSide: true,
+        processing: true,
         ajax: {
             url: BASE_URL + '/api/billing.php?action=list_invoices',
+            type: 'POST',
             dataSrc: 'data'
         },
         columns: [

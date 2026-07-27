@@ -56,8 +56,11 @@
 $(document).ready(function() {
     const csrfToken = $('input[name="csrf_token"]').val();
     $('#purchasesTable').DataTable({
+        serverSide: true,
+        processing: true,
         ajax: {
             url: BASE_URL + '/api/purchases.php?action=list',
+            type: 'POST',
             dataSrc: 'data'
         },
         columns: [

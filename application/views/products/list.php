@@ -312,8 +312,11 @@
 $(document).ready(function() {
     // Products DataTable Setup
     const productsTable = $('#productsTable').DataTable({
+        serverSide: true,
+        processing: true,
         ajax: {
             url: BASE_URL + '/api/products.php?action=list',
+            type: 'POST',
             dataSrc: 'data'
         },
         columns: [

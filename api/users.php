@@ -18,16 +18,29 @@ $auth->requirePermission('Manage Users');
 $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 
 switch ($action) {
-    case 'list':
+        case 'list':
         try {
-            $stmt = $db->query("
-                SELECT u.id, u.role_id, u.name, u.email, u.mobile, u.status, u.last_login, r.role_name 
-                FROM users u
-                JOIN roles r ON u.role_id = r.id
-                WHERE u.deleted_at IS NULL
-                ORDER BY u.name ASC
-            ");
-            Helpers::jsonResponse(true, "Users list", $stmt->fetchAll());
+            $request = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
+            if (isset($request['draw'])) {
+                $select = "u.id, u.role_id, u.name, u.email, u.mobile, u.status, u.last_login, r.role_name";
+                $from = "users u JOIN roles r ON u.role_id = r.id";
+                $baseWhere = "u.deleted_at IS NULL";
+                $searchColumns = ['u.name', 'u.email', 'u.mobile', 'r.role_name'];
+                $orderColumns = [0 => 'u.name', 1 => 'u.email', 2 => 'r.role_name', 3 => 'u.status'];
+                
+                $response = \App\Models\DataTableHelper::process($db, $request, $select, $from, $baseWhere, [], $searchColumns, $orderColumns, 'u.name ASC');
+                echo json_encode($response);
+                exit;
+            } else {
+                $stmt = $db->query("
+                    SELECT u.id, u.role_id, u.name, u.email, u.mobile, u.status, u.last_login, r.role_name 
+                    FROM users u
+                    JOIN roles r ON u.role_id = r.id
+                    WHERE u.deleted_at IS NULL
+                    ORDER BY u.name ASC
+                ");
+                Helpers::jsonResponse(true, "Users list", $stmt->fetchAll());
+            }
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed to load users: " . $e->getMessage());
         }

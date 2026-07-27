@@ -326,15 +326,28 @@ switch ($action) {
         }
         break;
 
-    case 'list_invoices':
+        case 'list_invoices':
         try {
-            $stmt = $db->query("
-                SELECT i.*, c.customer_name FROM invoices i
-                LEFT JOIN customers c ON i.customer_id = c.id
-                WHERE i.status != 'INACTIVE' AND i.deleted_at IS NULL
-                ORDER BY i.created_at DESC
-            ");
-            Helpers::jsonResponse(true, 'Invoices list', $stmt->fetchAll());
+            $request = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
+            if (isset($request['draw'])) {
+                $select = "i.*, c.customer_name";
+                $from = "invoices i LEFT JOIN customers c ON i.customer_id = c.id";
+                $baseWhere = "i.status != 'INACTIVE' AND i.deleted_at IS NULL";
+                $searchColumns = ['i.invoice_no', 'c.customer_name', 'i.status', 'i.payment_status'];
+                $orderColumns = [0 => 'i.created_at', 1 => 'i.invoice_no', 2 => 'c.customer_name', 3 => 'i.grand_total', 4 => 'i.payment_status'];
+                
+                $response = \App\Models\DataTableHelper::process($db, $request, $select, $from, $baseWhere, [], $searchColumns, $orderColumns, 'i.created_at DESC');
+                echo json_encode($response);
+                exit;
+            } else {
+                $stmt = $db->query("
+                    SELECT i.*, c.customer_name FROM invoices i
+                    LEFT JOIN customers c ON i.customer_id = c.id
+                    WHERE i.status != 'INACTIVE' AND i.deleted_at IS NULL
+                    ORDER BY i.created_at DESC
+                ");
+                Helpers::jsonResponse(true, 'Invoices list', $stmt->fetchAll());
+            }
         } catch (Exception $e) {
             Helpers::jsonResponse(false, 'Failed: ' . $e->getMessage());
         }

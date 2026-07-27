@@ -84,8 +84,11 @@ $(document).ready(function() {
 
     // DT Init
     const expensesTable = $('#expensesTable').DataTable({
+        serverSide: true,
+        processing: true,
         ajax: {
             url: BASE_URL + '/api/expenses.php?action=list',
+            type: 'POST',
             dataSrc: 'data'
         },
         columns: [

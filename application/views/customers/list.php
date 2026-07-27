@@ -114,8 +114,11 @@
 $(document).ready(function() {
     // DT Init
     const customersTable = $('#customersTable').DataTable({
+        serverSide: true,
+        processing: true,
         ajax: {
             url: BASE_URL + '/api/customers.php?action=list',
+            type: 'POST',
             dataSrc: 'data'
         },
         columns: [

@@ -18,16 +18,29 @@ $auth->requirePermission('Manage Inventory');
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 switch ($action) {
-    case 'list':
+        case 'list':
         try {
-            $stmt = $db->query("
-                SELECT p.*, COALESCE(p.order_status, 'PENDING') as order_status, s.supplier_name
-                FROM purchases p
-                LEFT JOIN suppliers s ON p.supplier_id = s.id
-                WHERE p.status = 'ACTIVE' AND p.deleted_at IS NULL
-                ORDER BY p.created_at DESC
-            ");
-            Helpers::jsonResponse(true, "Purchases list", $stmt->fetchAll());
+            $request = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
+            if (isset($request['draw'])) {
+                $select = "p.*, COALESCE(p.order_status, 'PENDING') as order_status, s.supplier_name";
+                $from = "purchases p LEFT JOIN suppliers s ON p.supplier_id = s.id";
+                $baseWhere = "p.status = 'ACTIVE' AND p.deleted_at IS NULL";
+                $searchColumns = ['p.purchase_no', 's.supplier_name', 'p.order_status', 'p.payment_status'];
+                $orderColumns = [0 => 'p.created_at', 1 => 'p.purchase_no', 2 => 's.supplier_name', 3 => 'p.grand_total', 4 => 'p.payment_status'];
+                
+                $response = \App\Models\DataTableHelper::process($db, $request, $select, $from, $baseWhere, [], $searchColumns, $orderColumns, 'p.created_at DESC');
+                echo json_encode($response);
+                exit;
+            } else {
+                $stmt = $db->query("
+                    SELECT p.*, COALESCE(p.order_status, 'PENDING') as order_status, s.supplier_name
+                    FROM purchases p
+                    LEFT JOIN suppliers s ON p.supplier_id = s.id
+                    WHERE p.status = 'ACTIVE' AND p.deleted_at IS NULL
+                    ORDER BY p.created_at DESC
+                ");
+                Helpers::jsonResponse(true, "Purchases list", $stmt->fetchAll());
+            }
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed to load purchases: " . $e->getMessage());
         }

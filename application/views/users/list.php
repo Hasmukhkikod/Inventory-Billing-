@@ -117,8 +117,11 @@ $(document).ready(function() {
 
     // 1. DT Init - Users list
     const usersTable = $('#usersTable').DataTable({
+        serverSide: true,
+        processing: true,
         ajax: {
             url: BASE_URL + '/api/users.php?action=list',
+            type: 'POST',
             dataSrc: 'data'
         },
         columns: [

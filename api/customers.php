@@ -18,18 +18,31 @@ $auth->requirePermission('Manage Customers');
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 switch ($action) {
-    case 'list':
+        case 'list':
         try {
-            $stmt = $db->query("
-                SELECT c.*,
-                  (c.opening_balance + 
-                   (SELECT IFNULL(SUM(grand_total), 0) FROM invoices WHERE customer_id = c.id AND status != 'INACTIVE') - 
-                   (SELECT IFNULL(SUM(amount), 0) FROM customer_payments WHERE customer_id = c.id AND status = 'ACTIVE')) as credit_balance
-                FROM customers c
-                WHERE c.status = 'ACTIVE' AND c.deleted_at IS NULL
-                ORDER BY c.customer_name ASC
-            ");
-            Helpers::jsonResponse(true, "Customers list", $stmt->fetchAll());
+            $request = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
+            if (isset($request['draw'])) {
+                $select = "c.*, (c.opening_balance + (SELECT IFNULL(SUM(grand_total), 0) FROM invoices WHERE customer_id = c.id AND status != 'INACTIVE') - (SELECT IFNULL(SUM(amount), 0) FROM customer_payments WHERE customer_id = c.id AND status = 'ACTIVE')) as credit_balance";
+                $from = "customers c";
+                $baseWhere = "c.status = 'ACTIVE' AND c.deleted_at IS NULL";
+                $searchColumns = ['c.customer_name', 'c.mobile', 'c.email', 'c.city'];
+                $orderColumns = [0 => 'c.customer_name', 1 => 'c.mobile', 2 => 'c.email', 3 => 'c.city', 4 => 'credit_balance'];
+                
+                $response = \App\Models\DataTableHelper::process($db, $request, $select, $from, $baseWhere, [], $searchColumns, $orderColumns, 'c.id DESC');
+                echo json_encode($response);
+                exit;
+            } else {
+                $stmt = $db->query("
+                    SELECT c.*,
+                      (c.opening_balance + 
+                       (SELECT IFNULL(SUM(grand_total), 0) FROM invoices WHERE customer_id = c.id AND status != 'INACTIVE') - 
+                       (SELECT IFNULL(SUM(amount), 0) FROM customer_payments WHERE customer_id = c.id AND status = 'ACTIVE')) as credit_balance
+                    FROM customers c
+                    WHERE c.status = 'ACTIVE' AND c.deleted_at IS NULL
+                    ORDER BY c.customer_name ASC
+                ");
+                Helpers::jsonResponse(true, "Customers list", $stmt->fetchAll());
+            }
         } catch (Exception $e) {
             Helpers::jsonResponse(false, "Failed to load customers: " . $e->getMessage());
         }
