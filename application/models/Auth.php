@@ -260,7 +260,7 @@ class Auth {
     /**
      * Restrict page to verified permission and optionally check plan feature
      */
-    public function requirePermission(string $permissionName, string $planFeatureKey = null): void {
+    public function requirePermission(string $permissionName, ?string $planFeatureKey = null): void {
         if (!$this->check()) {
             if ($this->isAjaxRequest()) {
                 Helpers::jsonResponse(false, "Session expired. Please log in again.");
