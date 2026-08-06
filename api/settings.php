@@ -81,6 +81,19 @@ switch ($action) {
         }
         break;
 
+    case 'set_language':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed.");
+
+        $language = trim($_POST['language'] ?? 'en');
+        try {
+            $db->query("UPDATE company_settings SET system_language = ? WHERE id = 1", [$language]);
+            Helpers::jsonResponse(true, "Language updated successfully");
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed to update language: " . $e->getMessage());
+        }
+        break;
+
     case 'save':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed.");

@@ -8,6 +8,36 @@ namespace App\Models;
 require_once __DIR__ . '/../../config/database.php';
 
 class Helpers {
+    private static $translations = [];
+    private static $currentLang = 'en';
+
+    /**
+     * Initialize language dictionaries
+     */
+    public static function initLanguage($langCode = 'en') {
+        self::$currentLang = $langCode;
+        $langFile = __DIR__ . '/../../application/lang/' . $langCode . '.json';
+        if (file_exists($langFile)) {
+            $json = file_get_contents($langFile);
+            self::$translations = json_decode($json, true) ?: [];
+        } else {
+            self::$translations = [];
+        }
+    }
+
+    public static function getCurrentLang() {
+        return self::$currentLang;
+    }
+
+    /**
+     * Translate a string
+     */
+    public static function translate($key) {
+        if (isset(self::$translations[$key])) {
+            return self::$translations[$key];
+        }
+        return $key;
+    }
     /**
      * Sanitize inputs to prevent XSS
      */

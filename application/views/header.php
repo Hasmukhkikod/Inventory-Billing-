@@ -38,6 +38,7 @@ $currentModule = in_array($currentDir, $validModules) ? $currentDir : $currentPa
 // Fetch Company Settings
 $db = $this->db;
 $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+\App\Models\Helpers::initLanguage($compSettings['system_language'] ?? 'en');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -48,7 +49,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
     <meta name="csrf-token" content="<?php echo \App\Models\Helpers::getCsrfToken(); ?>">
     <title><?php echo Helpers::sanitize($compSettings['company_name'] ?? COMPANY_NAME); ?> - IIMS</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/images/favicon.png?v=<?php echo Helpers::assetVersion('/assets/images/favicon.png'); ?>">
+    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/Asset%2015%4072x.png">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 Icons -->
@@ -152,7 +153,7 @@ foreach ($activeAds as $ad) {
                 <?php if (!empty($compSettings['company_logo']) && file_exists(BASE_DIR . '/uploads/' . $compSettings['company_logo'])): ?>
                     <img src="<?php echo BASE_URL . '/uploads/' . $compSettings['company_logo']; ?>" alt="Logo" style="height: 32px; width: 32px; object-fit: contain; border-radius: 6px;">
                 <?php else: ?>
-                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <img src="<?php echo BASE_URL; ?>/assets/img/Asset%2015%4072x.png" alt="Logo" style="height: 32px; width: 32px; object-fit: contain; border-radius: 6px;">
                 <?php endif; ?>
                 <span><?php echo \App\Models\Helpers::sanitize($compSettings['company_name'] ?? 'Grovixo'); ?></span>
             </a>
@@ -259,11 +260,11 @@ foreach ($activeAds as $ad) {
             </li>
             <?php endif; ?>
 
-            <?php if ($auth->hasPermission('Manage Users') && $auth->hasPlanFeature('users')): ?>
+            <?php if ($auth->hasPermission('Manage Users') && $_SESSION['user_id'] != 1): ?>
             <li class="sidebar-item <?php echo $currentModule === 'users' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/users/index" class="sidebar-link">
-                    <i class="fa-solid fa-users-gear"></i>
-                    <span>Users</span>
+                    <i class="fa-solid fa-user-group"></i>
+                    <span><?php echo \App\Models\Helpers::translate('Users'); ?></span>
                 </a>
             </li>
             <?php endif; ?>

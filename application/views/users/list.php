@@ -12,28 +12,28 @@
                 <ul class="nav nav-tabs border-0" id="usersTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active text-indigo border-0 bg-transparent fw-semibold" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab" aria-controls="users-pane" aria-selected="true">
-                            <i class="fa-solid fa-users me-2"></i>System Users
+                            <i class="fa-solid fa-users me-2"></i><?php echo \App\Models\Helpers::translate('System Users'); ?>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity-pane" type="button" role="tab" aria-controls="activity-pane" aria-selected="false">
-                            <i class="fa-solid fa-clock-rotate-left me-2"></i>Activity Logs
+                            <i class="fa-solid fa-clock-rotate-left me-2"></i><?php echo \App\Models\Helpers::translate('Activity Logs'); ?>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="logins-tab" data-bs-toggle="tab" data-bs-target="#logins-pane" type="button" role="tab" aria-controls="logins-pane" aria-selected="false">
-                            <i class="fa-solid fa-shield-halved me-2"></i>Login History
+                            <i class="fa-solid fa-shield-halved me-2"></i><?php echo \App\Models\Helpers::translate('Login History'); ?>
                         </button>
                     </li>
                 </ul>
                 <div class="d-flex gap-2">
                     <?php if ($auth->hasPlanFeature('roles')): ?>
                     <a href="<?php echo BASE_URL; ?>/roles/index" class="btn btn-outline-secondary btn-sm">
-                        <i class="fa-solid fa-user-shield me-1"></i> Manage Roles
+                        <i class="fa-solid fa-user-shield me-1"></i> <?php echo \App\Models\Helpers::translate('Manage Roles'); ?>
                     </a>
                     <?php endif; ?>
                     <a href="<?php echo BASE_URL; ?>/users/form" class="btn btn-primary btn-sm btn-action-add" id="btn-add-user">
-                        <i class="fa-solid fa-user-plus me-1"></i> Add User
+                        <i class="fa-solid fa-user-plus me-1"></i> <?php echo \App\Models\Helpers::translate('Add User'); ?>
                     </a>
                 </div>
             </div>
@@ -47,13 +47,13 @@
                             <table class="table table-hover align-middle w-100" id="usersTable">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th>Role</th>
-                                        <th>Email</th>
-                                        <th>Mobile</th>
-                                        <th>Last Login</th>
-                                        <th>Status</th>
-                                        <th class="text-end">Actions</th>
+                                        <th><?php echo \App\Models\Helpers::translate('NAME'); ?></th>
+                                        <th><?php echo \App\Models\Helpers::translate('ROLE'); ?></th>
+                                        <th><?php echo \App\Models\Helpers::translate('EMAIL'); ?></th>
+                                        <th><?php echo \App\Models\Helpers::translate('MOBILE'); ?></th>
+                                        <th><?php echo \App\Models\Helpers::translate('LAST LOGIN'); ?></th>
+                                        <th><?php echo \App\Models\Helpers::translate('STATUS'); ?></th>
+                                        <th class="text-end"><?php echo \App\Models\Helpers::translate('ACTIONS'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>

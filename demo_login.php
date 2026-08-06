@@ -131,6 +131,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           <label for="register-email">Work email</label>
                           <input id="register-email" name="email" type="email" autocomplete="email" required placeholder="Your Mail id" />
                       </div>
+                      <div class="field">
+                          <label for="register-mobile">Mobile Number</label>
+                          <input id="register-mobile" name="mobile" type="tel" autocomplete="tel" required placeholder="Your Mobile Number" />
+                      </div>
                       <p class="error" id="register-error" style="display:none;"></p>
                       <button class="submit" type="submit" id="register-submit-btn">Create my free account →</button>
                       <p class="terms">By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
@@ -145,8 +149,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <form id="login-form" method="POST" action="<?php echo BASE_URL; ?>/demo/login" novalidate>
                       <?php echo Helpers::csrfField(); ?>
                       <div class="field">
-                          <label for="login-email">Email address</label>
-                          <input id="login-email" name="email" type="email" autocomplete="email" required placeholder="Your Mail id" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" />
+                          <label for="login-email">Email or Mobile</label>
+                          <input id="login-email" name="email" type="text" autocomplete="username" required placeholder="Your Email or Mobile" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" />
                       </div>
                       <div class="field password">
                           <label for="login-password">Password</label>
@@ -162,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           <p class="error" style="display:block;"><?php echo htmlspecialchars($errorMessage); ?></p>
                       <?php endif; ?>
                       
-                      <p class="error" id="login-error">Enter a valid email address and your password to continue.</p>
+                      <p class="error" id="login-error">Enter a valid email/mobile and your password to continue.</p>
                       
                       <button class="submit" type="submit">Log in to Grovixo →</button>
                       <p class="terms">New to Grovixo? <a href="#" data-show-register>Start your free 15-day trial.</a></p>
@@ -203,7 +207,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const err = document.getElementById('login-error');
         err.style.display=valid?'none':'block';
         loginForm.querySelectorAll('input[required]').forEach(i=>i.classList.toggle('input-error',!i.checkValidity()));
-        if(!valid) e.preventDefault();
+        
+        if(!valid) {
+            e.preventDefault();
+        } else {
+            const btn = loginForm.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" style="display:inline-block;width:1rem;height:1rem;border:0.15em solid currentColor;border-right-color:transparent;border-radius:50%;animation:spinner-border .75s linear infinite;"></span> Logging in...';
+        }
     });
 
     // Registration Fetch Logic
@@ -220,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         registerForm.querySelectorAll('input[required]').forEach(i=>i.classList.toggle('input-error',!i.checkValidity()));
         
         if (!valid) {
-            err.textContent = "Please enter your name and a valid email.";
+            err.textContent = "Please fill in all required fields correctly.";
             err.style.display = 'block';
             return;
         }

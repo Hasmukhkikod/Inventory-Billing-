@@ -177,7 +177,7 @@ class Database {
         }
 
         $orgId = (int)$_SESSION['org_id'];
-        $globalTables = ['plans', 'organizations', 'permissions'];
+        $globalTables = ['plans', 'organizations', 'permissions', 'system_announcements'];
         
         $type = strtoupper(strtok(trim($sql), " \n\t\r"));
         

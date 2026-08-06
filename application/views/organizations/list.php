@@ -1,8 +1,8 @@
 <div class="content-body">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 mb-0">Organizations (Clients)</h2>
+        <h2 class="h4 mb-0"><?php echo \App\Models\Helpers::translate('Organizations (Clients)'); ?></h2>
         <a href="<?php echo BASE_URL; ?>/organizations/form" class="btn btn-primary shadow-sm">
-            <i class="fa-solid fa-plus me-2"></i>New Organization
+            <i class="fa-solid fa-plus me-2"></i><?php echo \App\Models\Helpers::translate('New Organization'); ?>
         </a>
     </div>
 
@@ -12,14 +12,14 @@
                 <table class="table table-hover align-middle mb-0" id="orgsTable">
                     <thead class="table-light">
                         <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Contact</th>
-                            <th>Plan</th>
-                            <th>Start Date</th>
-                            <th>Expiry Date</th>
-                            <th>Status</th>
-                            <th class="text-end">Actions</th>
+                            <th><?php echo \App\Models\Helpers::translate('ID'); ?></th>
+                            <th><?php echo \App\Models\Helpers::translate('Name'); ?></th>
+                            <th><?php echo \App\Models\Helpers::translate('Contact'); ?></th>
+                            <th><?php echo \App\Models\Helpers::translate('Plan'); ?></th>
+                            <th><?php echo \App\Models\Helpers::translate('Start Date'); ?></th>
+                            <th><?php echo \App\Models\Helpers::translate('Expiry Date'); ?></th>
+                            <th><?php echo \App\Models\Helpers::translate('Status'); ?></th>
+                            <th class="text-end"><?php echo \App\Models\Helpers::translate('Actions'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -51,8 +51,8 @@
                                 $isApproved = isset($o['is_approved']) ? (int)$o['is_approved'] : 0;
                                 
                                 if ($isVerified === 0) {
-                                    echo '<span class="badge bg-warning text-dark border"><i class="fa-solid fa-envelope-circle-check me-1"></i>Awaiting Verification</span>';
-                                    echo '<div class="text-muted mt-1" style="font-size:11px;">Link sent. Waiting for password set.</div>';
+                                    echo '<span class="badge bg-warning text-dark border"><i class="fa-solid fa-envelope-circle-check me-1"></i>' . \App\Models\Helpers::translate('Awaiting Verification') . '</span>';
+                                    echo '<div class="text-muted mt-1" style="font-size:11px;">' . \App\Models\Helpers::translate('Link sent. Waiting for password set.') . '</div>';
                                 } elseif ($isVerified === 1 && $isApproved === 0) {
                                     echo '<span class="badge bg-info text-dark border"><i class="fa-solid fa-user-clock me-1"></i>Awaiting Approval</span>';
                                     echo '<div class="text-muted mt-1" style="font-size:11px;">Password set. Needs admin approval.</div>';

@@ -147,56 +147,9 @@
     </div>
 </div>
 
-<!-- Floating Language Selector Button -->
-<button class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center" style="position: fixed; bottom: calc(80px + env(safe-area-inset-bottom)); right: 20px; width: 50px; height: 50px; z-index: 1050;" data-bs-toggle="modal" data-bs-target="#languageModal" title="Select Language">
-    <i class="fa-solid fa-language fs-4"></i>
-</button>
 
-<!-- Language Selector Modal -->
-<div class="modal fade" id="languageModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h6 class="modal-title"><i class="fa-solid fa-language text-indigo me-2"></i>Choose Language</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <input type="text" id="lang-search" class="form-control mb-3" placeholder="Search language... (e.g., Hindi)">
-                
-                <div class="list-group" id="lang-list" style="max-height: 300px; overflow-y: auto;">
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="en">English (Default)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="hi">Hindi (हिंदी)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="gu">Gujarati (ગુજરાતી)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="mr">Marathi (मराठी)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="bn">Bengali (বাংলা)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="ta">Tamil (தமிழ்)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="te">Telugu (తెలుగు)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="kn">Kannada (ಕನ್ನಡ)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="ml">Malayalam (മലയാളം)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="pa">Punjabi (ਪੰਜਾਬੀ)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="ur">Urdu (اردو)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="or">Odia (ଓଡ଼ିଆ)</button>
-                    <button class="list-group-item list-group-item-action lang-btn" data-lang="as">Assamese (অসমীয়া)</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Hidden Google Translate Element -->
-<div id="google_translate_element" style="display:none;"></div>
-<script type="text/javascript">
-function googleTranslateElementInit() {
-  new google.translate.TranslateElement({pageLanguage: 'en', autoDisplay: false}, 'google_translate_element');
-}
-</script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-<style>
-    .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
-    body { top: 0px !important; }
-    #goog-gt-tt { display: none !important; }
-</style>
 
 <!-- Include Mobile Bottom Navigation -->
 <?php require_once __DIR__ . '/bottom_nav.php'; ?>
@@ -395,41 +348,7 @@ $(document).ready(function() {
     // Removed applyGlobalTableLabels as we now use native responsive scrolling
 });
 
-// ==================== DYNAMIC LANGUAGE ENGINE ====================
-$(document).ready(function() {
-    $('#lang-search').on('input', function() {
-        const query = $(this).val().toLowerCase();
-        $('.lang-btn').each(function() {
-            const text = $(this).text().toLowerCase();
-            $(this).toggle(text.includes(query));
-        });
-    });
 
-    $('.lang-btn').on('click', function(e) {
-        e.preventDefault();
-        const langCode = $(this).data('lang');
-        const select = document.querySelector('select.goog-te-combo');
-        
-        if (select) {
-            select.value = langCode;
-            select.dispatchEvent(new Event('change'));
-        }
-        
-        // Save to cookie so it persists
-        document.cookie = `googtrans=/en/${langCode}; path=/`;
-        document.cookie = `googtrans=/en/${langCode}; domain=${location.hostname}; path=/`;
-        
-        $('#languageModal').modal('hide');
-    });
 
-    // Auto-enforce System Language Default
-    const sysLang = '<?php echo $compSettings["system_language"] ?? "en"; ?>';
-    if (sysLang !== 'en' && document.cookie.indexOf('googtrans=') === -1) {
-        document.cookie = `googtrans=/en/${sysLang}; path=/`;
-        document.cookie = `googtrans=/en/${sysLang}; domain=${location.hostname}; path=/`;
-        location.reload();
-    }
-});
-</script>
 </body>
 </html>

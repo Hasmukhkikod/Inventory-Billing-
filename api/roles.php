@@ -61,9 +61,10 @@ switch ($action) {
             }
             
             if (!empty($permissions)) {
-                $stmt = $db->pdo->prepare("INSERT INTO role_permissions (role_id, permission_id, created_by) VALUES (?, ?, ?)");
+                $orgId = $_SESSION['org_id'];
+                $stmt = $db->pdo->prepare("INSERT INTO role_permissions (role_id, permission_id, created_by, org_id) VALUES (?, ?, ?, ?)");
                 foreach ($permissions as $perm_id) {
-                    $stmt->execute([$roleId, (int)$perm_id, $created_by]);
+                    $stmt->execute([$roleId, (int)$perm_id, $created_by, $orgId]);
                 }
             }
 

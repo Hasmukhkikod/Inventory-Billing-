@@ -26,9 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstName = trim($_POST['firstName'] ?? '');
     $lastName = trim($_POST['lastName'] ?? '');
     $email = trim($_POST['email'] ?? '');
+    $mobile = trim($_POST['mobile'] ?? '');
     $password = bin2hex(random_bytes(8)); // Generate a temporary random password
 
-    if (empty($firstName) || empty($lastName) || empty($email)) {
+    if (empty($firstName) || empty($lastName) || empty($email) || empty($mobile)) {
         Helpers::jsonResponse(false, "All fields are required.");
     }
 
@@ -36,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Helpers::jsonResponse(false, "Invalid email address.");
     }
 
-    // Check if email already exists
-    $existingUser = $db->query("SELECT id FROM users WHERE email = ? LIMIT 1", [$email])->fetch();
-    $existingOrg = $db->query("SELECT id FROM organizations WHERE email = ? LIMIT 1", [$email])->fetch();
+    // Check if email or mobile already exists
+    $existingUser = $db->query("SELECT id FROM users WHERE email = ? OR mobile = ? LIMIT 1", [$email, $mobile])->fetch();
+    $existingOrg = $db->query("SELECT id FROM organizations WHERE email = ? OR phone = ? LIMIT 1", [$email, $mobile])->fetch();
     
     // If org exists but user doesn't, it's an orphaned record from a previous crash. Clean it up!
     if ($existingOrg && !$existingUser) {
@@ -47,11 +48,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($existingUser || $existingOrg) {
-        Helpers::jsonResponse(false, "This email is already registered.");
+        Helpers::jsonResponse(false, "This email or mobile is already registered.");
     }
 
     $orgName = $firstName . " " . $lastName . "'s Business";
-    $plan_id = 0; // We can set this to a default "Trial" plan ID if one exists, 0 for now.
+    $plan_id = 1; // Assign to Default Plan so they have access to features
     $start_date = date('Y-m-d');
     $valid_until = date('Y-m-d', strtotime('+15 days'));
     
@@ -67,11 +68,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             [$orgName, $email, $plan_id, $start_date, $valid_until, $verification_token]
         );
 
+        // Create Admin Role for new organization
+        $newRoleId = $db->insert(
+            "INSERT INTO roles (role_name, description, status, created_by, org_id) VALUES (?, ?, ?, ?, ?)",
+            ['Admin', 'Default Admin Role', 'ACTIVE', 1, $newOrgId]
+        );
+        
+        // Copy default Admin permissions (assuming role_id = 2 is the template)
+        $perms = $db->query("SELECT permission_id FROM role_permissions WHERE role_id = 2")->fetchAll();
+        foreach ($perms as $p) {
+            $db->insert(
+                "INSERT INTO role_permissions (role_id, permission_id, org_id) VALUES (?, ?, ?)", 
+                [$newRoleId, $p['permission_id'], $newOrgId]
+            );
+        }
+
         // Create Admin User
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $db->insert(
-            "INSERT INTO users (name, email, mobile, password, role_id, org_id, status) VALUES (?, ?, '', ?, 2, ?, 'ACTIVE')",
-            [$firstName . " " . $lastName, $email, $hashedPassword, $newOrgId]
+            "INSERT INTO users (name, email, mobile, password, role_id, org_id, status) VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE')",
+            [$firstName . " " . $lastName, $email, $mobile, $hashedPassword, $newRoleId, $newOrgId]
         );
 
         $db->getConnection()->commit();

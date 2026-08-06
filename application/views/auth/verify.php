@@ -68,6 +68,12 @@
                 <div class="mb-4 text-start">
                     <label class="form-label">Confirm Password</label>
                     <input type="password" name="confirm_password" class="form-control" required minlength="8">
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="showPasswordToggle" onclick="togglePasswordVisibility()">
+                        <label class="form-check-label text-muted" style="font-size: 0.85rem;" for="showPasswordToggle">
+                            Show passwords
+                        </label>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Save Password & Verify</button>
             </form>
@@ -80,5 +86,14 @@
             <a href="<?php echo BASE_URL; ?>/demo/login" class="btn btn-outline-secondary w-100">Back to Login</a>
         <?php endif; ?>
     </div>
+    <script>
+        function togglePasswordVisibility() {
+            const pwd = document.querySelector('input[name="password"]');
+            const confirmPwd = document.querySelector('input[name="confirm_password"]');
+            const isChecked = document.getElementById('showPasswordToggle').checked;
+            pwd.type = isChecked ? 'text' : 'password';
+            confirmPwd.type = isChecked ? 'text' : 'password';
+        }
+    </script>
 </body>
 </html>

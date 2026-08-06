@@ -17,13 +17,13 @@ class Auth {
     /**
      * Authenticate user by email and password
      */
-    public function login(string $email, string $password): bool {
+    public function login(string $loginId, string $password): bool {
         $stmt = $this->db->query("
             SELECT u.*, r.role_name 
             FROM users u 
             JOIN roles r ON u.role_id = r.id 
-            WHERE u.email = ? LIMIT 1
-        ", [$email]);
+            WHERE u.email = ? OR u.mobile = ? LIMIT 1
+        ", [$loginId, $loginId]);
         $user = $stmt->fetch();
 
         if ($user && $user['status'] === 'ACTIVE') {
@@ -34,19 +34,19 @@ class Auth {
                 $org = $orgStmt->fetch();
                 
                 if ($org && isset($org['is_verified']) && $org['is_verified'] == 0) {
-                    Helpers::logActivity($this->db, "auth", "Failed login: Organization email not verified: " . $email);
+                    Helpers::logActivity($this->db, "auth", "Failed login: Organization email not verified: " . $loginId);
                     echo "<script>alert('Your account is not verified or password is not set. Please check your email.'); window.location.href='" . BASE_URL . "/demo/login';</script>";
                     exit;
                 }
                 
                 if ($org && isset($org['is_approved']) && $org['is_approved'] == 0) {
-                    Helpers::logActivity($this->db, "auth", "Failed login: Organization not approved by System Admin: " . $email);
+                    Helpers::logActivity($this->db, "auth", "Failed login: Organization not approved by System Admin: " . $loginId);
                     echo "<script>alert('Your organization is awaiting System Admin approval. Please contact support.'); window.location.href='" . BASE_URL . "/demo/login';</script>";
                     exit;
                 }
                 
                 if (!$org || $org['status'] !== 'ACTIVE') {
-                    Helpers::logActivity($this->db, "auth", "Failed login: Organization inactive for email: " . $email);
+                    Helpers::logActivity($this->db, "auth", "Failed login: Organization inactive for email: " . $loginId);
                     return false;
                 }
             }
@@ -65,7 +65,7 @@ class Auth {
                     $diffDays = round(($validUntil - $today) / (60 * 60 * 24));
                 
                 if ($validUntil < $today) {
-                    Helpers::logActivity($this->db, "auth", "Failed login: Organization expired: " . $email);
+                    Helpers::logActivity($this->db, "auth", "Failed login: Organization expired: " . $loginId);
                     echo "<script>alert('Your demo has expired. Please contact support.'); window.location.href='" . BASE_URL . "/login';</script>";
                     exit;
                 } else {
