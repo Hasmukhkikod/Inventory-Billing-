@@ -159,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                       </div>
                       <div class="row">
                           <label><input type="checkbox" /> Remember me</label>
-                          <a href="#">Forgot password?</a>
+                          <a href="<?php echo BASE_URL; ?>/forgot_password">Forgot password?</a>
                       </div>
                       
                       <?php if (!empty($errorMessage)): ?>

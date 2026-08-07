@@ -26,23 +26,28 @@ if (empty($email)) {
 
 $db = new Database();
 
-// Check if user exists and is active
-$stmt = $db->query("SELECT id, name FROM users WHERE email = ? AND status = 'ACTIVE' LIMIT 1", [$email]);
-$user = $stmt->fetch();
+try {
+    // Check if user exists and is active
+    $stmt = $db->query("SELECT id, name FROM users WHERE email = ? AND status = 'ACTIVE' LIMIT 1", [$email]);
+    $user = $stmt->fetch();
 
-if (!$user) {
-    Helpers::jsonResponse(false, 'No account found with that email address.');
+    if (!$user) {
+        Helpers::jsonResponse(false, 'No account found with that email address.');
+    }
+
+    // Generate secure token
+    $token = bin2hex(random_bytes(32));
+    $request_ip = $_SERVER['REMOTE_ADDR'];
+    $expires_at = date('Y-m-d H:i:s', time() + 3600); // 1 hour from now
+
+    // Update user with reset info
+    $db->query("UPDATE users SET reset_token = ?, reset_request_ip = ?, reset_expires_at = ? WHERE id = ?", [
+        $token, $request_ip, $expires_at, $user['id']
+    ]);
+} catch (\Exception $e) {
+    error_log("Forgot password DB error: " . $e->getMessage());
+    Helpers::jsonResponse(false, 'Something went wrong. Please try again later.');
 }
-
-// Generate secure token
-$token = bin2hex(random_bytes(32));
-$request_ip = $_SERVER['REMOTE_ADDR'];
-$expires_at = date('Y-m-d H:i:s', time() + 3600); // 1 hour from now
-
-// Update user with reset info
-$db->query("UPDATE users SET reset_token = ?, reset_request_ip = ?, reset_expires_at = ? WHERE id = ?", [
-    $token, $request_ip, $expires_at, $user['id']
-]);
 
 // Send email
 $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
