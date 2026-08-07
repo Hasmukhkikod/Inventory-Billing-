@@ -628,18 +628,10 @@
                                     <label class="form-label"><i class="fa-solid fa-language text-indigo me-1"></i>System Language</label>
                                     <select class="form-select" name="system_language" id="set-system-language">
                                         <option value="en">English (Default)</option>
-                                        <option value="hi">Hindi (हिंदी)</option>
-                                        <option value="gu">Gujarati (ગુજરાતી)</option>
-                                        <option value="mr">Marathi (मराठी)</option>
-                                        <option value="bn">Bengali (বাংলা)</option>
-                                        <option value="ta">Tamil (தமிழ்)</option>
-                                        <option value="te">Telugu (తెలుగు)</option>
-                                        <option value="kn">Kannada (ಕನ್ನಡ)</option>
-                                        <option value="ml">Malayalam (മലയാളം)</option>
-                                        <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
-                                        <option value="ur">Urdu (اردو)</option>
-                                        <option value="or">Odia (ଓଡ଼ିଆ)</option>
-                                        <option value="as">Assamese (অসমীয়া)</option>
+                                        <option value="hi" disabled>Hindi (हिंदी) - Coming Soon</option>
+                                        <option value="gu" disabled>Gujarati (ગુજરાતી) - Coming Soon</option>
+                                        <option value="mr" disabled>Marathi (मराठी) - Coming Soon</option>
+                                      
                                     </select>
                                 </div>
                                 <div class="col-md-4">
