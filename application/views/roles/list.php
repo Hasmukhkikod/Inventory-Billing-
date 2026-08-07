@@ -101,7 +101,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const formData = new FormData();
                     formData.append('action', 'delete');
                     formData.append('id', id);
-                    
+                    formData.append('csrf_token', $('meta[name="csrf-token"]').attr('content'));
+
                     fetch('<?php echo BASE_URL; ?>/api/roles.php', {
                         method: 'POST',
                         body: formData

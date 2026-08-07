@@ -231,7 +231,7 @@ $(document).ready(function() {
                 $.ajax({
                     url: BASE_URL + '/api/users.php?action=delete',
                     type: 'POST',
-                    data: { id: id },
+                    data: { id: id, csrf_token: $('meta[name="csrf-token"]').attr('content') },
                     dataType: 'json',
                     success: function(res) {
                         if (res.status) {

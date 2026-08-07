@@ -21,15 +21,23 @@ if (session_status() === PHP_SESSION_NONE) {
 // Set Default Timezone
 date_default_timezone_set('Asia/Kolkata');
 
-// Error Reporting Config (For Dev)
+// Error Reporting Config
+// APP_ENV defaults to 'production' (errors hidden) unless explicitly set to
+// 'local' in .env — fail-safe so a forgotten .env setting never leaks stack
+// traces / file paths to end users on a live deployment.
+define('APP_ENV', $_ENV['APP_ENV'] ?? 'production');
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', APP_ENV === 'local' ? 1 : 0);
 
 // Application Directories
 define('BASE_DIR', dirname(__DIR__));
 define('UPLOAD_DIR', BASE_DIR . '/uploads');
 define('BACKUP_DIR', BASE_DIR . '/backups');
 define('LOG_DIR', BASE_DIR . '/logs');
+
+// Errors are always logged (even when hidden from output) so issues remain diagnosable
+ini_set('log_errors', 1);
+ini_set('error_log', LOG_DIR . '/php-error.log');
 
 // Part 6 Base URL & Paths
 define('BASE_URL', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost:8000'));

@@ -3,9 +3,6 @@
  * IIMS v2.0 - Create Invoice (Full-Width Layout)
  */
 $compSettings = $this->db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
-$loyaltyEnabled = (int)($compSettings['loyalty_enabled'] ?? 0);
-$loyaltyPer100 = (int)($compSettings['loyalty_points_per_100'] ?? 1);
-$loyaltyRedeemValue = (float)($compSettings['loyalty_redeem_value'] ?? 1.00);
 $companyState = trim($compSettings['state'] ?? '');
 $posMode = (int)($compSettings['pos_mode'] ?? 0);
 ?>
@@ -151,27 +148,6 @@ $posMode = (int)($compSettings['pos_mode'] ?? 0);
                     </div>
                 </div>
 
-                <!-- Loyalty -->
-                <?php if ($loyaltyEnabled): ?>
-                <div class="d-none mb-3 p-2 rounded border" id="loyalty-panel">
-                    <div class="d-flex justify-content-between small">
-                        <span><i class="fa-solid fa-star text-warning me-1"></i>Loyalty Points</span>
-                        <strong class="text-warning" id="customer-loyalty-points">0</strong>
-                    </div>
-                    <div class="form-check form-switch mt-1">
-                        <input class="form-check-input" type="checkbox" id="redeem-loyalty-toggle">
-                        <label class="form-check-label small" for="redeem-loyalty-toggle">Redeem (₹<span id="loyalty-redeem-value"><?php echo $loyaltyRedeemValue; ?></span>/pt)</label>
-                    </div>
-                    <div class="d-none mt-2" id="redeem-points-row">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text">Points</span>
-                            <input type="number" class="form-control" id="redeem-points-input" min="0" value="0">
-                            <span class="input-group-text text-emerald" id="redeem-discount-display">= ₹0</span>
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
-
                 <!-- Payment Mode -->
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -232,12 +208,6 @@ $posMode = (int)($compSettings['pos_mode'] ?? 0);
                                 </td>
                                 <td class="text-end text-success fw-bold" id="bill-coupon-discount">-₹0.00</td>
                             </tr>
-                            <?php if ($loyaltyEnabled): ?>
-                            <tr class="d-none" id="loyalty-discount-row">
-                                <td class="text-warning small"><i class="fa-solid fa-star me-1"></i>Loyalty</td>
-                                <td class="text-end text-warning fw-bold" id="bill-loyalty-discount">-₹0.00</td>
-                            </tr>
-                            <?php endif; ?>
                             <tr><td class="text-secondary">Round Off</td><td class="text-end" id="bill-roundoff">₹0.00</td></tr>
                         </table>
                     </div>
@@ -330,9 +300,6 @@ $posMode = (int)($compSettings['pos_mode'] ?? 0);
 
 
 <!-- Hidden config -->
-<input type="hidden" id="config-loyalty-enabled" value="<?php echo $loyaltyEnabled; ?>">
-<input type="hidden" id="config-loyalty-per-100" value="<?php echo $loyaltyPer100; ?>">
-<input type="hidden" id="config-loyalty-redeem-value" value="<?php echo $loyaltyRedeemValue; ?>">
 <input type="hidden" id="config-company-state" value="<?php echo htmlspecialchars($companyState); ?>">
 
 <script src="<?php echo BASE_URL; ?>/assets/js/billing.js?v=<?php echo \App\Models\Helpers::assetVersion('/assets/js/billing.js'); ?>" defer></script>

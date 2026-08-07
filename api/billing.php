@@ -1,7 +1,7 @@
 <?php
 /**
  * IIMS v2.0 - POS Billing & Invoice API
- * Enhanced: Split Payment, CGST/SGST/IGST, Coupons, Loyalty, Due Date
+ * Enhanced: Split Payment, CGST/SGST/IGST, Coupons, Due Date
  */
 require_once __DIR__ . '/../vendor/autoload.php';
 use App\Models\Auth;
@@ -81,7 +81,7 @@ switch ($action) {
 
     case 'get_customers':
         try {
-            $stmt = $db->query("SELECT id, customer_name, mobile, gst_number, state, loyalty_points FROM customers WHERE status = 'ACTIVE' AND deleted_at IS NULL ORDER BY customer_name ASC");
+            $stmt = $db->query("SELECT id, customer_name, mobile, gst_number, state FROM customers WHERE status = 'ACTIVE' AND deleted_at IS NULL ORDER BY customer_name ASC");
             Helpers::jsonResponse(true, 'Customers list', $stmt->fetchAll());
         } catch (Exception $e) {
             Helpers::jsonResponse(false, 'Failed: ' . $e->getMessage());
@@ -97,8 +97,6 @@ switch ($action) {
         $discount_amount = (float)($_POST['discount_amount'] ?? 0);
         $coupon_id = !empty($_POST['coupon_id']) ? (int)$_POST['coupon_id'] : null;
         $coupon_discount = (float)($_POST['coupon_discount'] ?? 0);
-        $loyalty_points_redeemed = (int)($_POST['loyalty_points_redeemed'] ?? 0);
-        $loyalty_discount = (float)($_POST['loyalty_discount'] ?? 0);
         $due_date = !empty($_POST['due_date']) ? $_POST['due_date'] : null;
         $notes = trim($_POST['notes'] ?? '');
         $is_igst = (int)($_POST['is_igst'] ?? 0);
@@ -118,7 +116,7 @@ switch ($action) {
         }
 
         try {
-            $result = $db->transaction(function($t) use ($customer_id, $invoice_type, $discount_amount, $coupon_id, $coupon_discount, $loyalty_points_redeemed, $loyalty_discount, $due_date, $notes, $is_igst, $payments, $cart) {
+            $result = $db->transaction(function($t) use ($customer_id, $invoice_type, $discount_amount, $coupon_id, $coupon_discount, $due_date, $notes, $is_igst, $payments, $cart) {
                 $sub_total = 0.00;
                 $total_tax = 0.00;
                 $total_cgst = 0.00;
@@ -184,7 +182,7 @@ switch ($action) {
                     ];
                 }
 
-                $grand_total = $sub_total + $total_tax - $discount_amount - $coupon_discount - $loyalty_discount;
+                $grand_total = $sub_total + $total_tax - $discount_amount - $coupon_discount;
                 $rounded_total = round($grand_total);
                 $round_off = $rounded_total - $grand_total;
 
@@ -234,22 +232,14 @@ switch ($action) {
                 $seq = str_pad($nextNum, 5, '0', STR_PAD_LEFT);
                 $invoice_number = $prefix . $year . '-' . $seq;
 
-                // Loyalty points earned
-                $loyaltySettings = $t->query("SELECT loyalty_enabled, loyalty_points_per_100 FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
-                $loyalty_earned = 0;
-                if ((int)($loyaltySettings['loyalty_enabled'] ?? 0) && $customer_id) {
-                    $loyalty_earned = (int)(floor($rounded_total / 100) * (int)($loyaltySettings['loyalty_points_per_100'] ?? 1));
-                }
-
                 // Save invoice
                 $invoiceId = $t->insert("
-                    INSERT INTO invoices (invoice_no, invoice_type, customer_id, invoice_date, due_date, subtotal, gst_amount, cgst_amount, sgst_amount, igst_amount, is_igst, discount, coupon_id, coupon_discount, loyalty_points_earned, loyalty_points_redeemed, round_off, grand_total, payment_method, paid_amount, due_amount, notes, status, created_by)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    INSERT INTO invoices (invoice_no, invoice_type, customer_id, invoice_date, due_date, subtotal, gst_amount, cgst_amount, sgst_amount, igst_amount, is_igst, discount, coupon_id, coupon_discount, round_off, grand_total, payment_method, paid_amount, due_amount, notes, status, created_by)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 ", [
                     $invoice_number, $invoice_type, $customer_id, date('Y-m-d'), $due_date,
                     $sub_total, $total_tax, $total_cgst, $total_sgst, $total_igst, $is_igst,
                     $discount_amount, $coupon_id, $coupon_discount,
-                    $loyalty_earned, $loyalty_points_redeemed,
                     $round_off, $rounded_total, $primary_method,
                     $actual_paid, $balance_amount, $notes, $pay_status, $_SESSION['user_id']
                 ]);
@@ -290,26 +280,6 @@ switch ($action) {
                 // Coupon usage
                 if ($coupon_id) {
                     $t->query("UPDATE coupons SET used_count = used_count + 1 WHERE id = ?", [$coupon_id]);
-                }
-
-                // Loyalty: earn + redeem
-                if ($customer_id && ($loyalty_earned > 0 || $loyalty_points_redeemed > 0)) {
-                    $custPts = $t->query("SELECT loyalty_points FROM customers WHERE id = ?", [$customer_id])->fetch();
-                    $currentPts = (int)($custPts['loyalty_points'] ?? 0);
-
-                    if ($loyalty_points_redeemed > 0) {
-                        $afterRedeem = $currentPts - $loyalty_points_redeemed;
-                        $t->insert("INSERT INTO loyalty_transactions (customer_id, invoice_id, points, type, balance_after, remarks, created_by) VALUES (?,?,?,?,?,?,?)",
-                            [$customer_id, $invoiceId, -$loyalty_points_redeemed, 'REDEEMED', $afterRedeem, "Redeemed on $invoice_number", $_SESSION['user_id']]);
-                        $currentPts = $afterRedeem;
-                    }
-                    if ($loyalty_earned > 0) {
-                        $afterEarn = $currentPts + $loyalty_earned;
-                        $t->insert("INSERT INTO loyalty_transactions (customer_id, invoice_id, points, type, balance_after, remarks, created_by) VALUES (?,?,?,?,?,?,?)",
-                            [$customer_id, $invoiceId, $loyalty_earned, 'EARNED', $afterEarn, "Earned from $invoice_number", $_SESSION['user_id']]);
-                        $currentPts = $afterEarn;
-                    }
-                    $t->query("UPDATE customers SET loyalty_points = ? WHERE id = ?", [$currentPts, $customer_id]);
                 }
 
                 $t->insert("INSERT INTO notifications (title, message, type, is_read, status) VALUES (?,?,'System',0,'PENDING')",

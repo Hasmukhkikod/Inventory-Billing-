@@ -10,7 +10,7 @@
         <div class="panel-card p-0" style="border-radius: 8px;">
             <div class="row g-0">
                 <!-- Sidebar Tabs -->
-                <div class="col-md-3 border-end bg-light" style="min-height: 500px;">
+                <div class="col-md-3 border-end bg-light" id="settings-tabs-panel">
                     <div class="p-3">
                         <ul class="nav nav-pills flex-row flex-md-column gap-2 overflow-auto text-nowrap" id="settingsTabs" role="tablist" style="padding-bottom: 10px;">
                             <li class="nav-item" role="presentation">
@@ -21,11 +21,6 @@
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link text-start fw-semibold settings-tab w-100" id="billing-tab" data-bs-toggle="tab" data-bs-target="#billing-pane" type="button" role="tab" aria-controls="billing-pane" aria-selected="false">
                             <i class="fa-solid fa-receipt me-2"></i>Invoice & Tax
-                        </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link text-start fw-semibold settings-tab w-100" id="loyalty-tab" data-bs-toggle="tab" data-bs-target="#loyalty-pane" type="button" role="tab" aria-controls="loyalty-pane" aria-selected="false">
-                            <i class="fa-solid fa-gift me-2"></i>Loyalty & Templates
                         </button>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -305,30 +300,6 @@
                                 <div class="col-md-12">
                                     <label class="form-label">Terms and Conditions</label>
                                     <textarea class="form-control" name="invoice_terms" id="set-terms" rows="4" placeholder="Business policies..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- LOYALTY PANE -->
-                        <div class="tab-pane fade" id="loyalty-pane" role="tabpanel" aria-labelledby="loyalty-tab" tabindex="0">
-                            <div class="row g-3">
-                                <div class="col-md-12">
-                                    <h6 class="text-indigo mb-3"><i class="fa-solid fa-gift me-2"></i>Customer Loyalty Program</h6>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Enable Loyalty Points</label>
-                                    <div class="form-check form-switch mt-1">
-                                        <input class="form-check-input" type="checkbox" name="loyalty_enabled" id="set-loyalty-enabled" value="1">
-                                        <label class="form-check-label" for="set-loyalty-enabled">Active</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Points per &#8377;100 spent</label>
-                                    <input type="number" class="form-control" name="loyalty_points_per_100" id="set-loyalty-points" min="0" placeholder="e.g. 10">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">&#8377; value per point</label>
-                                    <input type="number" step="0.01" class="form-control" name="loyalty_redeem_value" id="set-loyalty-redeem" min="0" placeholder="e.g. 0.50">
                                 </div>
                             </div>
                         </div>
@@ -1140,7 +1111,7 @@ $(document).ready(function() {
     $('.settings-tab').on('show.bs.tab', function (e) {
         $('.tab-pane').removeClass('show active');
         const target = $(e.target).attr('data-bs-target');
-        const formTabs = ['#company-pane', '#billing-pane', '#loyalty-pane', '#bank-pane', '#theme-pane', '#demo-pane'];
+        const formTabs = ['#company-pane', '#billing-pane', '#bank-pane', '#theme-pane', '#demo-pane'];
         if (formTabs.includes(target)) {
             $('#settings-save-row').show();
         } else {
@@ -1181,10 +1152,6 @@ $(document).ready(function() {
                 $("#set-state-code").val(s.state_code || '');
                 $("#set-footer").val(s.invoice_footer || '');
                 $("#set-terms").val(s.invoice_terms || '');
-                // Loyalty & Templates
-                $("#set-loyalty-enabled").prop('checked', s.loyalty_enabled == 1);
-                $("#set-loyalty-points").val(s.loyalty_points_per_100 || '');
-                $("#set-loyalty-redeem").val(s.loyalty_redeem_value || '');
                 $("#set-invoice-template").val(s.invoice_template || 'standard');
                 $("#set-system-language").val(s.system_language || 'en');
                 $("#set-pos-mode").prop('checked', s.pos_mode == 1);
@@ -1255,10 +1222,6 @@ $(document).ready(function() {
         }
 
         var formData = new FormData(this);
-        // Ensure loyalty_enabled is sent even when unchecked
-        if (!$("#set-loyalty-enabled").is(':checked')) {
-            formData.set('loyalty_enabled', '0');
-        }
         // Add logo file if selected
         var logoFile = $('#set-logo-file')[0].files[0];
         if (logoFile) {

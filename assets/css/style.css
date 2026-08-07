@@ -1069,6 +1069,40 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     opacity: 1;
 }
 
+/* Desktop-only: reserve a tall left column so the (vertically-stacked)
+   settings tabs and the tab content panel beside them line up nicely. */
+@media (min-width: 768px) {
+    #settings-tabs-panel {
+        min-height: 500px;
+    }
+}
+
+/* Mobile: Bootstrap's base .nav sets flex-wrap:wrap, which - combined with
+   flex-row (active below md) and each tab's own w-100 - was wrapping the
+   settings tabs into an ungainly multi-row grid with huge gaps, instead of
+   the same horizontal-scroll tab strip every other tabbed panel in the app
+   already uses. Make it one scrollable row instead. */
+@media (max-width: 767px) {
+    #settingsTabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.5rem;
+    }
+    #settingsTabs .settings-tab {
+        width: auto !important;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    /* The right border made sense beside the content column on desktop;
+       stacked full-width on mobile it's just a stray line at the screen
+       edge, so swap it for a bottom border separating tabs from content. */
+    #settings-tabs-panel {
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-color);
+    }
+}
+
 .sidebar-footer {
     padding: 0.75rem 1rem;
     border-top: 1px solid var(--border-color);
@@ -2191,10 +2225,13 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
 @media (max-width: 991px) {
     .sidebar {
         transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1050;
+        box-shadow: none;
     }
     .sidebar.show {
         transform: translateX(0);
+        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15);
     }
     .main-content {
         margin-left: 0 !important;
@@ -2530,6 +2567,178 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
         padding-top: 0.6rem;
     }
     #printersTable tbody tr td:nth-child(6)::before {
+        content: none !important;
+    }
+
+    /* ============ Every other hand-coded (non-DataTables) table across the
+       app -> same stacked-card treatment as Printer Settings. The global
+       responsive:true DataTables collapse only reaches tables actually
+       initialized via $().DataTable(); these are plain server/JS-rendered
+       tables so they need the same manual card CSS. ============ */
+    #rolesTable thead, #couponsTable thead, #backupsTable thead, #feedbackTable thead,
+    #orgsTable thead, #plansTable thead, #announcementsTable thead {
+        display: none;
+    }
+    #rolesTable, #rolesTable tbody, #rolesTable tr, #rolesTable td,
+    #couponsTable, #couponsTable tbody, #couponsTable tr, #couponsTable td,
+    #backupsTable, #backupsTable tbody, #backupsTable tr, #backupsTable td,
+    #feedbackTable, #feedbackTable tbody, #feedbackTable tr, #feedbackTable td,
+    #orgsTable, #orgsTable tbody, #orgsTable tr, #orgsTable td,
+    #plansTable, #plansTable tbody, #plansTable tr, #plansTable td,
+    #announcementsTable, #announcementsTable tbody, #announcementsTable tr, #announcementsTable td {
+        display: block;
+        width: 100% !important;
+    }
+    #rolesTable tbody tr:not(:has(td[colspan])),
+    #couponsTable tbody tr:not(:has(td[colspan])),
+    #backupsTable tbody tr:not(:has(td[colspan])),
+    #feedbackTable tbody tr:not(:has(td[colspan])),
+    #orgsTable tbody tr:not(:has(td[colspan])),
+    #plansTable tbody tr:not(:has(td[colspan])),
+    #announcementsTable tbody tr:not(:has(td[colspan])) {
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 0.85rem;
+        margin-bottom: 0.75rem;
+        background: var(--bg-secondary);
+    }
+    #rolesTable tbody tr:has(td[colspan]),
+    #couponsTable tbody tr:has(td[colspan]),
+    #backupsTable tbody tr:has(td[colspan]),
+    #feedbackTable tbody tr:has(td[colspan]),
+    #orgsTable tbody tr:has(td[colspan]),
+    #plansTable tbody tr:has(td[colspan]),
+    #announcementsTable tbody tr:has(td[colspan]) {
+        border: none;
+        padding: 0;
+    }
+    #rolesTable tbody tr:not(:has(td[colspan])) td,
+    #couponsTable tbody tr:not(:has(td[colspan])) td,
+    #backupsTable tbody tr:not(:has(td[colspan])) td,
+    #feedbackTable tbody tr:not(:has(td[colspan])) td,
+    #orgsTable tbody tr:not(:has(td[colspan])) td,
+    #plansTable tbody tr:not(:has(td[colspan])) td,
+    #announcementsTable tbody tr:not(:has(td[colspan])) td {
+        border: none;
+        padding: 0.4rem 0;
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        text-align: right;
+    }
+    #rolesTable tbody tr:not(:has(td[colspan])) td::before,
+    #couponsTable tbody tr:not(:has(td[colspan])) td::before,
+    #backupsTable tbody tr:not(:has(td[colspan])) td::before,
+    #feedbackTable tbody tr:not(:has(td[colspan])) td::before,
+    #orgsTable tbody tr:not(:has(td[colspan])) td::before,
+    #plansTable tbody tr:not(:has(td[colspan])) td::before,
+    #announcementsTable tbody tr:not(:has(td[colspan])) td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--text-secondary);
+        text-align: left;
+        flex-shrink: 0;
+    }
+    /* Card title column per table: card-style title, not a label:value row */
+    #rolesTable tbody tr td:nth-child(2),
+    #couponsTable tbody tr td:nth-child(1),
+    #backupsTable tbody tr td:nth-child(1),
+    #feedbackTable tbody tr td:nth-child(1),
+    #orgsTable tbody tr td:nth-child(2),
+    #plansTable tbody tr td:nth-child(2),
+    #announcementsTable tbody tr td:nth-child(1) {
+        display: block !important;
+        text-align: left;
+        padding: 0 0 0.6rem 0;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px dashed var(--border-color);
+        font-size: 1rem;
+    }
+    #rolesTable tbody tr td:nth-child(2)::before,
+    #couponsTable tbody tr td:nth-child(1)::before,
+    #backupsTable tbody tr td:nth-child(1)::before,
+    #feedbackTable tbody tr td:nth-child(1)::before,
+    #orgsTable tbody tr td:nth-child(2)::before,
+    #plansTable tbody tr td:nth-child(2)::before,
+    #announcementsTable tbody tr td:nth-child(1)::before {
+        content: none !important;
+    }
+    /* Hide the numeric ID column, redundant once cards stack. !important is
+       required here: the generic "all td" rule above sets display:flex
+       !important, which otherwise beats a plain display:none on a more
+       specific but non-important selector. */
+    #rolesTable tbody tr td:nth-child(1),
+    #orgsTable tbody tr td:nth-child(1),
+    #plansTable tbody tr td:nth-child(1) {
+        display: none !important;
+    }
+    /* All content: "Label" overrides below need !important - the generic
+       content: attr(data-label) fallback rule above is scoped with
+       :not(:has(td[colspan])), and :has()'s internal selector specificity
+       makes that generic rule MORE specific than a plain :nth-child()
+       override, so without !important these labels silently lose and never
+       render (matching the printers table's pre-existing pattern, which
+       already used !important here for the same reason). */
+    #rolesTable tbody tr td:nth-child(3)::before { content: "Description" !important; }
+    #rolesTable tbody tr td:nth-child(4)::before { content: "Status" !important; }
+    #couponsTable tbody tr td:nth-child(2)::before { content: "Name" !important; }
+    #couponsTable tbody tr td:nth-child(3)::before { content: "Type" !important; }
+    #couponsTable tbody tr td:nth-child(4)::before { content: "Value" !important; }
+    #couponsTable tbody tr td:nth-child(5)::before { content: "Min Order" !important; }
+    #couponsTable tbody tr td:nth-child(6)::before { content: "Valid Until" !important; }
+    #couponsTable tbody tr td:nth-child(7)::before { content: "Used" !important; }
+    #couponsTable tbody tr td:nth-child(8)::before { content: "Status" !important; }
+    #backupsTable tbody tr td:nth-child(2)::before { content: "Size" !important; }
+    #feedbackTable tbody tr td:nth-child(2) { white-space: normal !important; max-width: none !important; }
+    #feedbackTable tbody tr td:nth-child(2)::before { content: "Message" !important; }
+    #feedbackTable tbody tr td:nth-child(3)::before { content: "Page" !important; }
+    #feedbackTable tbody tr td:nth-child(4)::before { content: "Date" !important; }
+    #orgsTable tbody tr td:nth-child(3)::before { content: "Contact" !important; }
+    #orgsTable tbody tr td:nth-child(4)::before { content: "Plan" !important; }
+    #orgsTable tbody tr td:nth-child(5)::before { content: "Start Date" !important; }
+    #orgsTable tbody tr td:nth-child(6)::before { content: "Expiry Date" !important; }
+    #orgsTable tbody tr td:nth-child(7)::before { content: "Status" !important; }
+    /* Status column carries a badge plus a helper sentence ("Link sent.
+       Waiting for password set.") - too long to force onto the generic
+       right-aligned single line, where it was colliding with the floating
+       help button. Stack it full-width below its label instead. */
+    #orgsTable tbody tr:not(:has(td[colspan])) td:nth-child(7) {
+        display: block !important;
+        text-align: left !important;
+    }
+    #orgsTable tbody tr:not(:has(td[colspan])) td:nth-child(7)::before {
+        display: block;
+        margin-bottom: 0.35rem;
+    }
+    #plansTable tbody tr td:nth-child(3)::before { content: "Price" !important; }
+    #plansTable tbody tr td:nth-child(4)::before { content: "Duration (Days)" !important; }
+    #plansTable tbody tr td:nth-child(5)::before { content: "Status" !important; }
+    #announcementsTable tbody tr td:nth-child(2)::before { content: "Type" !important; }
+    #announcementsTable tbody tr td:nth-child(3)::before { content: "Location" !important; }
+    #announcementsTable tbody tr td:nth-child(4)::before { content: "Schedule" !important; }
+    #announcementsTable tbody tr td:nth-child(5)::before { content: "Status" !important; }
+    /* Actions: full-width row, buttons right-aligned, no label */
+    #rolesTable tbody tr td:last-child,
+    #couponsTable tbody tr td:last-child,
+    #backupsTable tbody tr td:last-child,
+    #feedbackTable tbody tr td:last-child,
+    #orgsTable tbody tr td:last-child,
+    #plansTable tbody tr td:last-child,
+    #announcementsTable tbody tr td:last-child {
+        justify-content: flex-end;
+        padding-top: 0.6rem;
+    }
+    #rolesTable tbody tr td:last-child::before,
+    #couponsTable tbody tr td:last-child::before,
+    #backupsTable tbody tr td:last-child::before,
+    #feedbackTable tbody tr td:last-child::before,
+    #orgsTable tbody tr td:last-child::before,
+    #plansTable tbody tr td:last-child::before,
+    #announcementsTable tbody tr td:last-child::before {
         content: none !important;
     }
 }

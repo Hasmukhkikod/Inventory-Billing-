@@ -1,7 +1,7 @@
 <?php
 /**
  * IIMS v2.0 - Invoice Detail View
- * Shows: GST breakdown (CGST/SGST/IGST), Split payments, Coupons, Loyalty
+ * Shows: GST breakdown (CGST/SGST/IGST), Split payments, Coupons
  */
 $payments = $this->db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND status = 'ACTIVE'", [(int)$invoice['id']])->fetchAll();
 $isIGST = (int)($invoice['is_igst'] ?? 0);
@@ -139,12 +139,6 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
                         <div class="d-flex justify-content-between mb-1 fw-semibold text-danger"><span>Balance Due:</span><span>₹<?php echo number_format($invoice['due_amount'], 2); ?></span></div>
                     <?php endif; ?>
 
-                    <?php if ((int)($invoice['loyalty_points_earned'] ?? 0) > 0): ?>
-                        <div class="d-flex justify-content-between mb-1 small text-warning"><span>Loyalty Earned:</span><span>+<?php echo $invoice['loyalty_points_earned']; ?> pts</span></div>
-                    <?php endif; ?>
-                    <?php if ((int)($invoice['loyalty_points_redeemed'] ?? 0) > 0): ?>
-                        <div class="d-flex justify-content-between mb-1 small text-warning"><span>Points Redeemed:</span><span>-<?php echo $invoice['loyalty_points_redeemed']; ?> pts</span></div>
-                    <?php endif; ?>
                 </div>
             </div>
 

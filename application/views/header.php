@@ -56,6 +56,9 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- DataTables Bootstrap 5 CSS -->
     <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- DataTables Responsive extension: collapses extra columns into an
+         expandable row instead of horizontal-scrolling on narrow screens -->
+    <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
     <!-- SweetAlert 2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <!-- Select2 Searchable Dropdowns -->
@@ -69,6 +72,33 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
     </script>
 </head>
 <body>
+<script>
+    // Vanilla-JS fallback for the sidebar open/close toggle, independent of
+    // jQuery and bound via delegation on document so it works regardless of
+    // script load order, whether jQuery/CDN scripts fail elsewhere on the
+    // page, or which toggle button variant (top navbar vs bottom nav "Menu")
+    // is present. The jQuery handler in footer.php does the same thing when
+    // it's available - this just guarantees the menu always opens even if
+    // that handler never gets registered.
+    document.addEventListener('click', function (e) {
+        var opener = e.target.closest('#sidebar-toggle-btn, #bottom-menu-toggle');
+        if (opener) {
+            e.preventDefault();
+            var sidebar = document.getElementById('app-sidebar');
+            var backdrop = document.getElementById('sidebar-backdrop');
+            if (sidebar) sidebar.classList.add('show');
+            if (backdrop) backdrop.style.display = 'block';
+            return;
+        }
+        var closer = e.target.closest('#sidebar-close-btn, #sidebar-backdrop, .btn-logout-icon');
+        if (closer) {
+            var sidebar2 = document.getElementById('app-sidebar');
+            var backdrop2 = document.getElementById('sidebar-backdrop');
+            if (sidebar2) sidebar2.classList.remove('show');
+            if (backdrop2) backdrop2.style.display = 'none';
+        }
+    });
+</script>
 <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
 <?php if(isset($_SESSION['plan_expired']) && $_SESSION['plan_expired']): ?>

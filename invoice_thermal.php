@@ -291,11 +291,6 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
         <?php endif; ?>
     <?php endif; ?>
 
-    <?php if ((int)$invoice['loyalty_points_earned'] > 0): ?>
-        <div class="divider"></div>
-        <div class="row small"><span>Points Earned:</span><span>+<?php echo $invoice['loyalty_points_earned']; ?> pts</span></div>
-    <?php endif; ?>
-
     <div class="divider"></div>
     <div class="text-center small" style="margin-top:6px;">
         <?php echo Helpers::sanitize($pos_footer_text); ?>

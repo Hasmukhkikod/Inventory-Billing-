@@ -1,6 +1,6 @@
 /**
  * IIMS v2.0 - POS Billing Controller
- * Features: Hold/Recall, Split Payment, Coupons, Loyalty, GST (CGST/SGST/IGST)
+ * Features: Hold/Recall, Split Payment, Coupons, GST (CGST/SGST/IGST)
  */
 $(document).ready(function () {
     let cart = [];
@@ -8,9 +8,6 @@ $(document).ready(function () {
     let lastInvoiceId = null;
     let customerData = {};
     const csrfToken = $('input[name="csrf_token"]').val();
-    const loyaltyEnabled = parseInt($('#config-loyalty-enabled').val()) || 0;
-    const loyaltyPer100 = parseInt($('#config-loyalty-per-100').val()) || 1;
-    const loyaltyRedeemValue = parseFloat($('#config-loyalty-redeem-value').val()) || 1.0;
     const companyState = $('#config-company-state').val() || '';
 
     loadCustomers();
@@ -341,7 +338,6 @@ $(document).ready(function () {
 
     // ==================== BILL CALCULATION ====================
     $('#bill-discount-input').on('input', recalculateBill);
-    $('#redeem-points-input').on('input', recalculateBill);
 
     function isInterState() {
         const custId = $('#pos-customer-select').val();
@@ -369,18 +365,7 @@ $(document).ready(function () {
         const flatDiscount = parseFloat($('#bill-discount-input').val()) || 0;
         const couponDiscount = appliedCoupon ? appliedCoupon.discount_amount : 0;
 
-        let loyaltyDiscount = 0;
-        if (loyaltyEnabled && $('#redeem-loyalty-toggle').is(':checked')) {
-            const pts = parseInt($('#redeem-points-input').val()) || 0;
-            loyaltyDiscount = pts * loyaltyRedeemValue;
-            $('#redeem-discount-display').text('= ₹' + loyaltyDiscount.toFixed(2));
-            $('#loyalty-discount-row').removeClass('d-none');
-            $('#bill-loyalty-discount').text('-₹' + loyaltyDiscount.toFixed(2));
-        } else {
-            $('#loyalty-discount-row').addClass('d-none');
-        }
-
-        const grandTotal = subtotal + totalTax - flatDiscount - couponDiscount - loyaltyDiscount;
+        const grandTotal = subtotal + totalTax - flatDiscount - couponDiscount;
         const roundedTotal = Math.round(grandTotal);
         const roundoff = roundedTotal - grandTotal;
 
@@ -493,23 +478,9 @@ $(document).ready(function () {
         recalculateBill();
     });
 
-    // ==================== LOYALTY ====================
+    // Recalculate CGST/SGST vs IGST split when the customer (and their state) changes
     $('#pos-customer-select').on('change', function () {
-        const id = $(this).val();
-        if (loyaltyEnabled && id && customerData[id]) {
-            const pts = customerData[id].loyalty_points || 0;
-            $('#customer-loyalty-points').text(pts);
-            $('#redeem-points-input').attr('max', pts).val(0);
-            $('#loyalty-panel').removeClass('d-none');
-        } else {
-            $('#loyalty-panel').addClass('d-none');
-        }
         recalculateBill();
-    });
-
-    $('#redeem-loyalty-toggle').on('change', function () {
-        if ($(this).is(':checked')) $('#redeem-points-row').removeClass('d-none');
-        else { $('#redeem-points-row').addClass('d-none'); $('#redeem-points-input').val(0); recalculateBill(); }
     });
 
     // ==================== HOLD & RECALL ====================
@@ -625,11 +596,6 @@ $(document).ready(function () {
     function submitInvoice(payments) {
         const flatDiscount = parseFloat($('#bill-discount-input').val()) || 0;
         const couponDiscount = appliedCoupon ? appliedCoupon.discount_amount : 0;
-        let loyaltyPointsRedeem = 0, loyaltyDiscount = 0;
-        if (loyaltyEnabled && $('#redeem-loyalty-toggle').is(':checked')) {
-            loyaltyPointsRedeem = parseInt($('#redeem-points-input').val()) || 0;
-            loyaltyDiscount = loyaltyPointsRedeem * loyaltyRedeemValue;
-        }
 
         $.ajax({
             url: BASE_URL + '/api/billing.php?action=create_invoice', type: 'POST', dataType: 'json',
@@ -637,8 +603,7 @@ $(document).ready(function () {
                 csrf_token: csrfToken, customer_id: $('#pos-customer-select').val(),
                 invoice_type: $('#pos-invoice-type').val(), payments: JSON.stringify(payments),
                 discount_amount: flatDiscount, coupon_id: appliedCoupon ? appliedCoupon.id : '',
-                coupon_discount: couponDiscount, loyalty_points_redeemed: loyaltyPointsRedeem,
-                loyalty_discount: loyaltyDiscount, due_date: $('#bill-due-date').val() || '',
+                coupon_discount: couponDiscount, due_date: $('#bill-due-date').val() || '',
                 notes: $('#bill-notes').val() || '', is_igst: isInterState() ? 1 : 0,
                 cart: JSON.stringify(cart)
             },
@@ -687,7 +652,6 @@ $(document).ready(function () {
         $('#pos-customer-select').val('').trigger('change');
         $('#coupon-code-input').val('').prop('disabled', false);
         $('#coupon-discount-row').addClass('d-none');
-        if (loyaltyEnabled) { $('#redeem-loyalty-toggle').prop('checked', false); $('#redeem-points-row').addClass('d-none'); }
         // Reset payment rows to single
         $('#payment-methods-container').html(
             '<div class="payment-row d-flex gap-2 mb-2" data-index="0">' +

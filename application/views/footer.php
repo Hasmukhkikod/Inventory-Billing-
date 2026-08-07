@@ -155,20 +155,26 @@
 <?php require_once __DIR__ . '/bottom_nav.php'; ?>
 
 <!-- Global scripts -->
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- jQuery already loaded in header.php -->
 <!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- DataTables Core & Bootstrap 5 Integration -->
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<!-- DataTables Responsive extension: collapses extra columns into an
+     expandable row instead of horizontal-scrolling on narrow screens -->
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 <script>
     $.fn.dataTable.ext.errMode = 'none';
     // Show a branded skeleton-row loading effect on every DataTable while its data
     // is being fetched, shaped to that table's own columns, instead of a blank or
     // flashing table. Applies app-wide by default - driven off DataTables' own
     // processing.dt event rather than the built-in indicator.
-    $.extend(true, $.fn.dataTable.defaults, { processing: true });
+    // responsive:true applies to every DataTable app-wide with no per-page
+    // changes needed - extra columns collapse into an expandable "+" row on
+    // narrow screens instead of forcing a horizontal scroll.
+    $.extend(true, $.fn.dataTable.defaults, { processing: true, responsive: true });
 
     // Minimum time the loader stays visible once shown, so a fast (e.g. local/
     // cached) response doesn't flash it on and off faster than the eye can register.

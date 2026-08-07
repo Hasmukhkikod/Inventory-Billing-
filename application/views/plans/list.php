@@ -25,7 +25,7 @@
                         <tr>
                             <td><?php echo $p['id']; ?></td>
                             <td><strong class="text-primary"><?php echo \App\Models\Helpers::sanitize($p['plan_name']); ?></strong></td>
-                            <td><?php echo number_format($p['price'], 2); ?></td>
+                            <td><?php echo \App\Models\Helpers::formatCurrency($p['price']); ?></td>
                             <td><?php echo $p['duration_days']; ?></td>
                             <td>
                                 <?php if($p['status'] === 'ACTIVE'): ?>

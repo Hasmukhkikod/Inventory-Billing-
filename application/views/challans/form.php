@@ -192,7 +192,7 @@ $(document).ready(function() {
     // Load Customers
     function loadCustomers(selectId) {
         $.ajax({
-            url: BASE_URL + '/api/billing.php?action=get_customers',
+            url: BASE_URL + '/api/customers.php?action=list',
             type: 'GET', dataType: 'json',
             success: function(res) {
                 const select = $("#dc-customer-select");

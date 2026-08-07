@@ -89,6 +89,7 @@ switch ($action) {
         $payment_status = trim($_POST['payment_status'] ?? 'UNPAID');
         $order_status = trim($_POST['order_status'] ?? 'PENDING');
         $discount = (float)($_POST['discount'] ?? 0);
+        $notes = Helpers::sanitize(trim($_POST['notes'] ?? ''));
         $cart = json_decode($_POST['cart'] ?? '[]', true);
 
         if ($supplier_id <= 0) {
@@ -105,7 +106,7 @@ switch ($action) {
         }
 
         try {
-            $result = $db->transaction(function($t) use ($db, $purchase_id, $supplier_id, $purchase_date, $payment_status, $order_status, $discount, $cart) {
+            $result = $db->transaction(function($t) use ($db, $purchase_id, $supplier_id, $purchase_date, $payment_status, $order_status, $discount, $notes, $cart) {
                 $subtotal = 0.00;
                 $gst_amount = 0.00;
                 $validatedItems = [];
@@ -188,8 +189,8 @@ switch ($action) {
                     $t->query("UPDATE purchase_items SET deleted_at = CURRENT_TIMESTAMP WHERE purchase_id = ?", [$purchase_id]);
 
                     // Update purchase header
-                    $t->query("UPDATE purchases SET supplier_id = ?, purchase_date = ?, subtotal = ?, discount = ?, gst_amount = ?, total_amount = ?, payment_status = ?, order_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-                        [$supplier_id, $purchase_date, $subtotal, $discount, $gst_amount, $total_amount, $payment_status, $order_status, $purchase_id]);
+                    $t->query("UPDATE purchases SET supplier_id = ?, purchase_date = ?, subtotal = ?, discount = ?, gst_amount = ?, total_amount = ?, payment_status = ?, order_status = ?, notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                        [$supplier_id, $purchase_date, $subtotal, $discount, $gst_amount, $total_amount, $payment_status, $order_status, $notes, $purchase_id]);
 
                     // Re-read current stock for new items (stock may have changed after reversal)
                     foreach ($validatedItems as &$item) {
@@ -230,9 +231,9 @@ switch ($action) {
                     $purchase_no = $prefix . $year . '-' . $seq;
 
                     $newId = $t->insert("
-                        INSERT INTO purchases (purchase_no, supplier_id, purchase_date, subtotal, discount, gst_amount, total_amount, payment_status, order_status, created_by)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ", [$purchase_no, $supplier_id, $purchase_date, $subtotal, $discount, $gst_amount, $total_amount, $payment_status, $order_status, $_SESSION['user_id']]);
+                        INSERT INTO purchases (purchase_no, supplier_id, purchase_date, subtotal, discount, gst_amount, total_amount, payment_status, order_status, notes, created_by)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ", [$purchase_no, $supplier_id, $purchase_date, $subtotal, $discount, $gst_amount, $total_amount, $payment_status, $order_status, $notes, $_SESSION['user_id']]);
 
                     foreach ($validatedItems as $item) {
                         $t->insert("INSERT INTO purchase_items (purchase_id, product_id, billing_unit_id, billing_unit_name, quantity, primary_qty, cost_price, gst, amount, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",

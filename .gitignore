@@ -32,6 +32,9 @@ php.zip
 .DS_Store
 Thumbs.db
 
+# Stray dev artifacts
+cookies.txt
+
 # IDE files
 .idea/
 .vscode/

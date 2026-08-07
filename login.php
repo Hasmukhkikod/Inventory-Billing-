@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Start your free trial — Grovixo</title>
+  <title>Log in — Grovixo</title>
   <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/Asset%2015%4072x.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -84,14 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               <img src="<?php echo BASE_URL; ?>/assets/img/grovixo_logo%201.png" alt="Grovixo" onerror="this.src='<?php echo BASE_URL; ?>/assets/images/logo.png'" />
           </a>
           <div class="side-content">
-              <p class="eyebrow">Built for growing businesses</p>
-              <h1>Start today. Feel the difference for <em>15 days.</em></h1>
-              <p>Bring billing, inventory, invoices and reports into one calm workspace — no credit card required.</p>
-              <ul class="trial-list">
-                  <li><span class="tick">✓</span>Full access to Grovixo for 15 days</li>
-                  <li><span class="tick">✓</span>GST invoices, POS billing and inventory tools</li>
-                  <li><span class="tick">✓</span>Set up your shop in just a few minutes</li>
-              </ul>
+              <p class="eyebrow">Welcome back</p>
+              <h1>Pick up right <em>where you left off.</em></h1>
+              <p>Log in to manage your billing, inventory, invoices and reports — all in one calm workspace.</p>
               <div class="quote">
                   <p>“Our counter became easier to run from the first day.”</p>
                   <span>Riya Mehta · The Paper Room</span>

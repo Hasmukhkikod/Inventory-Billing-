@@ -136,7 +136,6 @@ if ($uri === '/features') {
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
-        http_response_code(404);
         // Fallback for not-yet-refactored endpoints (temporary during migration)
         if ($uri === '/demo/login') {
             require __DIR__ . '/demo_login.php';
@@ -148,6 +147,7 @@ switch ($routeInfo[0]) {
         } else if ($uri !== '/' && file_exists(__DIR__ . $uri . '/index.php')) {
             require __DIR__ . $uri . '/index.php';
         } else {
+            http_response_code(404);
             echo "404 Not Found";
         }
         break;

@@ -107,9 +107,17 @@
             </table>
             </div>
 
-            <!-- Calculation summaries -->
-            <div class="row justify-content-end">
-                <div class="col-12 col-sm-5">
+            <!-- Notes + Calculation summaries -->
+            <div class="row">
+                <div class="col-12 col-sm-7">
+                    <?php if (!empty($purchase['notes'])): ?>
+                        <div class="border rounded p-3 bg-light small">
+                            <strong>Notes:</strong><br>
+                            <span class="text-muted"><?php echo nl2br(\App\Models\Helpers::sanitize($purchase['notes'])); ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <div class="col-12 col-sm-5 mt-3 mt-sm-0">
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-secondary">Subtotal (Taxable):</span>
                         <span>₹<?php echo number_format($purchase['subtotal'], 2); ?></span>

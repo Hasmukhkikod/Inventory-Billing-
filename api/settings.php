@@ -35,9 +35,6 @@ switch ($action) {
                     'invoice_footer' => '',
                     'invoice_terms' => '',
                     'state_code' => '',
-                    'loyalty_enabled' => 0,
-                    'loyalty_points_per_100' => 0,
-                    'loyalty_redeem_value' => 0,
                     'invoice_template' => 'standard',
                     'pos_template' => 'pos_standard',
                     'thermal_width' => '576',
@@ -119,9 +116,6 @@ switch ($action) {
         $state_code = trim($_POST['state_code'] ?? '');
         $invoice_footer = trim($_POST['invoice_footer'] ?? '');
         $invoice_terms = trim($_POST['invoice_terms'] ?? '');
-        $loyalty_enabled = (int)($_POST['loyalty_enabled'] ?? 0);
-        $loyalty_points_per_100 = (int)($_POST['loyalty_points_per_100'] ?? 0);
-        $loyalty_redeem_value = (float)($_POST['loyalty_redeem_value'] ?? 0);
         $invoice_template = trim($_POST['invoice_template'] ?? 'standard');
         $pos_template = trim($_POST['pos_template'] ?? 'pos_standard');
         $pos_mode = (int)($_POST['pos_mode'] ?? 0);
@@ -195,7 +189,6 @@ switch ($action) {
                     invoice_start = ?, invoice_end = ?, quotation_start = ?, quotation_end = ?,
                     purchase_start = ?, purchase_end = ?, challan_start = ?, challan_end = ?,
                     gst_slabs = ?, state_code = ?, invoice_footer = ?, invoice_terms = ?,
-                    loyalty_enabled = ?, loyalty_points_per_100 = ?, loyalty_redeem_value = ?,
                     invoice_template = ?, pos_template = ?, pos_mode = ?, system_language = ?,
                     pos_show_logo = ?, pos_show_cashier = ?, pos_show_customer_mobile = ?, pos_show_hsn = ?,
                     pos_show_gst_breakdown = ?, pos_header_text = ?, pos_footer_text = ?,
@@ -207,7 +200,6 @@ switch ($action) {
                 $invoice_start, $invoice_end, $quotation_start, $quotation_end,
                 $purchase_start, $purchase_end, $challan_start, $challan_end,
                 $gst_slabs, $state_code, $invoice_footer, $invoice_terms,
-                $loyalty_enabled, $loyalty_points_per_100, $loyalty_redeem_value,
                 $invoice_template, $pos_template, $pos_mode, $system_language,
                 $pos_show_logo, $pos_show_cashier, $pos_show_customer_mobile, $pos_show_hsn,
                 $pos_show_gst_breakdown, $pos_header_text, $pos_footer_text,

@@ -18,10 +18,19 @@ class Auth {
      * Authenticate user by email and password
      */
     public function login(string $loginId, string $password): bool {
+        try {
+            return $this->attemptLogin($loginId, $password);
+        } catch (\Exception $e) {
+            error_log("Login error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function attemptLogin(string $loginId, string $password): bool {
         $stmt = $this->db->query("
-            SELECT u.*, r.role_name 
-            FROM users u 
-            JOIN roles r ON u.role_id = r.id 
+            SELECT u.*, r.role_name
+            FROM users u
+            JOIN roles r ON u.role_id = r.id
             WHERE u.email = ? OR u.mobile = ? LIMIT 1
         ", [$loginId, $loginId]);
         $user = $stmt->fetch();
@@ -137,17 +146,21 @@ class Auth {
     public function logout(): void {
         if (isset($_SESSION['user_id'])) {
             $userId = $_SESSION['user_id'];
-            
-            // Update last logout log (subquery for SQLite compatibility)
-            $this->db->query("
-                UPDATE login_logs
-                SET logout_time = CURRENT_TIMESTAMP
-                WHERE id = (SELECT id FROM login_logs WHERE user_id = ? AND logout_time IS NULL ORDER BY login_time DESC LIMIT 1)
-            ", [$userId]);
 
-            Helpers::logActivity($this->db, "auth", "User logout", $userId);
+            try {
+                // Update last logout log (subquery for SQLite compatibility)
+                $this->db->query("
+                    UPDATE login_logs
+                    SET logout_time = CURRENT_TIMESTAMP
+                    WHERE id = (SELECT id FROM login_logs WHERE user_id = ? AND logout_time IS NULL ORDER BY login_time DESC LIMIT 1)
+                ", [$userId]);
+
+                Helpers::logActivity($this->db, "auth", "User logout", $userId);
+            } catch (\Exception $e) {
+                error_log("Logout log error: " . $e->getMessage());
+            }
         }
-        
+
         $_SESSION = [];
 
         if (ini_get("session.use_cookies")) {
@@ -172,21 +185,22 @@ class Auth {
         // Cache for the current request
         if ($this->planFeatures === null) {
             $orgId = $_SESSION['org_id'] ?? 0;
+            $this->planFeatures = [];
             if ($orgId > 0) {
-                $stmt = $this->db->query("
-                    SELECT p.features 
-                    FROM organizations o 
-                    JOIN plans p ON o.plan_id = p.id 
-                    WHERE o.id = ? LIMIT 1
-                ", [$orgId]);
-                $row = $stmt->fetch();
-                if ($row && !empty($row['features'])) {
-                    $this->planFeatures = json_decode($row['features'], true) ?: [];
-                } else {
-                    $this->planFeatures = [];
+                try {
+                    $stmt = $this->db->query("
+                        SELECT p.features
+                        FROM organizations o
+                        JOIN plans p ON o.plan_id = p.id
+                        WHERE o.id = ? LIMIT 1
+                    ", [$orgId]);
+                    $row = $stmt->fetch();
+                    if ($row && !empty($row['features'])) {
+                        $this->planFeatures = json_decode($row['features'], true) ?: [];
+                    }
+                } catch (\Exception $e) {
+                    error_log("hasPlanFeature error: " . $e->getMessage());
                 }
-            } else {
-                $this->planFeatures = [];
             }
         }
         
@@ -217,13 +231,18 @@ class Auth {
             return null;
         }
         if ($this->currentUser === null) {
-            $stmt = $this->db->query("
-                SELECT u.*, r.role_name 
-                FROM users u 
-                JOIN roles r ON u.role_id = r.id 
-                WHERE u.id = ? LIMIT 1
-            ", [$_SESSION['user_id']]);
-            $this->currentUser = $stmt->fetch() ?: null;
+            try {
+                $stmt = $this->db->query("
+                    SELECT u.*, r.role_name
+                    FROM users u
+                    JOIN roles r ON u.role_id = r.id
+                    WHERE u.id = ? LIMIT 1
+                ", [$_SESSION['user_id']]);
+                $this->currentUser = $stmt->fetch() ?: null;
+            } catch (\Exception $e) {
+                error_log("Auth::user() error: " . $e->getMessage());
+                return null;
+            }
         }
         return $this->currentUser;
     }
@@ -246,15 +265,20 @@ class Auth {
             return true;
         }
 
-        $stmt = $this->db->query("
-            SELECT COUNT(*) as allowed 
-            FROM role_permissions rp
-            JOIN permissions p ON rp.permission_id = p.id
-            WHERE rp.role_id = ? AND p.permission_name = ? AND rp.status = 'ACTIVE' AND p.status = 'ACTIVE'
-        ", [$roleId, $permissionName]);
-        
-        $res = $stmt->fetch();
-        return isset($res['allowed']) && $res['allowed'] > 0;
+        try {
+            $stmt = $this->db->query("
+                SELECT COUNT(*) as allowed
+                FROM role_permissions rp
+                JOIN permissions p ON rp.permission_id = p.id
+                WHERE rp.role_id = ? AND p.permission_name = ? AND rp.status = 'ACTIVE' AND p.status = 'ACTIVE'
+            ", [$roleId, $permissionName]);
+
+            $res = $stmt->fetch();
+            return isset($res['allowed']) && $res['allowed'] > 0;
+        } catch (\Exception $e) {
+            error_log("hasPermission error: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**

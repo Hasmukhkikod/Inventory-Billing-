@@ -12,6 +12,7 @@
             
             <div class="panel-body">
                 <form id="roleForm" onsubmit="saveRole(event)">
+                    <?php echo \App\Models\Helpers::csrfField(); ?>
                     <input type="hidden" name="id" value="<?php echo $id; ?>">
                     <input type="hidden" name="action" value="save">
 

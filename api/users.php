@@ -62,7 +62,8 @@ switch ($action) {
 
     case 'save':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Method not allowed.");
-        
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
+
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
@@ -123,6 +124,8 @@ switch ($action) {
         break;
 
     case 'delete':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Method not allowed.");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) Helpers::jsonResponse(false, "Invalid user ID.");
         if ($id === 1 || $id === (int)$_SESSION['user_id']) {

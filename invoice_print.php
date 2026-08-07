@@ -1,7 +1,7 @@
 <?php
 /**
  * IIMS v2.0 - Professional Invoice Print (A4)
- * Features: CGST/SGST/IGST, HSN, Split Payments, Loyalty, Coupons
+ * Features: CGST/SGST/IGST, HSN, Split Payments, Coupons
  */
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config/config.php';
@@ -229,9 +229,6 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
                 <div class="d-flex justify-content-between mb-1 fw-semibold text-danger"><span>Balance Due:</span><span><?php echo Helpers::formatCurrency($invoice['due_amount']); ?></span></div>
             <?php endif; ?>
 
-            <?php if ((int)$invoice['loyalty_points_earned'] > 0): ?>
-                <div class="d-flex justify-content-between mb-1 small text-warning"><span>Loyalty Earned:</span><span>+<?php echo $invoice['loyalty_points_earned']; ?> pts</span></div>
-            <?php endif; ?>
         </div>
     </div>
 

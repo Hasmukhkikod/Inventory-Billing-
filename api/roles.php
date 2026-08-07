@@ -24,7 +24,8 @@ switch ($action) {
     case 'save':
         if (!$auth->hasPlanFeature('roles')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Method not allowed.");
-        
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
+
         $id = (int)($_POST['id'] ?? 0);
         $role_name = trim($_POST['role_name'] ?? '');
         $description = trim($_POST['description'] ?? '');
@@ -82,6 +83,7 @@ switch ($action) {
     case 'delete':
         if (!$auth->hasPlanFeature('roles')) Helpers::jsonResponse(false, 'Feature not available in your plan.');
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Method not allowed.");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
         $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) Helpers::jsonResponse(false, "Invalid Role ID.");
         if ($id == 1) Helpers::jsonResponse(false, "Super Admin role cannot be deleted.");

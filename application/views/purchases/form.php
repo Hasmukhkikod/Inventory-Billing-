@@ -113,7 +113,7 @@ $isEdit = !empty($purchase);
                 <h6 class="fw-semibold mb-3"><i class="fa-solid fa-sticky-note text-indigo me-2"></i>Notes</h6>
                 <div class="mb-3">
                     <label class="form-label small">Purchase Notes</label>
-                    <textarea class="form-control form-control-sm" id="pur-notes" rows="4" placeholder="Optional remarks..."></textarea>
+                    <textarea class="form-control form-control-sm" id="pur-notes" rows="4" placeholder="Optional remarks..."><?php echo $isEdit ? htmlspecialchars($purchase['notes'] ?? '') : ''; ?></textarea>
                 </div>
             </div>
         </div>
@@ -549,6 +549,7 @@ $(document).ready(function() {
                 payment_status: paymentStatus,
                 order_status: orderStatus,
                 discount: discount,
+                notes: $("#pur-notes").val(),
                 cart: JSON.stringify(cart)
             },
             dataType: 'json',
