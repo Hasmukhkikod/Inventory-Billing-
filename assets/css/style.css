@@ -2741,6 +2741,135 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     #announcementsTable tbody tr td:last-child::before {
         content: none !important;
     }
+
+    /* ============ Invoices list -> polished mobile card: title + issued
+       date header (checkbox floated to the corner), a divider, icon-led
+       label:value rows, colored payment status, full-width actions row. ============ */
+    /* Each row is now its own bordered/shadowed card, so the outer
+       .panel-card wrapping the whole list needs to go flat/transparent -
+       otherwise its border+shadow sits right next to the first row's card
+       border and reads as a doubled line around the same edges. */
+    .panel-card:has(#invoicesTable) {
+        border: none;
+        box-shadow: none;
+        background: transparent;
+    }
+    .panel-card:has(#invoicesTable) .panel-body {
+        padding: 0;
+    }
+    #invoicesTable thead {
+        display: none;
+    }
+    #invoicesTable, #invoicesTable tbody, #invoicesTable tr, #invoicesTable td {
+        display: block;
+        width: 100% !important;
+    }
+    #invoicesTable tbody tr:not(:has(td[colspan])) {
+        position: relative;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1rem;
+        margin: 0 0 0.85rem 0;
+        background: var(--bg-primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    #invoicesTable tbody tr:has(td[colspan]) {
+        border: none;
+        padding: 0;
+    }
+    #invoicesTable tbody tr td {
+        border: none !important;
+        padding: 0;
+    }
+    /* Select checkbox: float to the top-right corner, out of the stack */
+    #invoicesTable tbody tr td:nth-child(1) {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: auto !important;
+    }
+    /* Invoice number: card title */
+    #invoicesTable tbody tr td:nth-child(2) {
+        font-size: 1.05rem;
+        font-weight: 700;
+        padding-right: 2.5rem;
+    }
+    /* Issued date: sub-header caption, with a divider beneath it separating
+       the header block from the detail rows */
+    #invoicesTable tbody tr td:nth-child(4) {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        padding-bottom: 0.85rem;
+        margin-bottom: 0.6rem;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+    #invoicesTable tbody tr td:nth-child(4)::before {
+        content: "Issued: " !important;
+    }
+    /* Paid Amount: redundant on mobile once Status shows the same thing
+       more usefully ("Paid" / "₹X due") - hide to keep the card tight */
+    #invoicesTable tbody tr td:nth-child(8) {
+        display: none !important;
+    }
+    /* Recipient / Type / Payment / Amount / Status: label left, icon+value right */
+    #invoicesTable tbody tr td:nth-child(3),
+    #invoicesTable tbody tr td:nth-child(5),
+    #invoicesTable tbody tr td:nth-child(6),
+    #invoicesTable tbody tr td:nth-child(7),
+    #invoicesTable tbody tr td:nth-child(9) {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.4rem 0;
+    }
+    #invoicesTable tbody tr td:nth-child(3)::before,
+    #invoicesTable tbody tr td:nth-child(5)::before,
+    #invoicesTable tbody tr td:nth-child(6)::before,
+    #invoicesTable tbody tr td:nth-child(7)::before,
+    #invoicesTable tbody tr td:nth-child(9)::before {
+        font-weight: 600;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }
+    #invoicesTable tbody tr td:nth-child(3)::before { content: "Recipient" !important; }
+    #invoicesTable tbody tr td:nth-child(5)::before { content: "Type" !important; }
+    #invoicesTable tbody tr td:nth-child(6)::before { content: "Payment" !important; }
+    #invoicesTable tbody tr td:nth-child(7)::before { content: "Amount" !important; }
+    #invoicesTable tbody tr td:nth-child(9)::before { content: "Status" !important; }
+    /* Small accent icons injected before each value in the render() JS -
+       hidden on desktop (see the min-width:768px rule further down) */
+    #invoicesTable .mobile-row-icon {
+        color: var(--accent-indigo);
+        opacity: 0.7;
+        font-size: 0.8rem;
+        margin-right: 0.45rem;
+    }
+    /* Actions: full-width row below everything, equal-width buttons */
+    #invoicesTable tbody tr td:last-child {
+        margin-top: 0.85rem;
+        padding-top: 0.85rem !important;
+        border-top: 1px solid var(--border-color) !important;
+    }
+    #invoicesTable tbody tr td:last-child .btn-group {
+        width: 100%;
+        display: flex;
+    }
+    #invoicesTable tbody tr td:last-child .btn {
+        flex: 1;
+    }
+}
+
+/* The .mobile-row-icon spans exist purely for the mobile card layout above -
+   keep the desktop table (which still shows plain columns via DataTables)
+   free of stray icons. */
+@media (min-width: 768px) {
+    #invoicesTable .mobile-row-icon {
+        display: none;
+    }
 }
 
 @media (max-width: 420px) {

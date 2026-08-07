@@ -65,6 +65,7 @@ $(document).ready(function() {
             type: 'POST',
             dataSrc: 'data'
         },
+        responsive: false, // hand-styled mobile card layout below instead of DataTables' generic collapse
         columns: [
             {
                 data: 'id',
@@ -78,14 +79,17 @@ $(document).ready(function() {
                 data: 'invoice_no',
                 className: 'fw-semibold text-dark',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/billing/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    return `<i class="fa-solid fa-file-invoice mobile-row-icon"></i><a href="${BASE_URL}/billing/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
                 }
             },
             {
                 data: 'customer_name',
-                defaultContent: '<span class="text-muted">Walk-in Customer</span>'
+                defaultContent: '<i class="fa-solid fa-user mobile-row-icon"></i><span class="text-muted">Walk-in Customer</span>',
+                render: function(data) {
+                    return '<i class="fa-solid fa-user mobile-row-icon"></i>' + (data || '');
+                }
             },
-            { 
+            {
                 data: 'invoice_date',
                 render: function(data) {
                     if(!data) return '-';
@@ -93,31 +97,35 @@ $(document).ready(function() {
                     return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
                 }
             },
-            { data: 'invoice_type' },
-            { 
+            {
+                data: 'invoice_type',
+                render: function(data) { return '<i class="fa-solid fa-tag mobile-row-icon"></i>' + data; }
+            },
+            {
                 data: 'payment_method',
                 render: function(data) {
-                    return `<span class="badge bg-light-primary">${data}</span>`;
+                    return '<i class="fa-solid fa-credit-card mobile-row-icon"></i><span class="badge bg-light-primary">' + data + '</span>';
                 }
             },
-            { 
+            {
                 data: 'grand_total',
-                render: function(data) { return '₹' + parseFloat(data).toFixed(2); },
+                render: function(data) { return '<i class="fa-solid fa-indian-rupee-sign mobile-row-icon"></i>₹' + parseFloat(data).toFixed(2); },
                 className: 'fw-semibold text-dark'
             },
-            { 
+            {
                 data: 'paid_amount',
                 render: function(data) { return '₹' + parseFloat(data).toFixed(2); },
                 className: 'text-emerald'
             },
-            { 
+            {
                 data: 'due_amount',
-                render: function(data) { 
+                render: function(data) {
                     const val = parseFloat(data);
+                    const icon = '<i class="fa-solid fa-circle-check mobile-row-icon"></i>';
                     if (val > 0) {
-                        return `<span class="text-rose fw-semibold">₹${val.toFixed(2)}</span>`;
+                        return icon + `<span class="text-rose fw-semibold">₹${val.toFixed(2)} due</span>`;
                     }
-                    return `<span class="text-success">Paid</span>`;
+                    return icon + `<span class="text-success">Paid</span>`;
                 }
             },
             {
