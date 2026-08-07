@@ -2596,11 +2596,13 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     #orgsTable tbody tr:not(:has(td[colspan])),
     #plansTable tbody tr:not(:has(td[colspan])),
     #announcementsTable tbody tr:not(:has(td[colspan])) {
+        position: relative;
         border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        padding: 0.85rem;
-        margin-bottom: 0.75rem;
+        border-radius: var(--radius-lg);
+        padding: 1.15rem;
+        margin-bottom: 1rem;
         background: var(--bg-secondary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
     }
     #rolesTable tbody tr:has(td[colspan]),
     #couponsTable tbody tr:has(td[colspan]),
@@ -2653,10 +2655,11 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     #announcementsTable tbody tr td:nth-child(1) {
         display: block !important;
         text-align: left;
-        padding: 0 0 0.6rem 0;
-        margin-bottom: 0.5rem;
-        border-bottom: 1px dashed var(--border-color);
-        font-size: 1rem;
+        padding: 0 0 0.75rem 0;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 1.1rem;
+        font-weight: 700;
     }
     #rolesTable tbody tr td:nth-child(2)::before,
     #couponsTable tbody tr td:nth-child(1)::before,
@@ -2667,14 +2670,26 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     #announcementsTable tbody tr td:nth-child(1)::before {
         content: none !important;
     }
-    /* Hide the numeric ID column, redundant once cards stack. !important is
-       required here: the generic "all td" rule above sets display:flex
-       !important, which otherwise beats a plain display:none on a more
-       specific but non-important selector. */
+    /* Show the numeric ID column in top right corner for cards */
     #rolesTable tbody tr td:nth-child(1),
     #orgsTable tbody tr td:nth-child(1),
     #plansTable tbody tr td:nth-child(1) {
-        display: none !important;
+        display: block !important;
+        position: absolute;
+        top: 1.15rem;
+        right: 1.15rem;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        padding: 0;
+        margin: 0;
+        width: auto !important;
+        border: none !important;
+    }
+    #rolesTable tbody tr td:nth-child(1)::before,
+    #orgsTable tbody tr td:nth-child(1)::before,
+    #plansTable tbody tr td:nth-child(1)::before {
+        content: none !important;
     }
     /* All content: "Label" overrides below need !important - the generic
        content: attr(data-label) fallback rule above is scoped with
@@ -2745,17 +2760,30 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     /* ============ Invoices list -> polished mobile card: title + issued
        date header (checkbox floated to the corner), a divider, icon-led
        label:value rows, colored payment status, full-width actions row. ============ */
-    /* Each row is now its own bordered/shadowed card, so the outer
-       .panel-card wrapping the whole list needs to go flat/transparent -
+    /* Remove styles from the outer wrappers of tables that have become cards
        otherwise its border+shadow sits right next to the first row's card
        border and reads as a doubled line around the same edges. */
-    .panel-card:has(#invoicesTable) {
-        border: none;
-        box-shadow: none;
-        background: transparent;
+    .panel-card:has(#invoicesTable),
+    .card:has(#orgsTable),
+    .card:has(#rolesTable),
+    .card:has(#couponsTable),
+    .card:has(#backupsTable),
+    .card:has(#feedbackTable),
+    .card:has(#plansTable),
+    .card:has(#announcementsTable) {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
     }
-    .panel-card:has(#invoicesTable) .panel-body {
-        padding: 0;
+    .panel-card:has(#invoicesTable) .panel-body,
+    .card:has(#orgsTable) .card-body,
+    .card:has(#rolesTable) .card-body,
+    .card:has(#couponsTable) .card-body,
+    .card:has(#backupsTable) .card-body,
+    .card:has(#feedbackTable) .card-body,
+    .card:has(#plansTable) .card-body,
+    .card:has(#announcementsTable) .card-body {
+        padding: 0 !important;
     }
     #invoicesTable thead {
         display: none;
