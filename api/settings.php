@@ -458,6 +458,21 @@ switch ($action) {
         }
         break;
 
+    case 'activity_logs_list':
+        try {
+            $logs = $db->query("
+                SELECT al.*, u.name as user_name, u.role_id
+                FROM activity_logs al
+                LEFT JOIN users u ON al.user_id = u.id
+                ORDER BY al.created_at DESC
+                LIMIT 100
+            ")->fetchAll();
+            Helpers::jsonResponse(true, "Logs loaded", $logs);
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed to load logs: " . $e->getMessage());
+        }
+        break;
+
     default:
         Helpers::jsonResponse(false, "Action not found: " . $action);
 }

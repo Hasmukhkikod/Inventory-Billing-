@@ -202,11 +202,19 @@ switch ($action) {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
         
         $productId = (int)($_POST['product_id'] ?? 0);
-        $type = trim($_POST['adjustment_type'] ?? ''); // IN, OUT
+        $adjustmentReason = trim($_POST['adjustment_type'] ?? ''); 
         $qty = (float)($_POST['quantity'] ?? 0);
         $remarks = trim($_POST['remarks'] ?? '');
 
-        if ($productId <= 0 || !in_array($type, ['IN', 'OUT']) || $qty <= 0) {
+        // Map reason to IN or OUT
+        $type = '';
+        if ($adjustmentReason === 'Increase') {
+            $type = 'IN';
+        } elseif (in_array($adjustmentReason, ['Decrease', 'Damage', 'Lost', 'Expired'])) {
+            $type = 'OUT';
+        }
+
+        if ($productId <= 0 || $type === '' || $qty <= 0) {
             Helpers::jsonResponse(false, "Validation failed: Check inputs.");
         }
 
@@ -220,13 +228,19 @@ switch ($action) {
             if ($newStock < 0) {
                 Helpers::jsonResponse(false, "Stock cannot fall below zero. Available: $oldStock");
             }
+            
+            // Prepend reason to remarks if it's specific
+            $finalRemarks = $remarks;
+            if ($adjustmentReason !== 'Increase' && $adjustmentReason !== 'Decrease') {
+                $finalRemarks = "[$adjustmentReason] " . $remarks;
+            }
 
-            $db->transaction(function($t) use ($productId, $type, $qty, $oldStock, $newStock, $remarks) {
+            $db->transaction(function($t) use ($productId, $type, $qty, $oldStock, $newStock, $finalRemarks) {
                 // Log Stock transaction with before/after levels!
                 $t->insert("
                     INSERT INTO stock_transactions (product_id, transaction_type, quantity, stock_before, stock_after, remarks, created_by) 
                     VALUES (?, 'Adjustment', ?, ?, ?, ?, ?)
-                ", [$productId, ($type === 'IN' ? $qty : -$qty), $oldStock, $newStock, $remarks, $_SESSION['user_id']]);
+                ", [$productId, ($type === 'IN' ? $qty : -$qty), $oldStock, $newStock, $finalRemarks, $_SESSION['user_id']]);
 
                 // Update product current stock
                 $t->query("UPDATE products SET current_stock = ? WHERE id = ?", [$newStock, $productId]);

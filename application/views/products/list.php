@@ -296,7 +296,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Audit Remarks</label>
-                        <textarea class="form-control" name="remarks" id="adjust-remarks" rows="3" required placeholder="e.g. Audit correction"></textarea>
+                        <textarea class="form-control" name="remarks" id="adjust-remarks" rows="3" placeholder="e.g. Audit correction"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

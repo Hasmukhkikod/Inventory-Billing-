@@ -7,7 +7,7 @@
 
 <div class="row g-4">
     <div class="col-md-12">
-        <div class="panel-card p-0" style="overflow: hidden;">
+        <div class="panel-card p-0" style="border-radius: 8px;">
             <div class="row g-0">
                 <!-- Sidebar Tabs -->
                 <div class="col-md-3 border-end bg-light" style="min-height: 500px;">
@@ -363,6 +363,7 @@
                                             background: #fff;
                                             border-radius: 12px;
                                             box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+                                            z-index: 999;
                                             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                                             pointer-events: none;
                                             margin-bottom: 15px;
@@ -797,7 +798,7 @@
 <?php if ($auth->hasPlanFeature("backups")): ?>
                     <!-- DATA & BACKUPS PANE -->
                     <div class="tab-pane fade" id="data-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
-                        <div class="row g-4">
+                        <div class="row g-4 mt-1">
                             <!-- Backups -->
                             <div class="col-md-8">
                                 <div class="panel-card h-100" style="border: 1px solid #e2e8f0; box-shadow: none;">
@@ -805,7 +806,7 @@
                                         <h6 class="mb-0 text-dark"><i class="fa-solid fa-database me-2 text-indigo"></i>Database Backups</h6>
                                         <?php if ($auth->hasPermission('Run Backups')): ?>
                                         <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" id="btn-run-backup" title="Create Backup">
-                                            <i class="fa-solid fa-plus"></i> Backup
+                                            <i class="fa-solid fa-plus"></i> Create Backup
                                         </button>
                                         <?php endif; ?>
                                     </div>
@@ -842,6 +843,35 @@
                                     </div>
                                 </div>
                                 <?php endif; ?>
+                            </div>
+                            
+                            <!-- Activity Logs -->
+                            <div class="col-md-12 mt-4">
+                                <div class="panel-card" style="border: 1px solid #e2e8f0; box-shadow: none;">
+                                    <div class="panel-header bg-light">
+                                        <h6 class="mb-0 text-dark"><i class="fa-solid fa-list-check me-2 text-indigo"></i>System Activity Logs</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo" id="btn-refresh-logs" title="Refresh Logs">
+                                            <i class="fa-solid fa-rotate-right"></i> Refresh
+                                        </button>
+                                    </div>
+                                    <div class="panel-body p-0 text-dark">
+                                        <div class="table-responsive p-3">
+                                            <table class="table table-hover align-middle mb-0 w-100" id="activityLogsTable">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Timestamp</th>
+                                                        <th>User</th>
+                                                        <th>Module</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!-- Loaded via AJAX -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1270,6 +1300,7 @@ $(document).ready(function() {
 
     // 2. Load Backups
     loadBackupsList();
+    loadActivityLogs();
 
     $("#btn-run-backup").click(function() {
         Swal.fire({
@@ -1338,11 +1369,60 @@ $(document).ready(function() {
                         `);
                     });
                 } else {
-                    body.append('<tr><td colspan="3" class="text-center py-4 text-secondary">No backups recorded yet</td></tr>');
+                    body.append('<tr><td colspan="3" class="text-center py-4 text-secondary">No backups recorded yet. Click Create Backup to make one.</td></tr>');
                 }
             }
         });
     }
+
+    function loadActivityLogs() {
+        $.ajax({
+            url: BASE_URL + '/api/settings.php?action=activity_logs_list',
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                if ($.fn.DataTable.isDataTable('#activityLogsTable')) {
+                    $('#activityLogsTable').DataTable().destroy();
+                }
+                
+                const body = $("#activityLogsTable tbody");
+                body.empty();
+                
+                if (res.status && res.data.length > 0) {
+                    res.data.forEach(function(log) {
+                        const date = new Date(log.created_at).toLocaleString('en-IN', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+                        const user = log.user_name || 'System';
+                        const module = log.module ? log.module.toUpperCase() : 'SYSTEM';
+                        const action = log.action || '';
+                        
+                        body.append(`
+                            <tr>
+                                <td><span class="small text-secondary">${date}</span></td>
+                                <td><div class="fw-semibold text-dark small">${user}</div></td>
+                                <td><span class="badge bg-light text-secondary border">${module}</span></td>
+                                <td><span class="small text-dark">${action}</span></td>
+                            </tr>
+                        `);
+                    });
+                }
+                
+                $('#activityLogsTable').DataTable({
+                    pageLength: 10,
+                    ordering: false,
+                    lengthChange: false,
+                    language: {
+                        emptyTable: "No recent activity logs found"
+                    }
+                });
+            }
+        });
+    }
+
+    $('#btn-refresh-logs').on('click', function() {
+        $(this).find('i').addClass('fa-spin');
+        loadActivityLogs();
+        setTimeout(() => $(this).find('i').removeClass('fa-spin'), 1000);
+    });
 
     // Delete backup
     $(document).on('click', '.btn-delete-backup', function() {
@@ -1464,10 +1544,6 @@ $(document).ready(function() {
             }
         });
     }
-
-    // Hide Commit Changes button when Coupons tab is active
-    $('button[data-bs-target="#coupons-pane"]').on('shown.bs.tab', function() { $('#settings-save-row').hide(); });
-    $('#settingsTabs button:not([data-bs-target="#coupons-pane"])').on('shown.bs.tab', function() { $('#settings-save-row').show(); });
 
     // ==================== PURGE ALL RECORDS ====================
     $('#btn-purge-all').click(function() {

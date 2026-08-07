@@ -127,7 +127,7 @@ class Auth {
         }
         } // End of user status active check
 
-        Helpers::logActivity($this->db, "auth", "Failed login attempt for email: " . $email);
+        Helpers::logActivity($this->db, "auth", "Failed login attempt for login id: " . $loginId);
         return false;
     }
 
