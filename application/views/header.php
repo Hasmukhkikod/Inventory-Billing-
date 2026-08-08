@@ -42,14 +42,19 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
 ?>
 <!DOCTYPE html>
 <html lang="en">
-<script>document.documentElement.setAttribute('data-theme', localStorage.getItem('grovixo-theme') || 'light');</script>
+<script>
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('grovixo-theme') || 'light');
+    if (localStorage.getItem('grovixo-sidebar-collapsed') === '1') {
+        document.documentElement.classList.add('sidebar-collapsed');
+    }
+</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?php echo \App\Models\Helpers::getCsrfToken(); ?>">
-    <title><?php echo Helpers::sanitize($compSettings['company_name'] ?? COMPANY_NAME); ?> - IIMS</title>
+    <title><?php echo Helpers::sanitize($compSettings['company_name'] ?? COMPANY_NAME); ?> - Billing</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/Asset%2015%4072x.png">
+    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/favicon.png">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 Icons -->
@@ -96,6 +101,14 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
             var backdrop2 = document.getElementById('sidebar-backdrop');
             if (sidebar2) sidebar2.classList.remove('show');
             if (backdrop2) backdrop2.style.display = 'none';
+            return;
+        }
+        var collapseToggle = e.target.closest('#sidebar-collapse-toggle');
+        if (collapseToggle) {
+            var collapsed = !document.documentElement.classList.contains('sidebar-collapsed');
+            document.documentElement.classList.toggle('sidebar-collapsed', collapsed);
+            localStorage.setItem('grovixo-sidebar-collapsed', collapsed ? '1' : '0');
+            collapseToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
         }
     });
 </script>
@@ -178,6 +191,9 @@ foreach ($activeAds as $ad) {
 <div class="app-wrapper">
     <!-- Sidebar -->
     <aside class="sidebar d-flex" id="app-sidebar">
+        <button class="sidebar-collapse-toggle d-none d-lg-flex" id="sidebar-collapse-toggle" type="button" aria-label="Collapse sidebar" aria-expanded="true">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
         <div class="sidebar-header d-flex justify-content-between align-items-center">
             <a href="<?php echo BASE_URL; ?>/index" class="sidebar-brand">
                 <?php if (!empty($compSettings['company_logo']) && file_exists(BASE_DIR . '/uploads/' . $compSettings['company_logo'])): ?>
@@ -194,7 +210,7 @@ foreach ($activeAds as $ad) {
             <?php if ($auth->hasPermission('Access Dashboard')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'index' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/index" class="sidebar-link">
-                    <i class="fa-solid fa-chart-pie"></i>
+                    <i class="fa-solid fa-gauge-high"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
@@ -203,7 +219,7 @@ foreach ($activeAds as $ad) {
             <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('inventory')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'products' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/products/index" class="sidebar-link">
-                    <i class="fa-solid fa-box-open"></i>
+                    <i class="fa-solid fa-warehouse"></i>
                     <span>Inventory</span>
                 </a>
             </li>
@@ -212,7 +228,7 @@ foreach ($activeAds as $ad) {
             <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('purchases')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'purchases' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/purchases/index" class="sidebar-link">
-                    <i class="fa-solid fa-cart-flatbed"></i>
+                    <i class="fa-solid fa-truck-ramp-box"></i>
                     <span>Purchases</span>
                 </a>
             </li>
@@ -230,7 +246,7 @@ foreach ($activeAds as $ad) {
             <?php if ($auth->hasPermission('Manage Inventory') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('returns')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'returns' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/returns/index" class="sidebar-link">
-                    <i class="fa-solid fa-rotate-left"></i>
+                    <i class="fa-solid fa-right-left"></i>
                     <span>Returns Log</span>
                 </a>
             </li>
@@ -266,7 +282,7 @@ foreach ($activeAds as $ad) {
             <?php if ($auth->hasPermission('Manage Suppliers') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('purchases')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'suppliers' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/suppliers/index" class="sidebar-link">
-                    <i class="fa-solid fa-truck-field"></i>
+                    <i class="fa-solid fa-industry"></i>
                     <span>Suppliers</span>
                 </a>
             </li>
@@ -284,7 +300,7 @@ foreach ($activeAds as $ad) {
             <?php if ($auth->hasPermission('View Reports') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('reports')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'reports' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/reports/index" class="sidebar-link">
-                    <i class="fa-solid fa-file-waveform"></i>
+                    <i class="fa-solid fa-chart-column"></i>
                     <span>Reports</span>
                 </a>
             </li>
@@ -314,7 +330,7 @@ foreach ($activeAds as $ad) {
             </li>
             <li class="sidebar-item <?php echo $currentModule === 'plans' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/plans/index" class="sidebar-link">
-                    <i class="fa-solid fa-list"></i>
+                    <i class="fa-solid fa-layer-group"></i>
                     <span>Plans</span>
                 </a>
             </li>
@@ -351,6 +367,14 @@ foreach ($activeAds as $ad) {
             </a>
         </div>
     </aside>
+    <script>
+        // Native title tooltips for the sidebar links - only really seen once
+        // the sidebar is collapsed to an icon rail, but harmless to set either way.
+        document.querySelectorAll('#app-sidebar .sidebar-link').forEach(function (link) {
+            var label = link.querySelector('span');
+            if (label) link.setAttribute('title', label.textContent.trim());
+        });
+    </script>
 
     <!-- Main Content Panel -->
     <main class="main-content">
@@ -362,7 +386,7 @@ foreach ($activeAds as $ad) {
 
         <?php if ($showHeader): ?>
         <!-- Top Navbar (Dashboard + Listing pages) -->
-        <header class="top-navbar <?php echo $isDashboard ? 'top-navbar-dashboard' : ''; ?> d-flex justify-content-between align-items-center">
+        <header class="top-navbar module-<?php echo App\Models\Helpers::sanitize($currentModule); ?> <?php echo $isDashboard ? 'top-navbar-dashboard' : ''; ?> d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
                 <button class="btn btn-outline-secondary d-lg-none py-1.5 px-2.5" id="sidebar-toggle-btn" type="button" aria-label="Toggle Menu">
                     <i class="fa-solid fa-bars fs-5"></i>

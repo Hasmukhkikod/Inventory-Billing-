@@ -48,7 +48,7 @@ if (empty($token)) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Reset Password — Grovixo</title>
-  <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/Asset%2015%4072x.png" />
+  <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet" />
@@ -139,6 +139,24 @@ if (empty($token)) {
               <button type="button" class="modal-btn" id="modal-btn-secondary">Close</button>
               <button type="button" class="modal-btn primary" id="modal-btn-primary">Try Again</button>
           </div>
+      </div>
+  </div>
+
+  <div id="otp-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="otp-modal-title">
+      <div class="modal-card">
+          <div class="modal-icon" style="background:#eaf0ff;color:var(--blue);">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3 id="otp-modal-title">Verify It's You</h3>
+          <p>Super Admin accounts need an extra check. Enter the 6-digit code we just emailed you.</p>
+          <form id="otp-form" novalidate>
+              <div class="field">
+                  <input id="otp-input" name="otp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="• • • • • •" style="text-align:center;font-size:22px;letter-spacing:10px;font-weight:700;" autocomplete="one-time-code" required />
+              </div>
+              <p class="error" id="otp-error"></p>
+              <button class="submit" id="btn-otp-submit" type="submit" style="margin-top:16px;">Verify Code →</button>
+              <button class="modal-btn" id="btn-otp-resend" type="button" style="width:100%;margin-top:10px;">Resend Code</button>
+          </form>
       </div>
   </div>
   
@@ -241,8 +259,13 @@ if (empty($token)) {
                 body: formData
             });
             const data = await res.json();
-            
-            if (data.status) {
+
+            if (data.status && data.data && data.data.otp_required) {
+                // Super Admin: password is held pending until the emailed OTP is verified
+                btn.disabled = false;
+                btn.textContent = 'Update Password →';
+                openOtpModal(data.message);
+            } else if (data.status) {
                 showModal('Success!', data.message + " Redirecting to login...", true);
                 form.reset();
                 setTimeout(() => {
@@ -257,6 +280,93 @@ if (empty($token)) {
             showModal('Error', "An error occurred. Please try again later.", false);
             btn.disabled = false;
             btn.textContent = 'Update Password →';
+        }
+    });
+
+    // ===== Super Admin OTP step =====
+    const otpModal = document.getElementById('otp-modal');
+    const otpInput = document.getElementById('otp-input');
+    const otpError = document.getElementById('otp-error');
+    const otpForm = document.getElementById('otp-form');
+    const otpSubmitBtn = document.getElementById('btn-otp-submit');
+    const otpResendBtn = document.getElementById('btn-otp-resend');
+
+    function openOtpModal(message) {
+        otpError.style.display = 'none';
+        otpInput.value = '';
+        otpModal.style.display = 'flex';
+        requestAnimationFrame(() => otpModal.classList.add('show'));
+        setTimeout(() => otpInput.focus(), 250);
+    }
+
+    function closeOtpModal() {
+        otpModal.classList.remove('show');
+        setTimeout(() => { otpModal.style.display = 'none'; }, 200);
+    }
+
+    otpInput.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    });
+
+    otpForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const code = otpInput.value.trim();
+        otpError.style.display = 'none';
+
+        if (code.length !== 6) {
+            otpError.textContent = 'Enter the 6-digit code from your email.';
+            otpError.style.display = 'block';
+            return;
+        }
+
+        otpSubmitBtn.disabled = true;
+        otpSubmitBtn.textContent = 'Verifying...';
+
+        try {
+            const body = new FormData();
+            body.append('token', document.querySelector('input[name="token"]').value);
+            body.append('otp', code);
+            body.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+
+            const res = await fetch(BASE_URL + '/api/verify_reset_otp.php', { method: 'POST', body });
+            const data = await res.json();
+
+            if (data.status) {
+                closeOtpModal();
+                showModal('Success!', data.message + " Redirecting to login...", true);
+                document.getElementById('reset-form').reset();
+                setTimeout(() => { window.location.href = BASE_URL + '/login'; }, 2000);
+            } else {
+                otpError.textContent = data.message;
+                otpError.style.display = 'block';
+            }
+        } catch (error) {
+            otpError.textContent = 'An error occurred. Please try again.';
+            otpError.style.display = 'block';
+        } finally {
+            otpSubmitBtn.disabled = false;
+            otpSubmitBtn.textContent = 'Verify Code →';
+        }
+    });
+
+    otpResendBtn.addEventListener('click', async function () {
+        otpResendBtn.disabled = true;
+        otpResendBtn.textContent = 'Sending...';
+        try {
+            const formData = new FormData(document.getElementById('reset-form'));
+            const res = await fetch(BASE_URL + '/api/reset_password.php', { method: 'POST', body: formData });
+            const data = await res.json();
+            otpError.style.display = 'none';
+            if (!data.status) {
+                otpError.textContent = data.message;
+                otpError.style.display = 'block';
+            }
+        } catch (error) {
+            otpError.textContent = 'Could not resend the code. Please try again.';
+            otpError.style.display = 'block';
+        } finally {
+            otpResendBtn.disabled = false;
+            otpResendBtn.textContent = 'Resend Code';
         }
     });
   </script>

@@ -29,7 +29,7 @@
 <div class="row g-3 mb-4">
     <div class="col-md-3">
         <div class="stat-card">
-            <div class="stat-card-icon blue"><i class="fa-solid fa-wallet"></i></div>
+            <div class="stat-card-icon blue"><i class="fa-solid fa-sack-dollar"></i></div>
             <div class="stat-card-val text-indigo" id="pl-sales">₹0.00</div>
             <div class="stat-card-label">Total Revenue (Sales)</div>
         </div>
@@ -43,7 +43,7 @@
     </div>
     <div class="col-md-3">
         <div class="stat-card">
-            <div class="stat-card-icon red"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+            <div class="stat-card-icon red"><i class="fa-solid fa-money-bill-wave"></i></div>
             <div class="stat-card-val text-rose" id="pl-expenses">₹0.00</div>
             <div class="stat-card-label">Total Expenses</div>
         </div>
@@ -78,12 +78,12 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="cust-rep-tab" data-bs-toggle="tab" data-bs-target="#cust-pane" type="button" role="tab" aria-controls="cust-pane" aria-selected="false">
-                    <i class="fa-solid fa-users me-2"></i>Customer Receivables
+                    <i class="fa-solid fa-hand-holding-dollar me-2"></i>Customer Receivables
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="supp-rep-tab" data-bs-toggle="tab" data-bs-target="#supp-pane" type="button" role="tab" aria-controls="supp-pane" aria-selected="false">
-                    <i class="fa-solid fa-truck-field me-2"></i>Supplier Payables
+                    <i class="fa-solid fa-money-bill-transfer me-2"></i>Supplier Payables
                 </button>
             </li>
             <li class="nav-item" role="presentation">
@@ -93,7 +93,7 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link text-secondary border-0 bg-transparent fw-semibold" id="overdue-rep-tab" data-bs-toggle="tab" data-bs-target="#overdue-pane" type="button" role="tab" aria-controls="overdue-pane" aria-selected="false">
-                    <i class="fa-solid fa-clock me-2"></i>Overdue Invoices
+                    <i class="fa-solid fa-calendar-xmark me-2"></i>Overdue Invoices
                 </button>
             </li>
         </ul>

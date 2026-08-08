@@ -43,7 +43,7 @@
                     
                     <!-- SYSTEM USERS LIST -->
                     <div class="tab-pane fade show active" id="users-pane" role="tabpanel" aria-labelledby="users-tab" tabindex="0">
-                        <div class="table-responsive">
+                        <div class="table-responsive entity-desktop-table">
                             <table class="table table-hover align-middle w-100" id="usersTable">
                                 <thead>
                                     <tr>
@@ -59,6 +59,7 @@
                                 <tbody></tbody>
                             </table>
                         </div>
+                        <div class="entity-mobile-cards" id="usersMobileCards"></div>
                     </div>
 
                     <!-- SYSTEM AUDIT ACTIVITY LOGS -->
@@ -164,7 +165,26 @@ $(document).ready(function() {
                     `;
                 }
             }
-        ]
+        ],
+        drawCallback: function() {
+            renderEntityMobileCards({
+                tableId: 'usersTable',
+                containerId: 'usersMobileCards',
+                titleCol: 0,
+                metaCols: [
+                    { col: 2, icon: 'fa-regular fa-envelope' },
+                    { col: 3, icon: 'fa-solid fa-phone' }
+                ],
+                fieldCols: [
+                    { col: 1, label: 'Role' },
+                    { col: 4, label: 'Last Login' },
+                    { col: 5, label: 'Status' }
+                ],
+                actionsCol: 6,
+                initials: function($tds) { return entityInitials($tds.eq(0).text()); },
+                emptyText: 'No users found.'
+            });
+        }
     });
 
     // 2. DT Init - Activity Logs

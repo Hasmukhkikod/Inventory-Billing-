@@ -33,7 +33,7 @@
             </button>
             <span class="badge bg-light-primary small d-none bulk-count">0 selected</span>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive entity-desktop-table">
             <table class="table table-hover w-100" id="invoicesTable">
                 <thead>
                     <tr>
@@ -52,6 +52,7 @@
                 <tbody></tbody>
             </table>
         </div>
+        <div class="entity-mobile-cards" id="invoicesMobileCards"></div>
     </div>
 </div>
 
@@ -146,7 +147,61 @@ $(document).ready(function() {
                 }
             }
         ],
-        order: [[1, 'desc']]
+        order: [[1, 'desc']],
+        drawCallback: function() {
+            renderInvoiceMobileCards(this.api().rows({ page: 'current' }).data().toArray());
+        }
     });
+
+    function renderInvoiceMobileCards(rows) {
+        const $container = $('#invoicesMobileCards');
+        $container.empty();
+
+        if (!rows.length) {
+            $container.html('<div class="entity-mobile-empty">No invoices found.</div>');
+            return;
+        }
+
+        rows.forEach(function(row) {
+            const dateStr = row.invoice_date ? new Date(row.invoice_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+            const due = parseFloat(row.due_amount) || 0;
+            const statusCls = due > 0 ? 'due' : 'paid';
+            const statusLabel = due > 0 ? ('₹' + due.toFixed(2) + ' Due') : 'Paid';
+            const statusIcon = due > 0 ? 'fa-triangle-exclamation' : 'fa-circle-check';
+            const customerName = row.customer_name || 'Walk-in Customer';
+
+            const $card = $(
+                '<article class="entity-mobile-card invoice-mobile-card">' +
+                    '<label class="invoice-mobile-select"><input type="checkbox" class="form-check-input bulk-check" value="' + row.id + '"></label>' +
+                    '<div class="invoice-mobile-head">' +
+                        '<div class="invoice-mobile-doc-icon"><i class="fa-solid fa-file-invoice"></i></div>' +
+                        '<div class="invoice-mobile-no"><a href="' + BASE_URL + '/billing/view?id=' + row.id + '">' + row.invoice_no + '</a></div>' +
+                    '</div>' +
+                    '<div class="invoice-mobile-recipient">' +
+                        '<div class="entity-mobile-avatar"><i class="fa-solid fa-user"></i></div>' +
+                        '<div class="invoice-mobile-recipient-info">' +
+                            '<span class="entity-field-label">Recipient</span>' +
+                            '<strong>' + customerName + '</strong>' +
+                            '<span class="invoice-mobile-issued">Issued: ' + dateStr + '</span>' +
+                        '</div>' +
+                        '<span class="invoice-status-pill ' + statusCls + '"><i class="fa-solid ' + statusIcon + '"></i>' + statusLabel + '</span>' +
+                    '</div>' +
+                    '<div class="invoice-mobile-grid">' +
+                        '<div><span class="entity-field-label"><i class="fa-solid fa-tag"></i>Type</span><strong>' + row.invoice_type + '</strong></div>' +
+                        '<div><span class="entity-field-label"><i class="fa-solid fa-credit-card"></i>Payment</span><strong>' + row.payment_method + '</strong></div>' +
+                        '<div><span class="entity-field-label"><i class="fa-solid fa-indian-rupee-sign"></i>Amount</span><strong>₹' + parseFloat(row.grand_total).toFixed(2) + '</strong></div>' +
+                        '<div><span class="entity-field-label"><i class="fa-solid ' + statusIcon + '"></i>Status</span><strong>' + statusLabel + '</strong></div>' +
+                    '</div>' +
+                    '<div class="entity-mobile-actions">' +
+                        '<div class="btn-group">' +
+                            '<a href="' + BASE_URL + '/billing/view?id=' + row.id + '" class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo"><i class="fa-solid fa-eye"></i> View</a>' +
+                            '<a href="' + BASE_URL + '/invoice_print?id=' + row.id + '" target="_blank" class="btn btn-sm btn-outline-secondary py-1 px-2 text-dark"><i class="fa-solid fa-print"></i> Print</a>' +
+                        '</div>' +
+                    '</div>' +
+                '</article>'
+            );
+            $container.append($card);
+        });
+    }
 });
 </script>

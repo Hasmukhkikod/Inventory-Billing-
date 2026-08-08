@@ -28,7 +28,7 @@
             </button>
             <span class="badge bg-light-primary small d-none bulk-count">0 selected</span>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive entity-desktop-table">
             <table class="table table-hover w-100" id="purchasesTable">
                 <thead>
                     <tr>
@@ -48,6 +48,7 @@
                 <tbody></tbody>
             </table>
         </div>
+        <div class="entity-mobile-cards" id="purchasesMobileCards"></div>
     </div>
 </div>
 
@@ -131,7 +132,26 @@ $(document).ready(function() {
                 }
             }
         ],
-        order: [[1, 'desc']]
+        order: [[1, 'desc']],
+        drawCallback: function() {
+            renderEntityMobileCards({
+                tableId: 'purchasesTable',
+                containerId: 'purchasesMobileCards',
+                titleCol: 1,
+                metaCols: [
+                    { col: 2, icon: 'fa-solid fa-industry' },
+                    { col: 3, icon: 'fa-regular fa-calendar' }
+                ],
+                fieldCols: [
+                    { col: 4, label: 'Payment Status' },
+                    { col: 5, label: 'Order Status' },
+                    { col: 9, label: 'Total', wide: true }
+                ],
+                actionsCol: 10,
+                initials: function($tds) { return entityInitials($tds.eq(2).text()); },
+                emptyText: 'No purchase orders found.'
+            });
+        }
     });
 
     window.updateOrderStatus = function(purchaseId, newStatus) {

@@ -30,7 +30,7 @@
                     </button>
                     <span class="badge bg-light-primary small d-none bulk-count">0 selected</span>
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive entity-desktop-table">
                     <table class="table table-hover w-100" id="expensesTable">
                         <thead>
                             <tr>
@@ -47,10 +47,11 @@
                         <tbody></tbody>
                     </table>
                 </div>
+                <div class="entity-mobile-cards" id="expensesMobileCards"></div>
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3">
         <!-- Expense Categories Manager -->
         <div class="panel-card">
@@ -148,6 +149,24 @@ $(document).ready(function() {
         language: {
             search: "_INPUT_",
             searchPlaceholder: "Search expense log..."
+        },
+        drawCallback: function() {
+            renderEntityMobileCards({
+                tableId: 'expensesTable',
+                containerId: 'expensesMobileCards',
+                titleCol: 1,
+                metaCols: [
+                    { col: 2, icon: 'fa-solid fa-tag' }
+                ],
+                fieldCols: [
+                    { col: 3, label: 'Description', wide: true },
+                    { col: 4, label: 'Payment Method' },
+                    { col: 6, label: 'Amount' }
+                ],
+                actionsCol: 7,
+                initials: function($tds) { return entityInitials($tds.eq(2).text()); },
+                emptyText: 'No expenses found.'
+            });
         }
     });
 

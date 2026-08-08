@@ -28,7 +28,7 @@
             </button>
             <span class="badge bg-light-primary small d-none bulk-count">0 selected</span>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive entity-desktop-table">
             <table class="table table-hover w-100" id="suppliersTable">
                 <thead>
                     <tr>
@@ -45,6 +45,7 @@
                 <tbody></tbody>
             </table>
         </div>
+        <div class="entity-mobile-cards" id="suppliersMobileCards"></div>
     </div>
 </div>
 
@@ -173,6 +174,25 @@ $(document).ready(function() {
         language: {
             search: "_INPUT_",
             searchPlaceholder: "Search supplier list..."
+        },
+        drawCallback: function() {
+            renderEntityMobileCards({
+                tableId: 'suppliersTable',
+                containerId: 'suppliersMobileCards',
+                titleCol: 1,
+                metaCols: [
+                    { col: 3, icon: 'fa-solid fa-phone' },
+                    { col: 4, icon: 'fa-regular fa-envelope' }
+                ],
+                fieldCols: [
+                    { col: 2, label: 'Contact Person' },
+                    { col: 5, label: 'GST Number' },
+                    { col: 6, label: 'Outstanding Payable' }
+                ],
+                actionsCol: 7,
+                initials: function($tds) { return entityInitials($tds.eq(1).text()); },
+                emptyText: 'No suppliers found.'
+            });
         }
     });
 

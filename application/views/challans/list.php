@@ -28,7 +28,7 @@
             </button>
             <span class="badge bg-light-primary small d-none bulk-count">0 selected</span>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive entity-desktop-table">
             <table class="table table-hover w-100" id="challansTable">
                 <thead>
                     <tr>
@@ -45,6 +45,7 @@
                 <tbody></tbody>
             </table>
         </div>
+        <div class="entity-mobile-cards" id="challansMobileCards"></div>
     </div>
 </div>
 
@@ -130,7 +131,26 @@ $(document).ready(function() {
                 }
             }
         ],
-        order: [[1, 'desc']]
+        order: [[1, 'desc']],
+        drawCallback: function() {
+            renderEntityMobileCards({
+                tableId: 'challansTable',
+                containerId: 'challansMobileCards',
+                titleCol: 1,
+                metaCols: [
+                    { col: 2, icon: 'fa-solid fa-user' },
+                    { col: 3, icon: 'fa-regular fa-calendar' }
+                ],
+                fieldCols: [
+                    { col: 4, label: 'Transport' },
+                    { col: 5, label: 'Vehicle No' },
+                    { col: 6, label: 'Status' }
+                ],
+                actionsCol: 7,
+                initials: function($tds) { return entityInitials($tds.eq(2).text()); },
+                emptyText: 'No delivery challans found.'
+            });
+        }
     });
 
     // Mark as Delivered

@@ -117,6 +117,11 @@ switch ($action) {
         $invoice_footer = trim($_POST['invoice_footer'] ?? '');
         $invoice_terms = trim($_POST['invoice_terms'] ?? '');
         $invoice_template = trim($_POST['invoice_template'] ?? 'standard');
+        $invoice_accent_color = trim($_POST['invoice_accent_color'] ?? '#2563eb');
+        if (!preg_match('/^#[0-9a-fA-F]{6}$/', $invoice_accent_color)) {
+            $invoice_accent_color = '#2563eb';
+        }
+        $invoice_bg_opacity = max(2, min(30, (int)($_POST['invoice_bg_opacity'] ?? 8)));
         $pos_template = trim($_POST['pos_template'] ?? 'pos_standard');
         $pos_mode = (int)($_POST['pos_mode'] ?? 0);
         $pos_show_logo = (int)($_POST['pos_show_logo'] ?? 0);
@@ -182,6 +187,90 @@ switch ($action) {
             $update_logo = true;
         }
 
+        // Handle payment QR code upload
+        $qr_filename = null;
+        $update_qr = false;
+
+        if (!empty($_FILES['payment_qr_code_file']['name']) && $_FILES['payment_qr_code_file']['error'] === UPLOAD_ERR_OK) {
+            $allowed = ['image/png', 'image/jpeg', 'image/webp'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $_FILES['payment_qr_code_file']['tmp_name']);
+            finfo_close($finfo);
+
+            if (!in_array($mime, $allowed)) {
+                Helpers::jsonResponse(false, "Invalid QR code image format. Use PNG, JPG, or WebP.");
+            }
+            if ($_FILES['payment_qr_code_file']['size'] > 2 * 1024 * 1024) {
+                Helpers::jsonResponse(false, "QR code image must be under 2MB.");
+            }
+
+            $ext = pathinfo($_FILES['payment_qr_code_file']['name'], PATHINFO_EXTENSION);
+            $qr_filename = 'payment_qr_' . time() . '.' . $ext;
+            $dest = UPLOAD_DIR . '/' . $qr_filename;
+
+            if (!move_uploaded_file($_FILES['payment_qr_code_file']['tmp_name'], $dest)) {
+                Helpers::jsonResponse(false, "Failed to upload QR code image.");
+            }
+
+            $old = $db->query("SELECT payment_qr_code FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+            if (!empty($old['payment_qr_code']) && file_exists(UPLOAD_DIR . '/' . $old['payment_qr_code'])) {
+                @unlink(UPLOAD_DIR . '/' . $old['payment_qr_code']);
+            }
+            $update_qr = true;
+        }
+
+        // Handle payment QR code removal
+        if (!empty($_POST['remove_qr_code'])) {
+            $old = $db->query("SELECT payment_qr_code FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+            if (!empty($old['payment_qr_code']) && file_exists(UPLOAD_DIR . '/' . $old['payment_qr_code'])) {
+                @unlink(UPLOAD_DIR . '/' . $old['payment_qr_code']);
+            }
+            $qr_filename = '';
+            $update_qr = true;
+        }
+
+        // Handle invoice background image upload
+        $invbg_filename = null;
+        $update_invbg = false;
+
+        if (!empty($_FILES['invoice_bg_image_file']['name']) && $_FILES['invoice_bg_image_file']['error'] === UPLOAD_ERR_OK) {
+            $allowed = ['image/png', 'image/jpeg', 'image/webp'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mime = finfo_file($finfo, $_FILES['invoice_bg_image_file']['tmp_name']);
+            finfo_close($finfo);
+
+            if (!in_array($mime, $allowed)) {
+                Helpers::jsonResponse(false, "Invalid background image format. Use PNG, JPG, or WebP.");
+            }
+            if ($_FILES['invoice_bg_image_file']['size'] > 3 * 1024 * 1024) {
+                Helpers::jsonResponse(false, "Background image must be under 3MB.");
+            }
+
+            $ext = pathinfo($_FILES['invoice_bg_image_file']['name'], PATHINFO_EXTENSION);
+            $invbg_filename = 'invoice_bg_' . time() . '.' . $ext;
+            $dest = UPLOAD_DIR . '/' . $invbg_filename;
+
+            if (!move_uploaded_file($_FILES['invoice_bg_image_file']['tmp_name'], $dest)) {
+                Helpers::jsonResponse(false, "Failed to upload background image.");
+            }
+
+            $old = $db->query("SELECT invoice_bg_image FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+            if (!empty($old['invoice_bg_image']) && file_exists(UPLOAD_DIR . '/' . $old['invoice_bg_image'])) {
+                @unlink(UPLOAD_DIR . '/' . $old['invoice_bg_image']);
+            }
+            $update_invbg = true;
+        }
+
+        // Handle invoice background image removal
+        if (!empty($_POST['remove_invoice_bg'])) {
+            $old = $db->query("SELECT invoice_bg_image FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+            if (!empty($old['invoice_bg_image']) && file_exists(UPLOAD_DIR . '/' . $old['invoice_bg_image'])) {
+                @unlink(UPLOAD_DIR . '/' . $old['invoice_bg_image']);
+            }
+            $invbg_filename = '';
+            $update_invbg = true;
+        }
+
         try {
             $sql = "UPDATE company_settings
                 SET company_name = ?, gst_number = ?, email = ?, phone = ?, address = ?,
@@ -193,7 +282,8 @@ switch ($action) {
                     pos_show_logo = ?, pos_show_cashier = ?, pos_show_customer_mobile = ?, pos_show_hsn = ?,
                     pos_show_gst_breakdown = ?, pos_header_text = ?, pos_footer_text = ?,
                     bank_name = ?, bank_account_no = ?, bank_ifsc = ?, bank_branch = ?, upi_id = ?,
-                    demo_popup_days_before = ?, demo_popup_timer_minutes = ?";
+                    demo_popup_days_before = ?, demo_popup_timer_minutes = ?,
+                    invoice_accent_color = ?, invoice_bg_opacity = ?";
             $params = [
                 $company_name, $gst_number, $email, $phone, $address,
                 $invoice_prefix, $quotation_prefix, $purchase_prefix, $challan_prefix,
@@ -204,12 +294,23 @@ switch ($action) {
                 $pos_show_logo, $pos_show_cashier, $pos_show_customer_mobile, $pos_show_hsn,
                 $pos_show_gst_breakdown, $pos_header_text, $pos_footer_text,
                 $bank_name, $bank_account_no, $bank_ifsc, $bank_branch, $upi_id,
-                $demo_popup_days_before, $demo_popup_timer_minutes
+                $demo_popup_days_before, $demo_popup_timer_minutes,
+                $invoice_accent_color, $invoice_bg_opacity
             ];
 
             if ($update_logo) {
                 $sql .= ", company_logo = ?";
                 $params[] = $logo_filename;
+            }
+
+            if ($update_qr) {
+                $sql .= ", payment_qr_code = ?";
+                $params[] = $qr_filename;
+            }
+
+            if ($update_invbg) {
+                $sql .= ", invoice_bg_image = ?";
+                $params[] = $invbg_filename;
             }
 
             $sql .= ", updated_at = CURRENT_TIMESTAMP WHERE id = 1";

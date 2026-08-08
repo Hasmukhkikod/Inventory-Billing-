@@ -82,10 +82,41 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
     <button class="btn btn-outline-secondary btn-sm" onclick="window.close();">Close</button>
 </div>
 
-<?php $theme = $company['invoice_template'] ?? 'standard'; ?>
-<div class="invoice-box theme-<?php echo htmlspecialchars($theme); ?>">
+<?php
+$theme = $company['invoice_template'] ?? 'standard';
+
+// Accent color customization - currently applied to the Standard theme's
+// header gradient, the one template built around a single flat brand color.
+// Professional/Classic/Modern keep their own fixed palette identities.
+function invoiceAccentLighten(string $hex, float $percent): string {
+    $hex = ltrim($hex, '#');
+    if (strlen($hex) !== 6) return '#6366f1';
+    $r = hexdec(substr($hex, 0, 2));
+    $g = hexdec(substr($hex, 2, 2));
+    $b = hexdec(substr($hex, 4, 2));
+    $r = (int)min(255, $r + (255 - $r) * $percent);
+    $g = (int)min(255, $g + (255 - $g) * $percent);
+    $b = (int)min(255, $b + (255 - $b) * $percent);
+    return sprintf('#%02x%02x%02x', $r, $g, $b);
+}
+$accentColor = (!empty($company['invoice_accent_color']) && preg_match('/^#[0-9a-fA-F]{6}$/', $company['invoice_accent_color']))
+    ? $company['invoice_accent_color'] : '#2563eb';
+$brandBarStyle = $theme === 'standard'
+    ? 'background: linear-gradient(135deg, ' . $accentColor . ', ' . invoiceAccentLighten($accentColor, 0.35) . ');'
+    : '';
+
+// Background watermark image, printed faintly behind the whole invoice.
+$bgImagePath = (!empty($company['invoice_bg_image']) && file_exists(UPLOAD_DIR . '/' . $company['invoice_bg_image']))
+    ? BASE_URL . '/uploads/' . $company['invoice_bg_image'] : null;
+$bgOpacityPct = isset($company['invoice_bg_opacity']) && $company['invoice_bg_opacity'] !== '' ? (int)$company['invoice_bg_opacity'] : 8;
+$bgOpacity = max(2, min(30, $bgOpacityPct)) / 100;
+?>
+<div class="invoice-box theme-<?php echo htmlspecialchars($theme); ?>" style="position:relative;">
+    <?php if ($bgImagePath): ?>
+        <div style="position:absolute; inset:0; z-index:-1; background-image:url('<?php echo htmlspecialchars($bgImagePath); ?>'); background-size:contain; background-repeat:no-repeat; background-position:center; opacity:<?php echo $bgOpacity; ?>; -webkit-print-color-adjust:exact; print-color-adjust:exact;"></div>
+    <?php endif; ?>
     <!-- Brand Header Bar -->
-    <div class="brand-bar d-flex justify-content-between align-items-center mb-0">
+    <div class="brand-bar d-flex justify-content-between align-items-center mb-0" style="<?php echo htmlspecialchars($brandBarStyle); ?>">
         <div>
             <h4 class="fw-bold mb-0"><?php echo Helpers::sanitize($company['company_name']); ?></h4>
             <small class="opacity-75"><?php echo Helpers::sanitize($company['address'] ?? ''); ?></small>
@@ -187,13 +218,23 @@ $isIGST = (int)($invoice['is_igst'] ?? 0);
                 </div>
             <?php endif; ?>
 
-            <?php if (!empty($company['bank_name'])): ?>
-                <div class="border rounded p-2 bg-light small">
-                    <strong>Bank Details:</strong><br>
-                    Bank: <?php echo Helpers::sanitize($company['bank_name']); ?><br>
-                    A/C: <?php echo Helpers::sanitize($company['bank_account_no'] ?? ''); ?><br>
-                    IFSC: <?php echo Helpers::sanitize($company['bank_ifsc'] ?? ''); ?>
-                    <?php if (!empty($company['upi_id'])): ?><br>UPI: <?php echo Helpers::sanitize($company['upi_id']); ?><?php endif; ?>
+            <?php if (!empty($company['bank_name']) || !empty($company['payment_qr_code'])): ?>
+                <div class="border rounded p-2 bg-light small d-flex align-items-center justify-content-between gap-2">
+                    <div>
+                        <?php if (!empty($company['bank_name'])): ?>
+                            <strong>Bank Details:</strong><br>
+                            Bank: <?php echo Helpers::sanitize($company['bank_name']); ?><br>
+                            A/C: <?php echo Helpers::sanitize($company['bank_account_no'] ?? ''); ?><br>
+                            IFSC: <?php echo Helpers::sanitize($company['bank_ifsc'] ?? ''); ?>
+                            <?php if (!empty($company['upi_id'])): ?><br>UPI: <?php echo Helpers::sanitize($company['upi_id']); ?><?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                    <?php if (!empty($company['payment_qr_code']) && file_exists(UPLOAD_DIR . '/' . $company['payment_qr_code'])): ?>
+                        <div class="text-center flex-shrink-0">
+                            <img src="<?php echo BASE_URL . '/uploads/' . $company['payment_qr_code']; ?>" alt="Scan to Pay" style="width:70px; height:70px; object-fit:contain; background:#fff; border:1px solid #dee2e6; border-radius:4px; padding:2px;">
+                            <div style="font-size:9px;" class="text-muted mt-1">Scan to Pay</div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </div>

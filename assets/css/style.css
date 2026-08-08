@@ -24,6 +24,7 @@
     --transition-normal: 0.25s ease;
 
     --sidebar-width: 250px;
+    --sidebar-collapsed-width: 78px;
     --header-height: 60px;
     --radius-sm: 6px;
     --radius-md: 10px;
@@ -949,6 +950,88 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     backdrop-filter: blur(4px);
     z-index: 1045;
     display: none;
+}
+
+/* Desktop/tablet sidebar collapse - the pill toggle pinned to the
+   sidebar's edge, and the icon-only rail state it switches into. Scoped to
+   >=992px because below that the sidebar is already an off-canvas drawer
+   (see the max-width:991px block) where a persistent icon rail doesn't apply. */
+@media (min-width: 992px) {
+    .sidebar-collapse-toggle {
+        position: absolute;
+        top: 74px;
+        right: -13px;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        background: var(--bg-card);
+        color: var(--text-secondary);
+        box-shadow: var(--card-shadow);
+        z-index: 1001;
+        transition: color var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .sidebar-collapse-toggle:hover {
+        color: var(--accent-indigo);
+        border-color: var(--accent-indigo);
+    }
+
+    .sidebar-collapse-toggle i {
+        font-size: 0.68rem;
+        transition: transform var(--transition-normal);
+    }
+
+    html.sidebar-collapsed .sidebar-collapse-toggle i {
+        transform: rotate(180deg);
+    }
+
+    html.sidebar-collapsed .sidebar {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    html.sidebar-collapsed .main-content {
+        margin-left: var(--sidebar-collapsed-width);
+    }
+
+    html.sidebar-collapsed .sidebar-header {
+        justify-content: center;
+        padding: 0 0.5rem;
+    }
+
+    html.sidebar-collapsed .sidebar-brand {
+        gap: 0;
+    }
+
+    html.sidebar-collapsed .sidebar-brand span,
+    html.sidebar-collapsed .sidebar-link span,
+    html.sidebar-collapsed .sidebar-user-details {
+        display: none;
+    }
+
+    html.sidebar-collapsed .sidebar-menu {
+        padding-left: 0.6rem;
+        padding-right: 0.6rem;
+    }
+
+    html.sidebar-collapsed .sidebar-link {
+        justify-content: center;
+        padding: 0.65rem;
+    }
+
+    html.sidebar-collapsed .sidebar-link i {
+        width: auto;
+    }
+
+    html.sidebar-collapsed .sidebar-footer {
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.75rem;
+    }
 }
 
 .sidebar-header {
@@ -2757,13 +2840,38 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
         content: none !important;
     }
 
-    /* ============ Invoices list -> polished mobile card: title + issued
-       date header (checkbox floated to the corner), a divider, icon-led
-       label:value rows, colored payment status, full-width actions row. ============ */
+    /* ============ Invoices list -> polished mobile card ============
+       Built by renderInvoiceMobileCards() in billing/index.php straight from
+       the DataTable's raw row data (not scraped <td> HTML), so it owns its
+       own icons/labels independent of the desktop table's rendering. */
+    .panel-card:has(#invoicesTable) { border: none !important; box-shadow: none !important; background: transparent !important; }
+    .panel-card:has(#invoicesTable) .panel-body { padding: 0 !important; }
+
+    .invoice-mobile-card { position: relative; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1rem; margin: 0 0 0.85rem 0; background: var(--bg-card); box-shadow: var(--card-shadow); }
+    .invoice-mobile-select { position: absolute; top: 1rem; right: 1rem; }
+    .invoice-mobile-head { display: flex; align-items: center; gap: 0.6rem; padding-right: 2rem; margin-bottom: 0.9rem; }
+    .invoice-mobile-doc-icon { width: 34px; height: 34px; border-radius: 9px; background: linear-gradient(135deg, #edf3ff, #e8eaff); color: #2563eb; display: grid; place-items: center; flex: 0 0 34px; font-size: 0.95rem; }
+    .invoice-mobile-no { font-weight: 700; font-size: 1.02rem; min-width: 0; }
+    .invoice-mobile-no a { color: var(--accent-indigo); text-decoration: none; }
+    .invoice-mobile-recipient { display: flex; align-items: flex-start; gap: 0.7rem; padding-bottom: 0.9rem; margin-bottom: 0.9rem; border-bottom: 1px solid var(--border-color); }
+    .invoice-mobile-recipient .entity-mobile-avatar { flex: 0 0 40px; width: 40px; height: 40px; background: linear-gradient(135deg, #edf3ff, #e8eaff); color: #6366f1; }
+    .invoice-mobile-recipient-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+    .invoice-mobile-recipient-info strong { font-size: 0.95rem; color: var(--text-primary); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .invoice-mobile-issued { font-size: 0.75rem; color: var(--text-secondary); }
+    .invoice-status-pill { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.32rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+    .invoice-status-pill.paid { background: #d9f6e7; color: #047857; }
+    .invoice-status-pill.due, .invoice-status-pill.partial { background: #fff0c8; color: #864300; }
+    .invoice-mobile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem 0.7rem; padding: 0.85rem 0.9rem; margin-bottom: 0.9rem; background: var(--bg-tertiary); border-radius: 12px; }
+    .invoice-mobile-grid > div { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+    .invoice-mobile-grid .entity-field-label { display: flex; align-items: center; gap: 0.35rem; color: var(--text-secondary); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+    .invoice-mobile-grid strong { color: var(--text-primary); font-size: 0.86rem; font-weight: 600; }
+    .invoice-mobile-card .entity-mobile-actions { margin-top: 0; padding-top: 0; border-top: none; }
+    [data-theme="dark"] .invoice-mobile-doc-icon,
+    [data-theme="dark"] .invoice-mobile-recipient .entity-mobile-avatar { background: rgba(99, 102, 241, 0.18); color: #a5b4fc; }
+
     /* Remove styles from the outer wrappers of tables that have become cards
        otherwise its border+shadow sits right next to the first row's card
        border and reads as a doubled line around the same edges. */
-    .panel-card:has(#invoicesTable),
     .card:has(#orgsTable),
     .card:has(#rolesTable),
     .card:has(#couponsTable),
@@ -2775,7 +2883,6 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
         box-shadow: none !important;
         background: transparent !important;
     }
-    .panel-card:has(#invoicesTable) .panel-body,
     .card:has(#orgsTable) .card-body,
     .card:has(#rolesTable) .card-body,
     .card:has(#couponsTable) .card-body,
@@ -2784,110 +2891,6 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     .card:has(#plansTable) .card-body,
     .card:has(#announcementsTable) .card-body {
         padding: 0 !important;
-    }
-    #invoicesTable thead {
-        display: none;
-    }
-    #invoicesTable, #invoicesTable tbody, #invoicesTable tr, #invoicesTable td {
-        display: block;
-        width: 100% !important;
-    }
-    #invoicesTable tbody tr:not(:has(td[colspan])) {
-        position: relative;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        padding: 1rem;
-        margin: 0 0 0.85rem 0;
-        background: var(--bg-primary);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-    #invoicesTable tbody tr:has(td[colspan]) {
-        border: none;
-        padding: 0;
-    }
-    #invoicesTable tbody tr td {
-        border: none !important;
-        padding: 0;
-    }
-    /* Select checkbox: float to the top-right corner, out of the stack */
-    #invoicesTable tbody tr td:nth-child(1) {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        width: auto !important;
-    }
-    /* Invoice number: card title */
-    #invoicesTable tbody tr td:nth-child(2) {
-        font-size: 1.05rem;
-        font-weight: 700;
-        padding-right: 2.5rem;
-    }
-    /* Issued date: sub-header caption, with a divider beneath it separating
-       the header block from the detail rows */
-    #invoicesTable tbody tr td:nth-child(4) {
-        color: var(--text-secondary);
-        font-size: 0.8rem;
-        padding-bottom: 0.85rem;
-        margin-bottom: 0.6rem;
-        border-bottom: 1px solid var(--border-color) !important;
-    }
-    #invoicesTable tbody tr td:nth-child(4)::before {
-        content: "Issued: " !important;
-    }
-    /* Paid Amount: redundant on mobile once Status shows the same thing
-       more usefully ("Paid" / "₹X due") - hide to keep the card tight */
-    #invoicesTable tbody tr td:nth-child(8) {
-        display: none !important;
-    }
-    /* Recipient / Type / Payment / Amount / Status: label left, icon+value right */
-    #invoicesTable tbody tr td:nth-child(3),
-    #invoicesTable tbody tr td:nth-child(5),
-    #invoicesTable tbody tr td:nth-child(6),
-    #invoicesTable tbody tr td:nth-child(7),
-    #invoicesTable tbody tr td:nth-child(9) {
-        display: flex !important;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.75rem;
-        padding: 0.4rem 0;
-    }
-    #invoicesTable tbody tr td:nth-child(3)::before,
-    #invoicesTable tbody tr td:nth-child(5)::before,
-    #invoicesTable tbody tr td:nth-child(6)::before,
-    #invoicesTable tbody tr td:nth-child(7)::before,
-    #invoicesTable tbody tr td:nth-child(9)::before {
-        font-weight: 600;
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        color: var(--text-secondary);
-        flex-shrink: 0;
-    }
-    #invoicesTable tbody tr td:nth-child(3)::before { content: "Recipient" !important; }
-    #invoicesTable tbody tr td:nth-child(5)::before { content: "Type" !important; }
-    #invoicesTable tbody tr td:nth-child(6)::before { content: "Payment" !important; }
-    #invoicesTable tbody tr td:nth-child(7)::before { content: "Amount" !important; }
-    #invoicesTable tbody tr td:nth-child(9)::before { content: "Status" !important; }
-    /* Small accent icons injected before each value in the render() JS -
-       hidden on desktop (see the min-width:768px rule further down) */
-    #invoicesTable .mobile-row-icon {
-        color: var(--accent-indigo);
-        opacity: 0.7;
-        font-size: 0.8rem;
-        margin-right: 0.45rem;
-    }
-    /* Actions: full-width row below everything, equal-width buttons */
-    #invoicesTable tbody tr td:last-child {
-        margin-top: 0.85rem;
-        padding-top: 0.85rem !important;
-        border-top: 1px solid var(--border-color) !important;
-    }
-    #invoicesTable tbody tr td:last-child .btn-group {
-        width: 100%;
-        display: flex;
-    }
-    #invoicesTable tbody tr td:last-child .btn {
-        flex: 1;
     }
 }
 
@@ -2913,6 +2916,285 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
         flex-basis: 100%;
         margin-left: 0 !important;
     }
+}
+
+/* ==================== Organizations mobile cards ==================== */
+.organization-mobile-toolbar,
+.organization-mobile-cards { display: none; }
+
+@media (max-width: 767px) {
+    /* The organization page owns its compact mobile header, matching the
+       card controls below it instead of duplicating the global search bar. */
+    .top-navbar.module-organizations { display: none !important; }
+    .organizations-list-page { margin-top: 0; }
+    .organization-desktop-heading,
+    .organization-desktop-table { display: none !important; }
+    .organization-mobile-toolbar,
+    .organization-mobile-cards { display: block; }
+
+    .organization-mobile-toolbar { margin: 0 -0.15rem 1.05rem; }
+    .organization-mobile-title-row { display: flex; align-items: center; gap: 0.7rem; }
+    .organization-mobile-menu { appearance: none; border: 0; background: transparent; color: var(--text-primary); padding: 0.4rem 0.2rem; font-size: 1.45rem; line-height: 1; }
+    .organization-mobile-title-row h1 { margin: 0; min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); font-family: Outfit, Inter, sans-serif; font-size: clamp(1.22rem, 5.2vw, 1.7rem); font-weight: 700; line-height: 1.15; white-space: nowrap; }
+    .organization-mobile-create { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 0.85rem; border-radius: 10px; background: var(--accent-indigo); color: #fff; font-size: 0.85rem; font-weight: 700; white-space: nowrap; box-shadow: 0 6px 14px rgba(79, 70, 229, 0.22); transition: background var(--transition-fast); }
+    .organization-mobile-create i { font-size: 0.78rem; }
+    .organization-mobile-create:hover, .organization-mobile-create:active { background: var(--accent-indigo-hover); color: #fff; }
+    .organization-mobile-search-row { display: flex; gap: 0.7rem; margin-top: 1.2rem; }
+    .organization-mobile-search { display: flex; flex: 1; align-items: center; gap: 0.7rem; min-width: 0; height: 48px; padding: 0 0.85rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-muted); }
+    .organization-mobile-search:focus-within { border-color: var(--accent-indigo); box-shadow: 0 0 0 3px var(--border-glow); }
+    .organization-mobile-search input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: var(--text-primary); font-size: 1rem; }
+    .organization-mobile-search input::placeholder { color: var(--text-muted); }
+    .organization-mobile-filter { width: 48px; height: 48px; border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-secondary); background: var(--bg-card); }
+
+    .organization-mobile-card { margin-bottom: 1.05rem; padding: 1.2rem 1rem 1rem; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--card-shadow); }
+    .organization-mobile-card[hidden] { display: none; }
+    .organization-mobile-card-head { display: flex; align-items: flex-start; gap: 0.75rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+    .organization-mobile-avatar { width: 52px; height: 52px; display: grid; flex: 0 0 52px; place-items: center; border-radius: 12px; background: linear-gradient(135deg, #edf3ff, #e8eaff); color: #2563eb; font: 700 1.35rem/1 Outfit, Inter, sans-serif; }
+    .organization-mobile-identity { min-width: 0; flex: 1; }
+    .organization-mobile-name-line { display: flex; align-items: center; flex-wrap: wrap; gap: 0.38rem; }
+    .organization-mobile-name-line h2 { margin: 0; color: var(--text-primary); font-family: Outfit, Inter, sans-serif; font-size: 1.17rem; font-weight: 700; line-height: 1.2; }
+    .organization-default-badge, .organization-mobile-id { padding: 0.25rem 0.45rem; border-radius: 7px; background: #f0eeff; color: var(--accent-indigo); font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+    .organization-mobile-contact { display: flex; flex-wrap: wrap; gap: 0.45rem 0.85rem; margin-top: 0.55rem; color: var(--text-secondary); font-size: 0.78rem; }
+    .organization-mobile-contact span { display: inline-flex; align-items: center; gap: 0.35rem; min-width: 0; }
+    .organization-mobile-contact i { color: var(--text-secondary); }
+    .organization-mobile-id { margin-left: auto; }
+    .organization-mobile-more { padding: 0.12rem 0.1rem; border: 0; background: transparent; color: var(--text-secondary); font-size: 1rem; }
+
+    .organization-mobile-details { display: grid; grid-template-columns: 1fr 1.18fr; gap: 1.1rem 0.8rem; padding: 1rem 0; }
+    .organization-mobile-details > div { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+    .organization-mobile-details > div > span { color: var(--text-secondary); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+    .organization-mobile-details strong { color: var(--text-primary); font-size: 0.92rem; font-weight: 600; line-height: 1.25; }
+    .organization-plan-badge { align-self: flex-start; padding: 0.35rem 0.55rem; border-radius: 6px; background: #cff4fb; color: #087fa8 !important; font-size: 0.78rem !important; }
+    .organization-status-badge { display: inline-flex; align-items: center; align-self: flex-start; gap: 0.35rem; padding: 0.35rem 0.55rem; border-radius: 7px; font-size: 0.75rem !important; white-space: nowrap; }
+    .organization-status-badge.awaiting-verification { background: #fff0c8; color: #864300; }
+    .organization-status-badge.awaiting-approval { background: #cff4fb; color: #087fa8; }
+    .organization-status-badge.active { background: #d9f6e7; color: #047857; }
+    .organization-status-badge.disabled { background: #fde2e2; color: #b91c1c; }
+    .organization-status-note { display: flex; align-items: center; gap: 0.75rem; min-height: 64px; padding: 0.8rem 0.9rem; border-radius: 11px; background: linear-gradient(100deg, #f4f7ff, #f8faff); color: #425878; font-size: 0.86rem; line-height: 1.35; }
+    .organization-status-note i { display: grid; width: 35px; height: 35px; flex: 0 0 35px; place-items: center; border-radius: 50%; background: #e8efff; color: #2563eb; font-size: 1rem; }
+    .organization-mobile-actions { display: grid; grid-template-columns: 1.3fr 1fr; gap: 0.55rem; margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--border-color); }
+    .organization-mobile-actions .btn { min-width: 0; padding: 0.58rem 0.25rem; border-radius: 9px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+    .organization-mobile-actions .btn i { margin-right: 0.25rem; }
+    .organization-mobile-empty { padding: 2rem 1rem; border: 1px dashed var(--border-color); border-radius: 14px; color: var(--text-secondary); text-align: center; }
+
+    [data-theme="dark"] .organization-mobile-avatar { background: rgba(99, 102, 241, 0.18); color: #a5b4fc; }
+    [data-theme="dark"] .organization-default-badge, [data-theme="dark"] .organization-mobile-id { background: rgba(99, 102, 241, 0.18); }
+    [data-theme="dark"] .organization-plan-badge { background: rgba(6, 182, 212, 0.18); color: #67e8f9 !important; }
+    [data-theme="dark"] .organization-status-note { background: var(--bg-tertiary); color: var(--text-secondary); }
+}
+
+@media (max-width: 390px) {
+    .organization-mobile-title-row { gap: 0.5rem; }
+    .organization-mobile-name-line h2 { font-size: 1.05rem; }
+    .organization-mobile-contact { font-size: 0.73rem; }
+}
+
+/* ==================== Demo accounts mobile cards ==================== */
+.demo-mobile-toolbar,
+.demo-mobile-cards { display: none; }
+
+@media (max-width: 767px) {
+    .top-navbar.module-demos { display: none !important; }
+    .demos-list-page { margin-top: 0; }
+    .demo-desktop-heading,
+    .demo-desktop-table { display: none !important; }
+    .demo-mobile-toolbar,
+    .demo-mobile-cards { display: block; }
+
+    .demo-mobile-toolbar { margin: 0 -0.15rem 1.05rem; }
+    .demo-mobile-title-row { display: flex; align-items: center; gap: 0.7rem; }
+    .demo-mobile-menu { appearance: none; border: 0; background: transparent; color: var(--text-primary); padding: 0.4rem 0.2rem; font-size: 1.45rem; line-height: 1; }
+    .demo-mobile-title-row h1 { margin: 0; min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); font-family: Outfit, Inter, sans-serif; font-size: clamp(1.22rem, 5.2vw, 1.7rem); font-weight: 700; line-height: 1.15; white-space: nowrap; }
+    .demo-mobile-create { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 0.85rem; border-radius: 10px; background: var(--accent-indigo); color: #fff; font-size: 0.85rem; font-weight: 700; white-space: nowrap; box-shadow: 0 6px 14px rgba(79, 70, 229, 0.22); transition: background var(--transition-fast); }
+    .demo-mobile-create i { font-size: 0.78rem; }
+    .demo-mobile-create:hover, .demo-mobile-create:active { background: var(--accent-indigo-hover); color: #fff; }
+    .demo-mobile-search-row { display: flex; gap: 0.7rem; margin-top: 1.2rem; }
+    .demo-mobile-search { display: flex; flex: 1; align-items: center; gap: 0.7rem; min-width: 0; height: 48px; padding: 0 0.85rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-muted); }
+    .demo-mobile-search:focus-within { border-color: var(--accent-indigo); box-shadow: 0 0 0 3px var(--border-glow); }
+    .demo-mobile-search input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: var(--text-primary); font-size: 1rem; }
+    .demo-mobile-search input::placeholder { color: var(--text-muted); }
+    .demo-mobile-filter { width: 48px; height: 48px; border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-secondary); background: var(--bg-card); }
+
+    .demo-mobile-card { margin-bottom: 1.05rem; padding: 1.2rem 1rem 1rem; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--card-shadow); }
+    .demo-mobile-card[hidden] { display: none; }
+    .demo-mobile-card-head { display: flex; align-items: flex-start; gap: 0.75rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+    .demo-mobile-avatar { width: 52px; height: 52px; display: grid; flex: 0 0 52px; place-items: center; border-radius: 12px; background: linear-gradient(135deg, #edf3ff, #e8eaff); color: #2563eb; font: 700 1.35rem/1 Outfit, Inter, sans-serif; }
+    .demo-mobile-identity { min-width: 0; flex: 1; }
+    .demo-mobile-identity h2 { margin: 0; color: var(--text-primary); font-family: Outfit, Inter, sans-serif; font-size: 1.17rem; font-weight: 700; line-height: 1.2; }
+    .demo-mobile-contact { display: flex; flex-wrap: wrap; gap: 0.45rem 0.85rem; margin-top: 0.55rem; color: var(--text-secondary); font-size: 0.78rem; }
+    .demo-mobile-contact span { display: inline-flex; align-items: center; gap: 0.35rem; min-width: 0; }
+    .demo-mobile-contact i { color: var(--text-secondary); }
+    .demo-mobile-id { margin-left: auto; padding: 0.25rem 0.45rem; border-radius: 7px; background: #f0eeff; color: var(--accent-indigo); font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+
+    .demo-mobile-details { display: grid; grid-template-columns: 1fr 1.18fr; gap: 1.1rem 0.8rem; padding: 1rem 0; }
+    .demo-mobile-details > div { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+    .demo-mobile-details > div > span { color: var(--text-secondary); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+    .demo-mobile-details strong { color: var(--text-primary); font-size: 0.92rem; font-weight: 600; line-height: 1.25; }
+    .demo-plan-badge { align-self: flex-start; padding: 0.35rem 0.55rem; border-radius: 6px; background: #cff4fb; color: #087fa8 !important; font-size: 0.78rem !important; }
+    .demo-status-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .demo-status-badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.32rem 0.5rem; border-radius: 7px; font-size: 0.72rem !important; white-space: nowrap; }
+    .demo-status-badge.approved { background: #d9f6e7; color: #047857; }
+    .demo-status-badge.pending { background: #fff0c8; color: #864300; }
+    .demo-status-badge.active { background: #d9f6e7; color: #047857; }
+    .demo-status-badge.disabled { background: #fde2e2; color: #b91c1c; }
+    .demo-status-note { display: flex; align-items: center; gap: 0.75rem; min-height: 64px; padding: 0.8rem 0.9rem; border-radius: 11px; background: linear-gradient(100deg, #f4f7ff, #f8faff); color: #425878; font-size: 0.86rem; line-height: 1.35; }
+    .demo-status-note i { display: grid; width: 35px; height: 35px; flex: 0 0 35px; place-items: center; border-radius: 50%; background: #e8efff; color: #2563eb; font-size: 1rem; }
+    .demo-mobile-actions { display: grid; grid-template-columns: 1fr; gap: 0.55rem; margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--border-color); }
+    .demo-mobile-actions .btn { min-width: 0; padding: 0.6rem 0.25rem; border-radius: 9px; font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+    .demo-mobile-actions .btn i { margin-right: 0.35rem; }
+    .demo-mobile-empty { padding: 2rem 1rem; border: 1px dashed var(--border-color); border-radius: 14px; color: var(--text-secondary); text-align: center; }
+
+    [data-theme="dark"] .demo-mobile-avatar { background: rgba(99, 102, 241, 0.18); color: #a5b4fc; }
+    [data-theme="dark"] .demo-mobile-id { background: rgba(99, 102, 241, 0.18); }
+    [data-theme="dark"] .demo-plan-badge { background: rgba(6, 182, 212, 0.18); color: #67e8f9 !important; }
+    [data-theme="dark"] .demo-status-note { background: var(--bg-tertiary); color: var(--text-secondary); }
+}
+
+@media (max-width: 390px) {
+    .demo-mobile-title-row { gap: 0.5rem; }
+    .demo-mobile-identity h2 { font-size: 1.05rem; }
+    .demo-mobile-contact { font-size: 0.73rem; }
+}
+
+/* ==================== Subscription plans mobile cards ==================== */
+.plan-mobile-toolbar,
+.plan-mobile-cards { display: none; }
+
+@media (max-width: 767px) {
+    .top-navbar.module-plans { display: none !important; }
+    .plans-list-page { margin-top: 0; }
+    .plan-desktop-heading,
+    .plan-desktop-table { display: none !important; }
+    .plan-mobile-toolbar,
+    .plan-mobile-cards { display: block; }
+
+    .plan-mobile-toolbar { margin: 0 -0.15rem 1.05rem; }
+    .plan-mobile-title-row { display: flex; align-items: center; gap: 0.7rem; }
+    .plan-mobile-menu { appearance: none; border: 0; background: transparent; color: var(--text-primary); padding: 0.4rem 0.2rem; font-size: 1.45rem; line-height: 1; }
+    .plan-mobile-title-row h1 { margin: 0; min-width: 0; flex: 1; color: var(--text-primary); font-family: Outfit, Inter, sans-serif; font-size: clamp(1.15rem, 5vw, 1.55rem); font-weight: 700; line-height: 1.15; white-space: nowrap; }
+    .plan-mobile-create { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.42rem; padding: 0.68rem 0.7rem; border-radius: 10px; font-size: 0.82rem; font-weight: 700; white-space: nowrap; box-shadow: 0 6px 14px rgba(79, 70, 229, 0.22); }
+    .plan-mobile-search-row { display: flex; gap: 0.7rem; margin-top: 1.2rem; }
+    .plan-mobile-search { display: flex; flex: 1; align-items: center; gap: 0.7rem; min-width: 0; height: 48px; padding: 0 0.85rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-muted); }
+    .plan-mobile-search:focus-within { border-color: var(--accent-indigo); box-shadow: 0 0 0 3px var(--border-glow); }
+    .plan-mobile-search input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: var(--text-primary); font-size: 1rem; }
+    .plan-mobile-search input::placeholder { color: var(--text-muted); }
+    .plan-mobile-filter { width: 48px; height: 48px; border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-secondary); background: var(--bg-card); }
+
+    .plan-mobile-card { margin-bottom: 1.05rem; padding: 1.2rem 1rem 1rem; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--card-shadow); }
+    .plan-mobile-card[hidden] { display: none; }
+    .plan-mobile-card-head { display: flex; align-items: flex-start; gap: 0.75rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+    .plan-mobile-avatar { width: 52px; height: 52px; display: grid; flex: 0 0 52px; place-items: center; border-radius: 12px; background: linear-gradient(135deg, #edf3ff, #e8eaff); color: #2563eb; font: 700 1.35rem/1 Outfit, Inter, sans-serif; }
+    .plan-mobile-identity { min-width: 0; flex: 1; }
+    .plan-mobile-identity h2 { margin: 0; color: var(--text-primary); font-family: Outfit, Inter, sans-serif; font-size: 1.17rem; font-weight: 700; line-height: 1.2; }
+    .plan-mobile-id { margin-left: auto; padding: 0.25rem 0.45rem; border-radius: 7px; background: #f0eeff; color: var(--accent-indigo); font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+
+    .plan-mobile-details { display: grid; grid-template-columns: 1fr 1.18fr; gap: 1.1rem 0.8rem; padding: 1rem 0; }
+    .plan-mobile-details > div { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+    .plan-mobile-details > div > span { color: var(--text-secondary); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+    .plan-mobile-details strong { color: var(--text-primary); font-size: 0.92rem; font-weight: 600; line-height: 1.25; }
+    .plan-status-badge { display: inline-flex; align-items: center; align-self: flex-start; gap: 0.35rem; padding: 0.35rem 0.55rem; border-radius: 7px; font-size: 0.75rem !important; white-space: nowrap; }
+    .plan-status-badge.active { background: #d9f6e7; color: #047857; }
+    .plan-status-badge.disabled { background: #fde2e2; color: #b91c1c; }
+    .plan-mobile-actions { display: grid; grid-template-columns: 1fr; gap: 0.55rem; margin-top: 1rem; padding-top: 0.9rem; border-top: 1px solid var(--border-color); }
+    .plan-mobile-actions .btn { min-width: 0; padding: 0.6rem 0.25rem; border-radius: 9px; font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+    .plan-mobile-actions .btn i { margin-right: 0.35rem; }
+    .plan-mobile-empty { padding: 2rem 1rem; border: 1px dashed var(--border-color); border-radius: 14px; color: var(--text-secondary); text-align: center; }
+
+    [data-theme="dark"] .plan-mobile-avatar { background: rgba(99, 102, 241, 0.18); color: #a5b4fc; }
+    [data-theme="dark"] .plan-mobile-id { background: rgba(99, 102, 241, 0.18); }
+}
+
+@media (max-width: 390px) {
+    .plan-mobile-create span { display: none; }
+    .plan-mobile-create { padding: 0.72rem 0.82rem; }
+    .plan-mobile-title-row { gap: 0.5rem; }
+    .plan-mobile-identity h2 { font-size: 1.05rem; }
+}
+
+/* ==================== Generic AJAX list-page mobile cards ====================
+   Shared by Customers/Suppliers/Products/Purchases/Quotations/Challans/Expenses/
+   Users (and any future DataTable-driven list) - see renderEntityMobileCards()
+   in footer.php. Desktop keeps the DataTable as-is; on mobile the <table> itself
+   hides and a card is rendered per row instead, built directly from that row's
+   already-rendered <td> HTML (so formatting/badges/links never drift out of sync
+   with the desktop table). DataTables' own search box and pagination controls
+   live outside the <table> element, so they stay visible and functional - no
+   separate mobile search implementation needed. */
+.entity-mobile-cards { display: none; }
+
+@media (max-width: 767px) {
+    .entity-desktop-table { display: none !important; }
+    .entity-mobile-cards { display: block; }
+
+    .entity-mobile-card { margin-bottom: 1rem; padding: 1.1rem 1rem 1rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: var(--card-shadow); }
+    .entity-mobile-card:last-child { margin-bottom: 0; }
+    .entity-mobile-card-head { display: flex; align-items: flex-start; gap: 0.75rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border-color); }
+    .entity-mobile-avatar { width: 44px; height: 44px; display: grid; flex: 0 0 44px; place-items: center; border-radius: 10px; background: linear-gradient(135deg, #edf3ff, #e8eaff); color: #2563eb; font: 700 1.05rem/1 Outfit, Inter, sans-serif; text-transform: uppercase; overflow: hidden; }
+    .entity-mobile-avatar-img { background: var(--bg-tertiary); border: 1px solid var(--border-color); }
+    .entity-mobile-avatar-img img { width: 100%; height: 100%; object-fit: cover; }
+    .entity-mobile-identity { min-width: 0; flex: 1; }
+    .entity-mobile-identity h2 { margin: 0; color: var(--text-primary); font-family: Outfit, Inter, sans-serif; font-size: 1.02rem; font-weight: 700; line-height: 1.3; word-break: break-word; }
+    .entity-mobile-identity h2 a { color: inherit; text-decoration: none; }
+    .entity-mobile-meta { display: flex; flex-wrap: wrap; gap: 0.3rem 0.7rem; margin-top: 0.4rem; color: var(--text-secondary); font-size: 0.78rem; }
+    .entity-mobile-meta > span { display: inline-flex; align-items: center; gap: 0.3rem; min-width: 0; }
+    .entity-mobile-meta > span i { color: var(--text-muted); }
+
+    .entity-mobile-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem 0.7rem; padding: 0.9rem 0; }
+    .entity-mobile-details > div { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+    .entity-mobile-details > div.entity-field-wide { grid-column: 1 / -1; }
+    .entity-mobile-details > div > span.entity-field-label { color: var(--text-secondary); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+    .entity-mobile-details strong { color: var(--text-primary); font-size: 0.86rem; font-weight: 600; line-height: 1.3; }
+
+    .entity-mobile-actions { margin-top: 0.4rem; padding-top: 0.85rem; border-top: 1px solid var(--border-color); }
+    .entity-mobile-actions .btn-group { display: flex; flex-wrap: wrap; gap: 0.5rem; width: 100%; }
+    .entity-mobile-actions .btn-group > .btn { flex: 1 1 0; min-width: 44px; padding: 0.5rem; border-radius: 9px !important; margin: 0 !important; }
+    .entity-mobile-empty { padding: 2rem 1rem; border: 1px dashed var(--border-color); border-radius: 14px; color: var(--text-secondary); text-align: center; }
+
+    [data-theme="dark"] .entity-mobile-avatar { background: rgba(99, 102, 241, 0.18); color: #a5b4fc; }
+}
+
+/* ==================== Products list -> compact mobile row ====================
+   Unlike the generic card system above, this keeps the real <table> (column
+   alignment reads better for a dense product list than stacked cards) but
+   hides desktop-only columns, folds the category into the name cell, and
+   swaps the button-group actions for a "..." dropdown - see products/list.php. */
+.product-mobile-category { display: none; }
+.product-actions-mobile { display: none; }
+
+@media (max-width: 767px) {
+    #productsTable thead th:nth-child(1),
+    #productsTable tbody td:nth-child(1),
+    #productsTable thead th:nth-child(5),
+    #productsTable tbody td:nth-child(5),
+    #productsTable thead th:nth-child(6),
+    #productsTable tbody td:nth-child(6),
+    #productsTable thead th:nth-child(7),
+    #productsTable tbody td:nth-child(7),
+    #productsTable thead th:nth-child(9),
+    #productsTable tbody td:nth-child(9) {
+        display: none !important;
+    }
+    /* table-layout:fixed so the 6 remaining columns are forced to share
+       100% of the (narrow) viewport instead of overflowing based on their
+       natural content width - long SKUs/names wrap instead of pushing
+       Status/Actions off the edge. */
+    #productsTable { table-layout: fixed; width: 100% !important; }
+    #productsTable th, #productsTable td { padding: 0.5rem 0.2rem; font-size: 0.72rem; vertical-align: middle; overflow: hidden; }
+    #productsTable thead th { font-size: 0.56rem; letter-spacing: 0.01em; white-space: nowrap; text-overflow: ellipsis; }
+    #productsTable tbody td { white-space: normal; word-break: break-word; }
+    #productsTable thead th:nth-child(2), #productsTable tbody td:nth-child(2) { width: 13%; padding-right: 0 !important; }
+    #productsTable thead th:nth-child(3), #productsTable tbody td:nth-child(3) { width: 27%; padding-left: 0.35rem !important; }
+    #productsTable thead th:nth-child(4), #productsTable tbody td:nth-child(4) { width: 20%; }
+    #productsTable thead th:nth-child(8), #productsTable tbody td:nth-child(8) { width: 15%; }
+    #productsTable thead th:nth-child(10), #productsTable tbody td:nth-child(10) { width: 16%; }
+    #productsTable thead th:nth-child(11), #productsTable tbody td:nth-child(11) { width: 9%; padding-left: 0 !important; text-align: center !important; }
+    .product-col-image img, .product-col-image div { width: 30px !important; height: 30px !important; }
+    .product-col-name a { display: block; font-size: 0.78rem; line-height: 1.25; }
+    .product-mobile-category { display: inline-block; margin-top: 0.2rem; padding: 0.1rem 0.35rem; border-radius: 5px; background: var(--bg-tertiary); color: var(--text-secondary); font-size: 0.58rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; }
+    #productsTable .badge { display: inline-block; font-size: 0.62rem; padding: 0.28rem 0.35rem; white-space: nowrap; line-height: 1.2; }
+    .product-actions-desktop { display: none !important; }
+    .product-actions-mobile { display: inline-block !important; }
+    .product-menu-btn { border: none; background: transparent; color: var(--text-secondary); padding: 0.3rem 0.35rem; }
 }
 
 @media (max-width: 1199px) {

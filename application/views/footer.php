@@ -228,6 +228,79 @@
             }
         }
     });
+
+    // First letter of up to the first two words of a name - for the round
+    // avatar badge on mobile cards (e.g. "Priya Sharma" -> "PS").
+    function entityInitials(name) {
+        const words = (name || '').trim().split(/\s+/).filter(Boolean);
+        return (words.slice(0, 2).map(w => w[0]).join('') || '?').toUpperCase();
+    }
+
+    // Renders a mobile card per row for any DataTable-driven list page, built
+    // directly from that row's already-rendered <td> HTML - so badges, links,
+    // and formatting never drift out of sync with the desktop table. Call from
+    // a table's drawCallback (fires on every load/search/page/sort) with:
+    //   tableId:      DataTable's <table> id
+    //   containerId:  empty <div> id to render cards into
+    //   titleCol:     column index used as the card's heading
+    //   metaCols:     column indexes shown as a small line under the heading
+    //   fieldCols:    [{ col, label, wide? }] shown in the details grid
+    //   actionsCol:   column index whose HTML (the .btn-group) is reused as-is
+    //   initials(row): optional fn($tds) -> avatar text; omit to hide the avatar
+    //   emptyText:    shown when the table has no rows
+    function renderEntityMobileCards(config) {
+        const $container = $('#' + config.containerId);
+        if (!$container.length) return;
+
+        const $rows = $('#' + config.tableId).find('> tbody > tr');
+        $container.empty();
+
+        // DataTables renders a single full-width <td> ("No data available...")
+        // when empty - treat that the same as zero rows.
+        if ($rows.length === 0 || ($rows.length === 1 && $rows.find('td').length === 1)) {
+            $container.html('<div class="entity-mobile-empty">' + (config.emptyText || 'No records found.') + '</div>');
+            return;
+        }
+
+        $rows.each(function () {
+            const $tds = $(this).find('> td');
+            const titleHtml = $tds.eq(config.titleCol).html() || '';
+
+            const metaHtml = (config.metaCols || []).map(function (m) {
+                const c = typeof m === 'object' ? m.col : m;
+                const icon = typeof m === 'object' && m.icon ? '<i class="' + m.icon + '"></i>' : '';
+                const html = ($tds.eq(c).html() || '').trim();
+                return (html && html !== '-') ? '<span>' + icon + html + '</span>' : '';
+            }).join('');
+
+            const fieldsHtml = (config.fieldCols || []).map(function (f) {
+                const cls = f.wide ? ' class="entity-field-wide"' : '';
+                return '<div' + cls + '><span class="entity-field-label">' + f.label + '</span><strong>' + ($tds.eq(f.col).html() || '') + '</strong></div>';
+            }).join('');
+
+            const actionsHtml = config.actionsCol != null ? ($tds.eq(config.actionsCol).html() || '') : '';
+            // Avatar is either a reused column's HTML (e.g. a product thumbnail
+            // <img>/placeholder already rendered for the desktop table) or
+            // initials text computed from the row - avatarCol takes priority.
+            const avatarInner = config.avatarCol != null ? ($tds.eq(config.avatarCol).html() || '') : (config.initials ? config.initials($tds) : '');
+            const showAvatar = config.avatarCol != null || !!config.initials;
+
+            const $card = $(
+                '<article class="entity-mobile-card">' +
+                    '<div class="entity-mobile-card-head">' +
+                        (showAvatar ? '<div class="entity-mobile-avatar' + (config.avatarCol != null ? ' entity-mobile-avatar-img' : '') + '">' + avatarInner + '</div>' : '') +
+                        '<div class="entity-mobile-identity">' +
+                            '<h2>' + titleHtml + '</h2>' +
+                            (metaHtml ? '<div class="entity-mobile-meta">' + metaHtml + '</div>' : '') +
+                        '</div>' +
+                    '</div>' +
+                    (fieldsHtml ? '<div class="entity-mobile-details">' + fieldsHtml + '</div>' : '') +
+                    (actionsHtml ? '<div class="entity-mobile-actions">' + actionsHtml + '</div>' : '') +
+                '</article>'
+            );
+            $container.append($card);
+        });
+    }
 </script>
 <!-- SweetAlert 2 JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>

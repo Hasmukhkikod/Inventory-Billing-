@@ -81,7 +81,7 @@
                                 <th>Stock</th>
                                 <th>GST</th>
                                 <th>Status</th>
-                                <th class="text-end">Actions</th>
+                                <th class="text-end"><span class="d-none d-md-inline">Actions</span></th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -330,6 +330,7 @@ $(document).ready(function() {
             },
             {
                 data: 'image',
+                className: 'product-col-image',
                 render: function(data) {
                     if (data) {
                         return `<img src="${BASE_URL}/${data}" class="rounded border border-secondary" style="width: 38px; height: 38px; object-fit: cover;">`;
@@ -337,11 +338,14 @@ $(document).ready(function() {
                     return `<div class="bg-tertiary rounded border border-secondary text-secondary d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;"><i class="fa-solid fa-image"></i></div>`;
                 }
             },
-            { 
-                data: 'product_name', 
-                className: 'fw-semibold',
+            {
+                data: 'product_name',
+                className: 'fw-semibold product-col-name',
                 render: function(data, type, row) {
-                    return `<a href="${BASE_URL}/products/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>`;
+                    const cat = row.category_name
+                        ? `<span class="product-mobile-category">${row.category_name}</span>`
+                        : '';
+                    return `<a href="${BASE_URL}/products/view?id=${row.id}" class="text-indigo text-decoration-none">${data}</a>${cat}`;
                 }
             },
             { data: 'sku' },
@@ -384,11 +388,11 @@ $(document).ready(function() {
             },
             {
                 data: null,
-                className: 'text-end',
+                className: 'text-end product-col-actions',
                 orderable: false,
                 render: function(data, type, row) {
                     return `
-                        <div class="btn-group">
+                        <div class="btn-group product-actions-desktop">
                             <button class="btn btn-sm btn-outline-secondary py-1 px-2 text-indigo btn-adjust" data-id="${row.id}" data-name="${row.product_name}" title="Adjust Stock">
                                 <i class="fa-solid fa-sliders"></i>
                             </button>
@@ -399,13 +403,41 @@ $(document).ready(function() {
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
+                        <div class="dropdown product-actions-mobile">
+                            <button class="btn btn-sm btn-outline-secondary product-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="${BASE_URL}/products/form?id=${row.id}"><i class="fa-solid fa-pen me-2 text-emerald"></i>Edit Product</a></li>
+                                <li><a class="dropdown-item" href="${BASE_URL}/products/view?id=${row.id}"><i class="fa-regular fa-eye me-2 text-indigo"></i>View Details</a></li>
+                                <li><a class="dropdown-item btn-adjust" href="#" data-id="${row.id}" data-name="${row.product_name}"><i class="fa-solid fa-sliders me-2 text-indigo"></i>Adjust Stock</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger btn-delete" href="#" data-id="${row.id}"><i class="fa-solid fa-trash-can me-2"></i>Delete Product</a></li>
+                            </ul>
+                        </div>
                     `;
                 }
             }
         ],
         order: [[2, 'asc']],
+        responsive: false, // hand-styled compact mobile row layout below instead of DataTables' generic collapse
+        autoWidth: false, // otherwise DataTables sets a fixed inline pixel width from
+                           // the full desktop column set, fighting the mobile CSS's
+                           // percentage-based column widths and pushing Status/Actions off-screen
         drawCallback: function() {
             applyMobileLabels();
+            // The "..." menu sits inside a horizontally-scrollable table cell,
+            // which clips Bootstrap's default absolutely-positioned dropdown.
+            // Popper's "fixed" strategy positions it relative to the viewport
+            // instead, escaping that clipping - see .table-responsive's
+            // overflow-x:auto and the row's own overflow:hidden.
+            document.querySelectorAll('#productsTable .product-menu-btn').forEach(function(btn) {
+                new bootstrap.Dropdown(btn, {
+                    popperConfig: function(defaultConfig) {
+                        return Object.assign({}, defaultConfig, { strategy: 'fixed' });
+                    }
+                });
+            });
         },
         language: {
             search: "_INPUT_",

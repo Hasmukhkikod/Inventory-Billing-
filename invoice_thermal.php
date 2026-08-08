@@ -291,6 +291,14 @@ $payments = $db->query("SELECT * FROM invoice_payments WHERE invoice_id = ? AND 
         <?php endif; ?>
     <?php endif; ?>
 
+    <?php if (!empty($company['payment_qr_code']) && file_exists(UPLOAD_DIR . '/' . $company['payment_qr_code'])): ?>
+        <div class="divider"></div>
+        <div class="text-center" style="margin-top:6px;">
+            <img src="<?php echo BASE_URL . '/uploads/' . $company['payment_qr_code']; ?>" alt="Scan to Pay" style="width:120px; height:120px; object-fit:contain; background:#fff;">
+            <div class="small bold" style="margin-top:2px;">Scan to Pay</div>
+        </div>
+    <?php endif; ?>
+
     <div class="divider"></div>
     <div class="text-center small" style="margin-top:6px;">
         <?php echo Helpers::sanitize($pos_footer_text); ?>

@@ -322,12 +322,15 @@
                                         .preview-body { flex: 1; padding: 10px; }
                                         .preview-line { height: 4px; background: #e9ecef; margin-bottom: 4px; border-radius: 2px; }
                                         
-                                        /* Large Hover Popover */
+                                        /* Large Hover Popover - opens downward from the card so it
+                                           never gets clipped by the panel's top edge (it used to open
+                                           upward via bottom:100%, which cut it off for any card near
+                                           the top of the scroll area). */
                                         .hover-large-preview {
                                             position: absolute;
-                                            bottom: 100%;
+                                            top: 100%;
                                             left: 50%;
-                                            transform: translateX(-50%) translateY(10px) scale(0.9);
+                                            transform: translateX(-50%) translateY(-10px) scale(0.9);
                                             opacity: 0;
                                             visibility: hidden;
                                             width: 320px;
@@ -337,7 +340,7 @@
                                             z-index: 999;
                                             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
                                             pointer-events: none;
-                                            margin-bottom: 15px;
+                                            margin-top: 15px;
                                             border: 1px solid #e5e7eb;
                                             overflow: hidden;
                                         }
@@ -349,25 +352,25 @@
                                         .hover-large-preview::after {
                                             content: '';
                                             position: absolute;
-                                            top: 100%;
+                                            bottom: 100%;
                                             left: 50%;
                                             margin-left: -10px;
                                             border-width: 10px;
                                             border-style: solid;
-                                            border-color: #fff transparent transparent transparent;
+                                            border-color: transparent transparent #fff transparent;
                                         }
                                         /* Detailed Mockup Elements */
                                         .mockup { padding: 15px; font-family: sans-serif; }
                                         .mockup-table { width: 100%; margin-top: 10px; border-collapse: collapse; }
                                         .mockup-table th { font-size: 8px; text-transform: uppercase; padding: 4px; text-align: left; }
                                         .mockup-table td { font-size: 8px; padding: 4px; border-bottom: 1px solid #eee; }
-                                        
+
                                         /* Alignment Helpers */
-                                        .hover-large-preview.preview-align-left { left: 0; transform: translateX(0) translateY(10px) scale(0.9); transform-origin: left bottom; }
+                                        .hover-large-preview.preview-align-left { left: 0; transform: translateX(0) translateY(-10px) scale(0.9); transform-origin: left top; }
                                         .template-preview-wrapper:hover .hover-large-preview.preview-align-left { transform: translateX(0) translateY(0) scale(1); }
                                         .hover-large-preview.preview-align-left::after { left: 15%; margin-left: 0; }
-                                        
-                                        .hover-large-preview.preview-align-right { left: auto; right: 0; transform: translateX(0) translateY(10px) scale(0.9); transform-origin: right bottom; }
+
+                                        .hover-large-preview.preview-align-right { left: auto; right: 0; transform: translateX(0) translateY(-10px) scale(0.9); transform-origin: right top; }
                                         .template-preview-wrapper:hover .hover-large-preview.preview-align-right { transform: translateX(0) translateY(0) scale(1); }
                                         .hover-large-preview.preview-align-right::after { left: auto; right: 15%; margin-left: 0; }
                                     </style>
@@ -482,6 +485,37 @@
                                                     <div class="preview-body"><div class="preview-line w-100" style="background:#000; height:2px;"></div></div>
                                                 </div>
                                                 <div class="p-2 text-center fw-bold small bg-white border-top">Classic</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Template Customization: accent color (Standard/Modern) + background image (all themes) -->
+                                    <div class="row g-3 mt-2 justify-content-center">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Accent Color <span class="text-muted small fw-normal">(Standard &amp; Modern themes)</span></label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="color" class="form-control form-control-color" name="invoice_accent_color" id="set-accent-color" value="#2563eb" title="Choose accent color">
+                                                <input type="text" class="form-control form-control-sm" id="set-accent-color-hex" value="#2563eb" maxlength="7" style="max-width:110px;">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label">Invoice Background Image <span class="text-muted small fw-normal">(printed as a faint watermark behind the content)</span></label>
+                                            <div class="d-flex flex-wrap align-items-center gap-3 row-gap-2">
+                                                <div id="invbg-preview" style="width:64px; height:64px; border-radius:10px; border:2px dashed #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#f8fafc;">
+                                                    <i class="fa-solid fa-image text-muted fs-4" id="invbg-placeholder"></i>
+                                                    <img id="invbg-img" src="" alt="Invoice Background" style="width:100%; height:100%; object-fit:cover; display:none;">
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <input type="file" class="form-control form-control-sm" id="set-invbg-file" accept="image/png,image/jpeg,image/webp" style="max-width:280px;">
+                                                    <small class="text-muted">PNG, JPG, or WebP. Max 3MB.</small>
+                                                    <div class="mt-1 d-flex align-items-center gap-2">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 d-none" id="btn-remove-invbg"><i class="fa-solid fa-trash-can me-1"></i>Remove</button>
+                                                    </div>
+                                                </div>
+                                                <div style="min-width:180px;">
+                                                    <label class="form-label small mb-1">Opacity: <span id="invbg-opacity-val">8</span>%</label>
+                                                    <input type="range" class="form-range" name="invoice_bg_opacity" id="set-invbg-opacity" min="2" max="30" value="8">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -715,6 +749,24 @@
                                 <div class="col-md-6">
                                     <label class="form-label">UPI ID</label>
                                     <input type="text" class="form-control" name="upi_id" id="set-upi-id" placeholder="e.g. business@upi">
+                                </div>
+
+                                <div class="col-md-12">
+                                    <hr class="my-2">
+                                    <label class="form-label">Payment QR Code</label>
+                                    <div class="d-flex flex-wrap align-items-center gap-3 row-gap-2">
+                                        <div id="qr-preview" style="width:96px; height:96px; border-radius:10px; border:2px dashed #cbd5e1; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#f8fafc;">
+                                            <i class="fa-solid fa-qrcode text-muted fs-3" id="qr-placeholder"></i>
+                                            <img id="qr-img" src="" alt="Payment QR Code" style="width:100%; height:100%; object-fit:contain; display:none;">
+                                        </div>
+                                        <div>
+                                            <input type="file" class="form-control form-control-sm" id="set-qr-file" accept="image/png,image/jpeg,image/webp" style="max-width:280px;">
+                                            <small class="text-muted">PNG, JPG, or WebP. Max 2MB. Upload your UPI/bank scan-to-pay QR - it's printed on invoices &amp; receipts.</small>
+                                            <div class="mt-1">
+                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 d-none" id="btn-remove-qr"><i class="fa-solid fa-trash-can me-1"></i>Remove QR Code</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1178,6 +1230,25 @@ $(document).ready(function() {
                     $('#logo-placeholder').hide();
                     $('#btn-remove-logo').removeClass('d-none');
                 }
+                // Payment QR Code
+                if (s.payment_qr_code) {
+                    $('#qr-img').attr('src', BASE_URL + '/uploads/' + s.payment_qr_code).show();
+                    $('#qr-placeholder').hide();
+                    $('#btn-remove-qr').removeClass('d-none');
+                }
+                // Invoice Accent Color
+                var accentColor = s.invoice_accent_color || '#2563eb';
+                $('#set-accent-color').val(accentColor);
+                $('#set-accent-color-hex').val(accentColor);
+                // Invoice Background Image
+                if (s.invoice_bg_image) {
+                    $('#invbg-img').attr('src', BASE_URL + '/uploads/' + s.invoice_bg_image).show();
+                    $('#invbg-placeholder').hide();
+                    $('#btn-remove-invbg').removeClass('d-none');
+                }
+                var bgOpacity = s.invoice_bg_opacity || 8;
+                $('#set-invbg-opacity').val(bgOpacity);
+                $('#invbg-opacity-val').text(bgOpacity);
             }
         }
     });
@@ -1212,6 +1283,82 @@ $(document).ready(function() {
         }
     });
 
+    // Payment QR code preview
+    $('#set-qr-file').on('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            Swal.fire({ icon: 'warning', title: 'File Too Large', text: 'QR code image must be under 2MB', background: '#ffffff', color: '#0f172a' });
+            $(this).val('');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#qr-img').attr('src', e.target.result).show();
+            $('#qr-placeholder').hide();
+            $('#btn-remove-qr').removeClass('d-none');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Remove QR code
+    $('#btn-remove-qr').click(function() {
+        $('#qr-img').attr('src', '').hide();
+        $('#qr-placeholder').show();
+        $('#set-qr-file').val('');
+        $(this).addClass('d-none');
+        if (!$('#remove-qr-flag').length) {
+            $('#settingsForm').append('<input type="hidden" name="remove_qr_code" id="remove-qr-flag" value="1">');
+        }
+    });
+
+    // Accent color: keep the swatch and hex text input in sync
+    $('#set-accent-color').on('input', function() {
+        $('#set-accent-color-hex').val($(this).val());
+    });
+    $('#set-accent-color-hex').on('change', function() {
+        var v = $(this).val().trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(v)) {
+            $('#set-accent-color').val(v);
+        } else {
+            $(this).val($('#set-accent-color').val());
+        }
+    });
+
+    // Invoice background image preview
+    $('#set-invbg-file').on('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        if (file.size > 3 * 1024 * 1024) {
+            Swal.fire({ icon: 'warning', title: 'File Too Large', text: 'Background image must be under 3MB', background: '#ffffff', color: '#0f172a' });
+            $(this).val('');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#invbg-img').attr('src', e.target.result).show();
+            $('#invbg-placeholder').hide();
+            $('#btn-remove-invbg').removeClass('d-none');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Remove invoice background image
+    $('#btn-remove-invbg').click(function() {
+        $('#invbg-img').attr('src', '').hide();
+        $('#invbg-placeholder').show();
+        $('#set-invbg-file').val('');
+        $(this).addClass('d-none');
+        if (!$('#remove-invbg-flag').length) {
+            $('#settingsForm').append('<input type="hidden" name="remove_invoice_bg" id="remove-invbg-flag" value="1">');
+        }
+    });
+
+    // Opacity slider live readout
+    $('#set-invbg-opacity').on('input', function() {
+        $('#invbg-opacity-val').text($(this).val());
+    });
+
     // Save Settings (with FormData for file upload)
     $("#settingsForm").submit(function(e) {
         e.preventDefault();
@@ -1226,6 +1373,16 @@ $(document).ready(function() {
         var logoFile = $('#set-logo-file')[0].files[0];
         if (logoFile) {
             formData.append('company_logo_file', logoFile);
+        }
+        // Add payment QR code file if selected
+        var qrFile = $('#set-qr-file')[0].files[0];
+        if (qrFile) {
+            formData.append('payment_qr_code_file', qrFile);
+        }
+        // Add invoice background image file if selected
+        var invbgFile = $('#set-invbg-file')[0].files[0];
+        if (invbgFile) {
+            formData.append('invoice_bg_image_file', invbgFile);
         }
         
         // Append Demo Settings manually since they are outside the form tag

@@ -28,7 +28,7 @@
             </button>
             <span class="badge bg-light-primary small d-none bulk-count">0 selected</span>
         </div>
-        <div class="table-responsive">
+        <div class="table-responsive entity-desktop-table">
             <table class="table table-hover w-100" id="customersTable">
                 <thead>
                     <tr>
@@ -44,6 +44,7 @@
                 <tbody></tbody>
             </table>
         </div>
+        <div class="entity-mobile-cards" id="customersMobileCards"></div>
     </div>
 </div>
 
@@ -174,6 +175,24 @@ $(document).ready(function() {
         language: {
             search: "_INPUT_",
             searchPlaceholder: "Search CRM list..."
+        },
+        drawCallback: function() {
+            renderEntityMobileCards({
+                tableId: 'customersTable',
+                containerId: 'customersMobileCards',
+                titleCol: 1,
+                metaCols: [
+                    { col: 2, icon: 'fa-solid fa-phone' },
+                    { col: 3, icon: 'fa-regular fa-envelope' }
+                ],
+                fieldCols: [
+                    { col: 4, label: 'GST Number' },
+                    { col: 5, label: 'Outstanding Credit' }
+                ],
+                actionsCol: 6,
+                initials: function($tds) { return entityInitials($tds.eq(1).text()); },
+                emptyText: 'No customers found.'
+            });
         }
     });
 
