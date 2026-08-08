@@ -21,6 +21,7 @@ if ($auth->check()) {
 
 $errorMessage = "";
 $loginSuccess = false;
+$showDemoAccountModal = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!Helpers::verifyCsrf()) {
@@ -28,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $email = trim($_POST['email'] ?? '');
         $password = trim($_POST['password'] ?? '');
-        
+
         // Rate limiting check
         $attempts = $_SESSION['login_attempts'] ?? 0;
         $lockoutTime = $_SESSION['login_lockout'] ?? 0;
@@ -46,13 +47,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     unset($_SESSION['login_lockout']);
                     $loginSuccess = true;
                 } else {
-                    // Increment failed attempts
-                    $_SESSION['login_attempts'] = $attempts + 1;
-                    if ($_SESSION['login_attempts'] >= 5) {
-                        $_SESSION['login_lockout'] = time() + (5 * 60); // 5 minutes lockout
-                        $errorMessage = "Account locked due to 5 failed attempts. Try again in 5 minutes.";
+                    // Before treating this as a wrong password, check whether these
+                    // credentials actually belong to a Demo account - a common mix-up
+                    // since demo signups use the same email/password shape as real
+                    // accounts, just in a separate database. This is a read-only check
+                    // (no session mutation, no calling Auth::login() again) so it can't
+                    // accidentally log the visitor into the demo workspace from here.
+                    $isDemoAccount = false;
+                    try {
+                        $demoDb = new Database('demo');
+                        $demoUser = $demoDb->query("SELECT password, status FROM users WHERE email = ? OR mobile = ? LIMIT 1", [$email, $email])->fetch();
+                        if ($demoUser && $demoUser['status'] === 'ACTIVE' && password_verify($password, $demoUser['password'])) {
+                            $isDemoAccount = true;
+                        }
+                    } catch (\Exception $e) {
+                        error_log("Demo account lookup failed during main login: " . $e->getMessage());
+                    }
+
+                    if ($isDemoAccount) {
+                        $showDemoAccountModal = true;
                     } else {
-                        $errorMessage = "Invalid email or password, or account is disabled. Attempt {$_SESSION['login_attempts']} of 5.";
+                        // Increment failed attempts
+                        $_SESSION['login_attempts'] = $attempts + 1;
+                        if ($_SESSION['login_attempts'] >= 5) {
+                            $_SESSION['login_lockout'] = time() + (5 * 60); // 5 minutes lockout
+                            $errorMessage = "Account locked due to 5 failed attempts. Try again in 5 minutes.";
+                        } else {
+                            $errorMessage = "Invalid email or password, or account is disabled. Attempt {$_SESSION['login_attempts']} of 5.";
+                        }
                     }
                 }
             }
@@ -66,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Log in — Grovixo</title>
-  <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/favicon.png" />
+  <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/favicon.png?v=<?php echo Helpers::assetVersion('/assets/img/favicon.png'); ?>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet" />

@@ -54,7 +54,7 @@ $compSettings = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1"
     <meta name="csrf-token" content="<?php echo \App\Models\Helpers::getCsrfToken(); ?>">
     <title><?php echo Helpers::sanitize($compSettings['company_name'] ?? COMPANY_NAME); ?> - Billing</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/favicon.png">
+    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/favicon.png?v=<?php echo \App\Models\Helpers::assetVersion('/assets/img/favicon.png'); ?>">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 Icons -->
@@ -282,7 +282,7 @@ foreach ($activeAds as $ad) {
             <?php if ($auth->hasPermission('Manage Suppliers') && $_SESSION['user_id'] != 1 && $auth->hasPlanFeature('purchases')): ?>
             <li class="sidebar-item <?php echo $currentModule === 'suppliers' ? 'active' : ''; ?>">
                 <a href="<?php echo BASE_URL; ?>/suppliers/index" class="sidebar-link">
-                    <i class="fa-solid fa-industry"></i>
+                    <i class="fa-solid fa-handshake"></i>
                     <span>Suppliers</span>
                 </a>
             </li>
@@ -380,12 +380,12 @@ foreach ($activeAds as $ad) {
     <main class="main-content">
         <?php
         $isDashboard = ($currentModule === 'index');
-        $isFormPage = in_array($currentPage, ['form', 'view', 'day_end']);
-        $showHeader = !$isFormPage; // Show header on dashboard + listing pages, hide on form/view/edit pages
+        $isFormPage = in_array($currentPage, ['form', 'day_end']);
+        $showHeader = !$isFormPage; // Show header on dashboard + listing + details pages, hide only on add/edit forms
         ?>
 
         <?php if ($showHeader): ?>
-        <!-- Top Navbar (Dashboard + Listing pages) -->
+        <!-- Top Navbar (Dashboard + Listing + Details pages) -->
         <header class="top-navbar module-<?php echo App\Models\Helpers::sanitize($currentModule); ?> <?php echo $isDashboard ? 'top-navbar-dashboard' : ''; ?> d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
                 <button class="btn btn-outline-secondary d-lg-none py-1.5 px-2.5" id="sidebar-toggle-btn" type="button" aria-label="Toggle Menu">

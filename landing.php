@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Grovixo makes GST billing, invoices, POS and inventory beautifully simple." />
   <title>Grovixo — Billing that works beautifully</title>
-  <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/favicon.png" />
+  <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/img/favicon.png?v=<?php echo \App\Models\Helpers::assetVersion('/assets/img/favicon.png'); ?>" />
   <link rel="apple-touch-icon" href="<?php echo BASE_URL; ?>/assets/img/Asset%2015%4072x.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

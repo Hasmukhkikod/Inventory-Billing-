@@ -4,15 +4,22 @@
  * Product Details & Ledger View
  */
 ?>
+<div class="panel-card mb-4 no-print">
+    <div class="panel-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 text-indigo"><i class="fa-solid fa-box me-2"></i>Product Details</h5>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="<?php echo BASE_URL; ?>/products/form?id=<?php echo $product['id']; ?>" class="btn btn-outline-secondary btn-sm text-emerald"><i class="fa-solid fa-pencil me-1"></i>Edit</a>
+            <a href="<?php echo BASE_URL; ?>/products/index" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-arrow-left me-1"></i>Back</a>
+        </div>
+    </div>
+</div>
+
 <div class="row g-4">
     <!-- Product Profile Card -->
     <div class="col-md-4">
         <div class="panel-card h-100">
             <div class="panel-header">
                 <h6 class="mb-0 text-indigo"><i class="fa-solid fa-circle-info me-2"></i>Product Card</h6>
-                <a href="<?php echo BASE_URL; ?>/products/form?id=<?php echo $product['id']; ?>" class="btn btn-sm btn-outline-secondary text-emerald py-1">
-                    <i class="fa-solid fa-pencil me-1"></i> Edit
-                </a>
             </div>
             
             <div class="panel-body text-center">

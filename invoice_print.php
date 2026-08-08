@@ -284,7 +284,7 @@ $bgOpacity = max(2, min(30, $bgOpacityPct)) / 100;
     </div>
 
     <div class="text-center mt-4 text-muted small border-top pt-3">
-        <?php echo Helpers::sanitize($company['invoice_footer'] ?? 'Thank you!'); ?>
+        <?php echo Helpers::sanitize($company['invoice_footer'] ?: 'Thank you for your business!'); ?>
     </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>

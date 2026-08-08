@@ -1426,6 +1426,16 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     justify-content: space-between;
 }
 
+/* Invoice/Purchase Order/Challan/Quotation/Return detail views: the
+   surrounding col-lg-8 is a percentage of the page width, so on a wide
+   monitor the "document" card stretches far beyond a sensible reading/print
+   width, leaving a large empty gap wherever content (e.g. terms/notes) is
+   short. Cap it to a natural document width and let .justify-content-center
+   on the parent row keep it centered. */
+.document-view-col {
+    max-width: 900px;
+}
+
 .panel-body {
     padding: 1.25rem;
 }
@@ -2378,6 +2388,21 @@ h1, h2, h3, h4, h5, h6, .brand-logo {
     .day-end-header-controls input[type="date"] {
         flex: 1 1 100%;
         max-width: none !important;
+    }
+}
+
+/* Returns page toolbar (2 tabs + 2 "New ..." buttons): on tablet/desktop
+   widths the combined content is wider than many window sizes, and the
+   default .panel-header row has no wrap, so the second button got clipped
+   past the edge instead of dropping to its own line. Scoped to >=768px only
+   - below that, the existing .panel-header mobile rule already switches to
+   flex-direction:column with align-items:stretch, and adding flex-wrap here
+   too would fight that column layout and break the stretch sizing of its
+   children (buttons row stops filling the available width). */
+@media (min-width: 768px) {
+    .returns-toolbar-header {
+        flex-wrap: wrap;
+        row-gap: 0.75rem;
     }
 }
 

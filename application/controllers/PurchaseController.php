@@ -71,6 +71,8 @@ class PurchaseController {
             WHERE pi.purchase_id = ?
         ", [(int)$id])->fetchAll();
 
+        $company = $db->query("SELECT * FROM company_settings WHERE id = 1 LIMIT 1")->fetch();
+
         // Load layout views
         require_once __DIR__ . '/../views/header.php';
         require_once __DIR__ . '/../views/purchases/view.php';

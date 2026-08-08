@@ -6,7 +6,7 @@
 ?>
 
 <div class="panel-card text-dark">
-    <div class="panel-header d-flex justify-content-between align-items-center">
+    <div class="panel-header returns-toolbar-header gap-3">
         <ul class="nav nav-tabs border-0" id="returnsTabs" role="tablist">
             <li class="nav-item" role="presentation">
                 <button class="nav-link active text-indigo border-0 bg-transparent fw-semibold" id="sales-ret-tab" data-bs-toggle="tab" data-bs-target="#sales-ret-pane" type="button" role="tab" aria-controls="sales-ret-pane" aria-selected="true">
@@ -19,7 +19,7 @@
                 </button>
             </li>
         </ul>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <a href="<?php echo BASE_URL; ?>/returns/form?type=SALES" class="btn btn-outline-primary btn-sm">
                 <i class="fa-solid fa-plus me-1"></i> New Sales Return
             </a>
@@ -28,13 +28,13 @@
             </a>
         </div>
     </div>
-    
+
     <div class="panel-body text-dark">
         <div class="tab-content" id="returnsTabsContent">
-            
+
             <!-- SALES RETURNS TAB -->
             <div class="tab-pane fade show active" id="sales-ret-pane" role="tabpanel" aria-labelledby="sales-ret-tab" tabindex="0">
-                <div class="table-responsive">
+                <div class="table-responsive entity-desktop-table">
                     <table class="table table-hover w-100" id="salesReturnsTable">
                         <thead>
                             <tr>
@@ -50,11 +50,12 @@
                         <tbody></tbody>
                     </table>
                 </div>
+                <div class="entity-mobile-cards" id="salesReturnsMobileCards"></div>
             </div>
 
             <!-- PURCHASE RETURNS TAB -->
             <div class="tab-pane fade" id="purchase-ret-pane" role="tabpanel" aria-labelledby="purchase-ret-tab" tabindex="0">
-                <div class="table-responsive">
+                <div class="table-responsive entity-desktop-table">
                     <table class="table table-hover w-100" id="purchaseReturnsTable">
                         <thead>
                             <tr>
@@ -70,6 +71,7 @@
                         <tbody></tbody>
                     </table>
                 </div>
+                <div class="entity-mobile-cards" id="purchaseReturnsMobileCards"></div>
             </div>
 
         </div>
@@ -117,7 +119,26 @@ $(document).ready(function() {
                 }
             }
         ],
-        order: [[0, 'desc']]
+        order: [[0, 'desc']],
+        drawCallback: function() {
+            renderEntityMobileCards({
+                tableId: 'salesReturnsTable',
+                containerId: 'salesReturnsMobileCards',
+                titleCol: 0,
+                metaCols: [
+                    { col: 1, icon: 'fa-solid fa-file-invoice' },
+                    { col: 2, icon: 'fa-solid fa-user' }
+                ],
+                fieldCols: [
+                    { col: 3, label: 'Return Date' },
+                    { col: 4, label: 'Total Refund' },
+                    { col: 5, label: 'Remarks', wide: true }
+                ],
+                actionsCol: 6,
+                initials: function($tds) { return entityInitials($tds.eq(2).text()); },
+                emptyText: 'No sales returns found.'
+            });
+        }
     });
 
     // Purchase returns datatable
@@ -159,7 +180,26 @@ $(document).ready(function() {
                 }
             }
         ],
-        order: [[0, 'desc']]
+        order: [[0, 'desc']],
+        drawCallback: function() {
+            renderEntityMobileCards({
+                tableId: 'purchaseReturnsTable',
+                containerId: 'purchaseReturnsMobileCards',
+                titleCol: 0,
+                metaCols: [
+                    { col: 1, icon: 'fa-solid fa-file-invoice' },
+                    { col: 2, icon: 'fa-solid fa-truck' }
+                ],
+                fieldCols: [
+                    { col: 3, label: 'Return Date' },
+                    { col: 4, label: 'Total Value' },
+                    { col: 5, label: 'Remarks', wide: true }
+                ],
+                actionsCol: 6,
+                initials: function($tds) { return entityInitials($tds.eq(2).text()); },
+                emptyText: 'No purchase returns found.'
+            });
+        }
     });
 
     // Reload tab tables on click

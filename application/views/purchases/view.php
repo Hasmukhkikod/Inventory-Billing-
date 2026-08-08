@@ -5,7 +5,7 @@
  */
 ?>
 <div class="row g-4 justify-content-center text-dark">
-    <div class="col-md-9 col-lg-8">
+    <div class="col-md-9 col-lg-8 document-view-col">
         <div class="panel-card mb-4 no-print">
             <div class="panel-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark"><i class="fa-solid fa-file-invoice me-2"></i>Purchase Order Summary</h5>
@@ -24,17 +24,25 @@
         <div class="card border p-4 bg-white shadow-sm text-dark">
             <!-- Header Block -->
             <div class="row align-items-center mb-4">
-                <div class="col-12 col-sm-8">
-                    <h4 class="fw-bold mb-1 text-uppercase text-dark"><?php echo \App\Models\Helpers::sanitize($purchase['supplier_name']); ?></h4>
-                    <p class="mb-0 text-muted small" style="white-space: pre-line;">
-                        <?php echo \App\Models\Helpers::sanitize($purchase['supplier_address'] ?? ''); ?>
-                    </p>
-                    <p class="mb-0 small mt-1">
-                        <strong>Phone:</strong> <?php echo \App\Models\Helpers::sanitize($purchase['supplier_mobile'] ?? ''); ?>
-                    </p>
-                    <?php if (!empty($purchase['supplier_gst'])): ?>
-                        <p class="mb-0 small"><strong>GSTIN:</strong> <?php echo \App\Models\Helpers::sanitize($purchase['supplier_gst']); ?></p>
+                <div class="col-12 col-sm-8 d-flex align-items-center gap-3">
+                    <?php if (!empty($company['company_logo']) && file_exists(UPLOAD_DIR . '/' . $company['company_logo'])): ?>
+                        <img src="<?php echo BASE_URL . '/uploads/' . $company['company_logo']; ?>" alt="Logo" style="width:58px; height:58px; object-fit:contain; border-radius:10px; border:1px solid #e5e7eb; background:#fff; padding:4px; flex-shrink:0;">
                     <?php endif; ?>
+                    <div>
+                        <h4 class="fw-bold mb-1 text-uppercase text-dark"><?php echo \App\Models\Helpers::sanitize($company['company_name'] ?? 'Grovixo'); ?></h4>
+                        <p class="mb-0 text-muted small" style="white-space: pre-line;">
+                            <?php echo \App\Models\Helpers::sanitize($company['address'] ?? ''); ?>
+                        </p>
+                        <?php
+                            $companyContactParts = [];
+                            if (!empty($company['phone'])) $companyContactParts[] = '<strong>Phone:</strong> ' . \App\Models\Helpers::sanitize($company['phone']);
+                            if (!empty($company['email'])) $companyContactParts[] = '<strong>Email:</strong> ' . \App\Models\Helpers::sanitize($company['email']);
+                            if (!empty($company['gst_number'])) $companyContactParts[] = '<strong>GSTIN:</strong> ' . \App\Models\Helpers::sanitize($company['gst_number']);
+                        ?>
+                        <?php if (!empty($companyContactParts)): ?>
+                            <p class="mb-0 small mt-1 text-secondary"><?php echo implode(' &nbsp;|&nbsp; ', $companyContactParts); ?></p>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <div class="col-12 col-sm-4 text-sm-end mt-3 mt-sm-0">
                     <h4 class="fw-bold text-secondary mb-1">PURCHASE ORDER</h4>

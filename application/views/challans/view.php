@@ -5,7 +5,7 @@
  */
 ?>
 <div class="row g-4 justify-content-center text-dark">
-    <div class="col-md-9 col-lg-8">
+    <div class="col-md-9 col-lg-8 document-view-col">
         <div class="panel-card mb-4 no-print">
             <div class="panel-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark"><i class="fa-solid fa-truck me-2"></i>Delivery Challan</h5>
@@ -40,11 +40,11 @@
                     <p class="text-secondary small mb-0">Date: <?php echo date('d-M-Y', strtotime($challan['challan_date'])); ?></p>
                     <?php
                     $statusBadge = 'bg-light-primary text-indigo';
-                    if ($challan['challan_status'] === 'DELIVERED') $statusBadge = 'bg-light-success text-success';
-                    elseif ($challan['challan_status'] === 'CANCELLED') $statusBadge = 'bg-light-danger text-rose';
-                    elseif ($challan['challan_status'] === 'PENDING') $statusBadge = 'bg-light-warning text-warning';
+                    if ($challan['status'] === 'DELIVERED') $statusBadge = 'bg-light-success text-success';
+                    elseif ($challan['status'] === 'CANCELLED') $statusBadge = 'bg-light-danger text-rose';
+                    elseif ($challan['status'] === 'DISPATCHED') $statusBadge = 'bg-light-warning text-warning';
                     ?>
-                    <span class="badge <?php echo $statusBadge; ?> mt-1"><?php echo \App\Models\Helpers::sanitize($challan['challan_status']); ?></span>
+                    <span class="badge <?php echo $statusBadge; ?> mt-1"><?php echo \App\Models\Helpers::sanitize($challan['status']); ?></span>
                 </div>
             </div>
 

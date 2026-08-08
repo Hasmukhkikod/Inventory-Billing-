@@ -426,8 +426,7 @@ $(document).ready(function() {
 
     // Removed applyGlobalTableLabels as we now use native responsive scrolling
 });
-
-
+</script>
 
 </body>
 </html>

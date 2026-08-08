@@ -159,6 +159,26 @@ switch ($action) {
         }
         break;
 
+    case 'category_delete':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, "Invalid method");
+        if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, "CSRF verification failed");
+        $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) Helpers::jsonResponse(false, "Invalid category ID.");
+
+        try {
+            $inUse = $db->query("SELECT COUNT(*) AS cnt FROM expenses WHERE category_id = ? AND deleted_at IS NULL", [$id])->fetch();
+            if ($inUse && (int)$inUse['cnt'] > 0) {
+                Helpers::jsonResponse(false, "This category is used by {$inUse['cnt']} expense record(s) and cannot be deleted.");
+            }
+
+            $db->query("UPDATE expense_categories SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?", [$id]);
+            Helpers::logActivity($db, "expenses", "Deleted Expense Category ID: $id", $id);
+            Helpers::jsonResponse(true, "Expense category deleted.");
+        } catch (Exception $e) {
+            Helpers::jsonResponse(false, "Failed to delete category: " . $e->getMessage());
+        }
+        break;
+
     case 'bulk':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') Helpers::jsonResponse(false, 'Method not allowed');
         if (!Helpers::verifyCsrf()) Helpers::jsonResponse(false, 'CSRF verification failed');

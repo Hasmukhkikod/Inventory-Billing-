@@ -6,7 +6,7 @@
 $type = $_GET['type'] ?? 'SALES'; // SALES or PURCHASE
 ?>
 <div class="row g-4 justify-content-center text-dark">
-    <div class="col-md-9 col-lg-8">
+    <div class="col-md-9 col-lg-8 document-view-col">
         <div class="panel-card mb-4 no-print">
             <div class="panel-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark"><i class="fa-solid fa-file-invoice me-2"></i>Return Transaction Details</h5>

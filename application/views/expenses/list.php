@@ -223,6 +223,39 @@ $(document).ready(function() {
         });
     });
 
+    // Category Deletion
+    $("#expense-categories-list").on('click', '.btn-delete-cat', function() {
+        const id = $(this).data('id');
+        Swal.fire({
+            title: 'Delete category?',
+            text: "This category will be removed from the list. Categories still in use by existing expenses can't be deleted.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, delete!',
+            background: '#ffffff',
+            color: '#0f172a'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: BASE_URL + '/api/expenses.php?action=category_delete',
+                    type: 'POST',
+                    data: { id: id, csrf_token: $('meta[name="csrf-token"]').attr('content') },
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res.status) {
+                            loadExpenseCategories();
+                            Swal.fire({ icon: 'success', title: 'Deleted', text: res.message, background: '#ffffff', color: '#0f172a' });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Failed', text: res.message, background: '#ffffff', color: '#0f172a' });
+                        }
+                    }
+                });
+            }
+        });
+    });
+
     function loadExpenseCategories() {
         $.ajax({
             url: BASE_URL + '/api/expenses.php?action=categories_list',
@@ -234,8 +267,11 @@ $(document).ready(function() {
                     list.empty();
                     
                     res.data.forEach(c => {
-                        list.append(`<li class="list-group-item bg-transparent text-secondary border-secondary px-0 small d-flex justify-content-between">
+                        list.append(`<li class="list-group-item bg-transparent text-secondary border-secondary px-0 small d-flex justify-content-between align-items-center">
                             <span><i class="fa-solid fa-tag text-indigo me-2"></i>${c.category_name}</span>
+                            <button type="button" class="btn btn-sm btn-link text-danger p-0 btn-delete-cat" data-id="${c.id}" title="Delete category">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </li>`);
                     });
                 }
