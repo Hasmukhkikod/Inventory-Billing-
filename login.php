@@ -57,7 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     try {
                         $demoDb = new Database('demo');
                         $demoUser = $demoDb->query("SELECT password, status FROM users WHERE email = ? OR mobile = ? LIMIT 1", [$email, $email])->fetch();
-                        if ($demoUser && $demoUser['status'] === 'ACTIVE' && password_verify($password, $demoUser['password'])) {
+                        // Always run password_verify - against a dummy hash when no demo
+                        // account matches - so a wrong-password request and a
+                        // no-such-account request take the same amount of time. Without
+                        // this, response timing alone would reveal whether an email has
+                        // a demo account, even without knowing its password.
+                        $hashToCheck = $demoUser['password'] ?? '$2y$12$09XHi3m5Z1WEJL2SMmUJfupFAgp6ycWg80VHouVaTXTn1E.6gMYtO';
+                        $passwordMatches = password_verify($password, $hashToCheck);
+                        if ($demoUser && $demoUser['status'] === 'ACTIVE' && $passwordMatches) {
                             $isDemoAccount = true;
                         }
                     } catch (\Exception $e) {
@@ -155,7 +162,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
       </section>
   </main>
-  
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
 
@@ -176,7 +184,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if(!valid) e.preventDefault();
     });
 
-
+    <?php if ($showDemoAccountModal): ?>
+    Swal.fire({
+        icon: 'info',
+        title: 'This is a Demo Account',
+        html: 'These details belong to a <strong>Demo/Trial account</strong>, not a main Grovixo account.<br>Please log in from the Demo Account page instead.',
+        confirmButtonText: 'Go to Demo Login →',
+        confirmButtonColor: '#3b5bff',
+        showCancelButton: true,
+        cancelButtonText: 'Stay here',
+    }).then(function (result) {
+        if (result.isConfirmed) {
+            window.location.href = BASE_URL + '/demo/login';
+        }
+    });
+    <?php endif; ?>
   </script>
 </body>
 </html>
