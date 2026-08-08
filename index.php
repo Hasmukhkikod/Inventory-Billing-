@@ -43,6 +43,8 @@ use App\Controllers\OrganizationController;
 use App\Controllers\DemoController;
 use App\Controllers\VerificationController;
 use App\Controllers\AnnouncementsController;
+use App\Controllers\DistributorController;
+use App\Controllers\LeadController;
 use App\Models\Database;
 use App\Models\Auth;
 
@@ -72,6 +74,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
     $r->addRoute('GET', '/organizations/index', [OrganizationController::class, 'index']);
     $r->addRoute('GET', '/demos/index', [DemoController::class, 'index']);
     $r->addRoute('GET', '/announcements/index', [AnnouncementsController::class, 'index']);
+    $r->addRoute('GET', '/distributors/index', [DistributorController::class, 'index']);
+    $r->addRoute('GET', '/leads/index', [LeadController::class, 'index']);
 
     // Modules (Form)
     $r->addRoute('GET', '/products/form', [ProductController::class, 'form']);

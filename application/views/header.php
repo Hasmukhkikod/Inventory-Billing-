@@ -32,7 +32,7 @@ $requestPath = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 $uriSegments = $requestPath === '' ? [] : explode('/', $requestPath);
 $currentDir = $uriSegments[0] ?? 'index';
 $currentPage = end($uriSegments) ?: 'index';
-$validModules = ['products', 'customers', 'suppliers', 'expenses', 'billing', 'reports', 'users', 'settings', 'purchases', 'returns', 'quotations', 'challans', 'organizations', 'demos', 'plans', 'announcements'];
+$validModules = ['products', 'customers', 'suppliers', 'expenses', 'billing', 'reports', 'users', 'settings', 'purchases', 'returns', 'quotations', 'challans', 'organizations', 'demos', 'plans', 'announcements', 'distributors', 'leads'];
 $currentModule = in_array($currentDir, $validModules) ? $currentDir : $currentPage;
 
 // Fetch Company Settings
@@ -338,6 +338,18 @@ foreach ($activeAds as $ad) {
                 <a href="<?php echo BASE_URL; ?>/announcements/index" class="sidebar-link">
                     <i class="fa-solid fa-bullhorn text-danger"></i>
                     <span>Broadcasts</span>
+                </a>
+            </li>
+            <li class="sidebar-item <?php echo $currentModule === 'distributors' ? 'active' : ''; ?>">
+                <a href="<?php echo BASE_URL; ?>/distributors/index" class="sidebar-link">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <span>Distributors</span>
+                </a>
+            </li>
+            <li class="sidebar-item <?php echo $currentModule === 'leads' ? 'active' : ''; ?>">
+                <a href="<?php echo BASE_URL; ?>/leads/index" class="sidebar-link">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>Leads</span>
                 </a>
             </li>
             <?php endif; ?>
